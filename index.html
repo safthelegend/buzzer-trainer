@@ -2,1141 +2,983 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MIST Buzzer Trainer</title>
 <style>
-/* ── DESIGN TOKENS ─────────────────────────────────────── */
-:root {
-  --bg:      #08080c;
-  --s1:      #0f0f14;
-  --s2:      #16161d;
-  --border:  rgba(255,255,255,.07);
-  --accent:  #7c6af7;
-  --a-dim:   rgba(124,106,247,.13);
-  --green:   #22c55e;
-  --g-dim:   rgba(34,197,94,.11);
-  --red:     #ef4444;
-  --r-dim:   rgba(239,68,68,.11);
-  --yellow:  #f59e0b;
-  --y-dim:   rgba(245,158,11,.11);
-  --t1:      #ededf3;
-  --t2:      #7e7e96;
-  --t3:      #3e3e52;
-  --radius:  10px;
-}
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --text: #e8e8e8;
+    --text2: #888;
+    --accent: #7c6ef7;
+    --accent2: #5b4dd6;
+    --green: #4caf83;
+    --red: #e05c5c;
+    --yellow: #d4a843;
+    --radius: 10px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+  header { padding: 18px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: .02em; }
+  header .sub { color: var(--text2); font-size: .82rem; }
+  .score-bar { margin-left: auto; display: flex; gap: 20px; font-size: .85rem; }
+  .score-bar span { color: var(--text2); }
+  .score-bar b { color: var(--text); }
 
-/* ── RESET ─────────────────────────────────────────────── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px;-webkit-text-size-adjust:100%}
-body{
-  background:var(--bg);
-  color:var(--t1);
-  font-family:'Inter',system-ui,-apple-system,sans-serif;
-  line-height:1.6;
-  min-height:100vh;
-}
+  main { max-width: 820px; margin: 0 auto; padding: 28px 20px; }
 
-/* ── APP SHELL ─────────────────────────────────────────── */
-.app{
-  max-width:700px;
-  margin:0 auto;
-  padding:44px 20px 96px;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; align-items: center; }
+  select, button { font-family: var(--font); font-size: .85rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+  select { padding: 8px 12px; }
+  button { padding: 8px 16px; transition: background .15s, border-color .15s; }
+  button:hover { background: var(--surface2); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: .72rem; font-weight: 600; letter-spacing: .05em; }
+  .pill.on { background: rgba(124,110,247,.25); color: var(--accent); border: 1px solid rgba(124,110,247,.4); }
+  .pill.off { background: rgba(100,100,100,.15); color: var(--text2); border: 1px solid var(--border); }
 
-/* ── HEADER ────────────────────────────────────────────── */
-.hd{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hd-title{font-size:1rem;font-weight:600;letter-spacing:-.01em;color:var(--t1)}
-.hd-title em{font-style:normal;color:var(--accent)}
-.hd-score{
-  font-size:.72rem;font-weight:600;text-transform:uppercase;
-  letter-spacing:.09em;color:var(--t2);
-  display:flex;align-items:center;gap:8px;
-}
-.hd-score-val{
-  font-size:1.1rem;font-weight:700;color:var(--t1);
-  text-transform:none;letter-spacing:normal;
-}
+  .mode-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .mode-btn { padding: 7px 14px; border-radius: 99px; font-size: .8rem; border: 1px solid var(--border); background: var(--surface); color: var(--text2); }
+  .mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-/* ── MODE TABS ─────────────────────────────────────────── */
-.tabs{
-  display:flex;
-  background:var(--s1);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:3px;gap:2px;
-}
-.tab{
-  flex:1;background:transparent;border:none;
-  color:var(--t2);padding:8px 10px;
-  border-radius:8px;font-size:.82rem;font-weight:500;
-  cursor:pointer;transition:background .15s,color .15s;
-  white-space:nowrap;
-}
-.tab:hover{color:var(--t1)}
-.tab.on{background:var(--s2);color:var(--t1);font-weight:600}
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; min-height: 160px; margin-bottom: 20px; }
+  .q-meta { display: flex; gap: 12px; margin-bottom: 14px; font-size: .75rem; color: var(--text2); align-items: center; flex-wrap: wrap; }
+  .q-meta .tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; }
+  .pts-label { color: var(--yellow); font-weight: 700; font-size: 1rem; }
+  #qText { font-size: 1.08rem; line-height: 1.75; }
+  #qText .sp { color: var(--text2); }
+  #qText .un { color: var(--text); }
+  .blind-hint { color: var(--accent); font-style: italic; font-size: 1rem; }
 
-/* ── CHIPS (topic filter) ──────────────────────────────── */
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{
-  background:transparent;border:1px solid var(--border);
-  color:var(--t3);padding:4px 13px;border-radius:999px;
-  font-size:.77rem;font-weight:500;cursor:pointer;
-  transition:border-color .15s,color .15s,background .15s;
-}
-.chip:hover{border-color:var(--t2);color:var(--t2)}
-.chip.on{border-color:var(--accent);color:var(--accent);background:var(--a-dim)}
+  .ans-row { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  #ansInput { flex: 1; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: .95rem; font-family: var(--font); }
+  #ansInput:focus { outline: none; border-color: var(--accent); }
+  .ans-timer { font-size: 1.1rem; font-weight: 700; color: var(--yellow); min-width: 28px; text-align: center; }
+  .ans-timer.urgent { color: var(--red); }
 
-/* ── SUB-TABS (finals rounds) ──────────────────────────── */
-.sub-tabs{display:none;gap:6px;flex-wrap:wrap}
-.sub-tabs.vis{display:flex}
-.stab{
-  background:transparent;border:1px solid var(--border);
-  color:var(--t2);padding:5px 14px;border-radius:999px;
-  font-size:.78rem;font-weight:500;cursor:pointer;
-  transition:all .15s;
-}
-.stab:hover{color:var(--t1);border-color:var(--t2)}
-.stab.on{border-color:var(--accent);color:var(--accent);background:var(--a-dim)}
+  .feedback { border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; font-size: .93rem; line-height: 1.6; display: none; }
+  .feedback.correct { background: rgba(76,175,131,.12); border: 1px solid rgba(76,175,131,.3); color: var(--green); }
+  .feedback.wrong { background: rgba(224,92,92,.1); border: 1px solid rgba(224,92,92,.25); color: var(--red); }
+  .feedback .ans-reveal { margin-top: 10px; color: var(--text); font-size: .88rem; border-top: 1px solid var(--border); padding-top: 10px; }
 
-/* ── SCORE STRIP (MIST modes) ──────────────────────────── */
-.score-strip{display:none;gap:10px}
-.score-strip.vis{display:flex}
-.sc{
-  flex:1;background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--radius);padding:14px 10px;text-align:center;
-}
-.sc-n{font-size:1.5rem;font-weight:700;line-height:1;margin-bottom:3px}
-.sc-l{font-size:.66rem;font-weight:600;text-transform:uppercase;
-       letter-spacing:.09em;color:var(--t3)}
+  #buzzBtn { width: 100%; padding: 22px; font-size: 1.3rem; font-weight: 700; letter-spacing: .05em; border-radius: var(--radius); background: var(--surface); border: 2px solid var(--border); color: var(--text); transition: all .12s; margin-bottom: 14px; }
+  #buzzBtn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #buzzBtn:disabled { opacity: .4; cursor: default; }
+  #buzzBtn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-/* ── QUESTION CARD ─────────────────────────────────────── */
-.card{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--radius);padding:28px;
-  display:flex;flex-direction:column;gap:18px;
-}
+  .nav-row { display: flex; gap: 10px; justify-content: flex-end; }
 
-.q-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.q-lbl{font-size:.69rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t3)}
-.q-pts{
-  font-size:.76rem;font-weight:700;
-  color:var(--accent);background:var(--a-dim);
-  padding:3px 11px;border-radius:999px;
-}
-.q-pts.hidden{display:none}
+  #boardWrap { display: none; }
+  .board-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 18px; }
+  .board-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 8px; text-align: center; cursor: pointer; transition: background .12s; font-weight: 700; font-size: .9rem; }
+  .board-cell:hover:not(.used) { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .board-cell.used { opacity: .3; cursor: default; pointer-events: none; }
+  .board-cell.topic-header { background: var(--surface2); cursor: default; font-size: .7rem; font-weight: 600; letter-spacing: .05em; color: var(--text2); text-transform: uppercase; padding: 10px 4px; }
+  .board-cell.topic-header:hover { background: var(--surface2); color: var(--text2); }
 
-.prog{height:2px;background:var(--border);border-radius:1px;overflow:hidden}
-.prog-fill{height:100%;background:var(--accent);border-radius:1px;width:0%;transition:width .08s linear}
+  .mic-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); display: inline-block; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
-/* ── QUESTION TEXT ─────────────────────────────────────── */
-.q-text{
-  font-size:1.01rem;line-height:1.9;min-height:88px;
-  color:var(--t1);word-break:break-word;
-}
-.q-text .sp{color:var(--t1)}
-.q-text .un{color:var(--t3)}
-.q-text .mark{color:var(--yellow);font-weight:600}
+  .stats { display: flex; gap: 18px; font-size: .8rem; padding: 10px 0; border-top: 1px solid var(--border); color: var(--text2); }
+  .stats b { color: var(--text); }
 
-/* ── CONTROLS ──────────────────────────────────────────── */
-.ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.btn{
-  padding:9px 20px;border-radius:8px;border:none;
-  font-size:.87rem;font-weight:600;cursor:pointer;
-  transition:opacity .15s,transform .1s;outline:none;
-  white-space:nowrap;
-}
-.btn:active{transform:scale(.96)}
-.btn:disabled{opacity:.28;cursor:not-allowed;transform:none}
+  .blind-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(124,110,247,.15); border: 1px solid rgba(124,110,247,.35); border-radius: 99px; padding: 3px 10px; font-size: .75rem; color: var(--accent); }
 
-.btn-r{background:var(--s2);color:var(--t1);border:1px solid var(--border)}
-.btn-r:hover:not(:disabled){border-color:var(--t2)}
-.btn-buzz{background:var(--red);color:#fff;padding:9px 28px;font-size:.92rem}
-.btn-buzz:hover:not(:disabled){opacity:.85}
-.btn-buzz.live{animation:blip 1.2s ease-in-out infinite}
-@keyframes blip{0%,100%{opacity:1}50%{opacity:.7}}
-.btn-g{background:transparent;color:var(--t2);border:1px solid var(--border)}
-.btn-g:hover:not(:disabled){color:var(--t1);border-color:var(--t2)}
-.btn-sub{background:var(--accent);color:#fff}
-.btn-sub:hover:not(:disabled){opacity:.88}
-.sp-r{flex:1}
+  .rules-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; font-size: .8rem; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+  .rules-box b { color: var(--text); }
+  .rules-box ul { padding-left: 18px; margin-top: 4px; }
 
-/* ── SETTINGS ──────────────────────────────────────────── */
-.settings{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-.set{display:flex;align-items:center;gap:7px;font-size:.77rem;color:var(--t2)}
-.set-v{color:var(--t1);font-weight:500;min-width:30px}
-input[type=range]{width:88px;accent-color:var(--accent);cursor:pointer}
-.tog{cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}
-.tog input{accent-color:var(--accent);cursor:pointer}
+  .phase-badge { font-size: .8rem; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+  .phase-badge.answer { background: rgba(212,168,67,.15); border: 1px solid rgba(212,168,67,.3); color: var(--yellow); }
+  .phase-badge.reading { background: rgba(76,175,131,.12); border: 1px solid rgba(76,175,131,.25); color: var(--green); }
 
-/* ── ANSWER PHASE ──────────────────────────────────────── */
-.ans-phase{display:none;flex-direction:column;gap:8px}
-.ans-phase.vis{display:flex}
-.ans-row{display:flex;gap:7px;align-items:center}
-.ans-input{
-  flex:1;background:var(--bg);border:1px solid var(--border);
-  border-radius:8px;color:var(--t1);padding:9px 13px;
-  font-size:.95rem;outline:none;transition:border-color .15s;
-  font-family:inherit;
-}
-.ans-input:focus{border-color:var(--accent)}
-.mic-btn{
-  background:var(--s2);border:1px solid var(--border);
-  color:var(--t2);border-radius:8px;padding:9px 12px;
-  cursor:pointer;font-size:1rem;line-height:1;
-  transition:all .15s;
-}
-.mic-btn:hover{border-color:var(--t2);color:var(--t1)}
-.mic-btn.hot{
-  background:var(--r-dim);border-color:var(--red);color:var(--red);
-  animation:blip 1s ease-in-out infinite;
-}
-
-/* ── TRANSCRIPT ─────────────────────────────────────────── */
-.trans{
-  font-size:.8rem;min-height:18px;padding-left:2px;
-  font-style:italic;color:var(--t3);transition:color .2s;
-}
-.trans.live{color:var(--t2)}
-.trans.done{color:var(--t1);font-style:normal;font-weight:500}
-
-/* ── FEEDBACK ──────────────────────────────────────────── */
-.fb{display:none;padding:14px 18px;border-radius:8px;font-size:.9rem;line-height:1.65}
-.fb.vis{display:block}
-.fb.ok{background:var(--g-dim);color:var(--green)}
-.fb.bad{background:var(--r-dim);color:var(--red)}
-.fb.info{background:var(--a-dim);color:#b0aaff}
-.fb strong{font-weight:700}
-.fb .note{margin-top:5px;font-size:.78rem;opacity:.8}
-
-/* ── JEOPARDY BOARD ─────────────────────────────────────── */
-.j-board{display:none;flex-direction:column;gap:5px;overflow-x:auto}
-.j-board.vis{display:flex}
-.j-row{display:flex;gap:5px;min-width:0}
-.j-hd{
-  flex:1;text-align:center;font-size:.65rem;font-weight:600;
-  text-transform:uppercase;letter-spacing:.08em;color:var(--t2);
-  padding:8px 4px;
-}
-.j-cell{
-  flex:1;min-width:0;background:var(--s2);border:1px solid var(--border);
-  border-radius:8px;padding:16px 6px;text-align:center;
-  font-size:.88rem;font-weight:700;color:var(--accent);
-  cursor:pointer;transition:all .15s;
-}
-.j-cell:hover{border-color:var(--accent);background:var(--a-dim)}
-.j-cell.done{
-  background:var(--bg);color:var(--t3);
-  border-color:var(--border);cursor:default;pointer-events:none;
-}
-
-/* ── ADD ARTICLE PANEL ──────────────────────────────────── */
-details.add{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--radius);
-}
-details.add summary{
-  padding:14px 20px;cursor:pointer;
-  font-size:.84rem;font-weight:500;color:var(--t2);
-  user-select:none;list-style:none;
-  display:flex;align-items:center;gap:8px;transition:color .15s;
-}
-details.add summary::-webkit-details-marker{display:none}
-details.add summary::before{
-  content:'+';font-size:1.1rem;font-weight:300;
-  color:var(--t3);transition:color .15s;
-}
-details[open].add summary::before{content:'−'}
-details.add summary:hover{color:var(--t1)}
-.add-body{padding:0 20px 20px;display:flex;flex-direction:column;gap:10px}
-.field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--t3)}
-.field input,.field textarea{
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:7px;color:var(--t1);padding:9px 13px;
-  font-size:.87rem;font-family:inherit;outline:none;
-  transition:border-color .15s;
-}
-.field input:focus,.field textarea:focus{border-color:var(--accent)}
-.field textarea{height:110px;resize:vertical}
-.field-note{font-size:.72rem;color:var(--t3)}
-.gen-st{font-size:.79rem;color:var(--t2);min-height:18px}
-
-/* ── MISS LOG ───────────────────────────────────────────── */
-.miss-wrap{display:none;flex-direction:column;gap:10px}
-.miss-wrap.vis{display:flex}
-.sec-lbl{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t3)}
-.miss-list{list-style:none;display:flex;flex-direction:column;gap:5px}
-.mi{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:11px 15px}
-.mi-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.mi-ans{font-weight:600;font-size:.87rem;color:var(--red)}
-.mi-due{font-size:.7rem;color:var(--t3)}
-.mi-clue{font-size:.76rem;color:var(--t3);margin-top:3px}
-
-/* ── UTIL ───────────────────────────────────────────────── */
-.hidden{display:none!important}
+  .spacer { flex: 1; }
 </style>
 </head>
 <body>
-<div class="app">
+<header>
+  <div>
+    <h1>MIST Buzzer Trainer</h1>
+    <div class="sub">MIST 2026 Nationals Prep</div>
+  </div>
+  <div class="score-bar">
+    <div><span>Score </span><b id="hScore">0</b></div>
+    <div><span>✓ </span><b id="hRight">0</b></div>
+    <div><span>✗ </span><b id="hWrong">0</b></div>
+  </div>
+</header>
 
-  <!-- Header -->
-  <div class="hd">
-    <div class="hd-title">MIST <em>Buzzer</em> Trainer</div>
-    <div class="hd-score hidden" id="hdScore">Score <span class="hd-score-val" id="hdScoreVal">0</span></div>
+<main>
+  <!-- Mode row -->
+  <div class="mode-row">
+    <button class="mode-btn active" data-mode="practice">Practice</button>
+    <button class="mode-btn" data-mode="round1">Round 1</button>
+    <button class="mode-btn" data-mode="round23">Round 2 / 3</button>
+    <button class="mode-btn" data-mode="finals">Finals</button>
+    <div class="spacer"></div>
+    <button id="blindBtn" title="Hide question text — audio only">
+      Blind Mode <span id="blindPill" class="pill off">OFF</span>
+    </button>
   </div>
 
-  <!-- Mode tabs -->
-  <div class="tabs" role="tablist">
-    <button class="tab on" data-mode="practice">Practice</button>
-    <button class="tab" data-mode="round1">Round 1</button>
-    <button class="tab" data-mode="round23">Round 2 / 3</button>
-    <button class="tab" data-mode="finals">Finals</button>
+  <!-- Finals sub-round -->
+  <div id="finalsRow" style="display:none;margin-bottom:14px;">
+    <div class="mode-row">
+      <button class="mode-btn active" data-fin="fr1">Finals R1 — 100 pts, no penalty</button>
+      <button class="mode-btn" data-fin="fr2">Finals R2 — 200 pts, −10%</button>
+      <button class="mode-btn" data-fin="fr3">Jeopardy — choose value, −10%</button>
+    </div>
   </div>
 
-  <!-- Topic filter (practice + round23) -->
-  <div class="chips" id="topicBar"></div>
-
-  <!-- Finals sub-tabs -->
-  <div class="sub-tabs" id="finalsTabs">
-    <button class="stab on" data-fr="fr1">Finals R1 · 100 pts</button>
-    <button class="stab" data-fr="fr2">Finals R2 · 200 pts</button>
-    <button class="stab" data-fr="fr3">Finals R3 · Jeopardy</button>
+  <!-- Controls -->
+  <div class="controls">
+    <select id="topicSel">
+      <option value="all">All Topics</option>
+      <option value="Water">Water</option>
+      <option value="Sudan">Sudan</option>
+      <option value="Housing">Housing Inequality</option>
+      <option value="Seerah">Seerah</option>
+      <option value="Current Events">Current Events</option>
+    </select>
+    <button id="startBtn" class="primary">Start</button>
+    <button id="resetBtn">Reset Stats</button>
+    <button id="rulesBtn">Rules</button>
   </div>
 
-  <!-- Score strip (MIST modes) -->
-  <div class="score-strip" id="scoreStrip">
-    <div class="sc"><div class="sc-n" id="scScore" style="color:var(--accent)">0</div><div class="sc-l">Score</div></div>
-    <div class="sc"><div class="sc-n" id="scRight" style="color:var(--green)">0</div><div class="sc-l">Correct</div></div>
-    <div class="sc"><div class="sc-n" id="scWrong" style="color:var(--red)">0</div><div class="sc-l">Wrong</div></div>
-    <div class="sc"><div class="sc-n" id="scLeft" style="color:var(--t2)">—</div><div class="sc-l">Left</div></div>
+  <!-- Rules box (hidden by default) -->
+  <div id="rulesBox" class="rules-box" style="display:none;">
+    <b>MIST Quiz Bowl Rules</b>
+    <ul>
+      <li>Judge reads the <b>point value first</b>, then the question. You may buzz at any time.</li>
+      <li>Buzzing <b>stops the reader</b> immediately — the question is not repeated.</li>
+      <li>After buzzing: <b>10 seconds</b> to answer. If reading was still in progress when you buzzed, you get up to <b>10 more seconds</b> once your answer is judged incorrect (for other teams to steal).</li>
+      <li><b>Wrong answer:</b> floor opens to all other teams who may buzz to steal.</li>
+      <li><b>Penalties:</b> Practice = none · Round 1 = full deduction · Round 2/3 = −10% · Finals R1 = none · Finals R2/R3 = −10%</li>
+    </ul>
   </div>
 
   <!-- Jeopardy board -->
-  <div class="j-board" id="jBoard"></div>
+  <div id="boardWrap">
+    <div style="font-size:.8rem;color:var(--text2);margin-bottom:6px;">Select a question from the Jeopardy board:</div>
+    <div class="board-grid" id="boardGrid"></div>
+    <div style="height:16px;"></div>
+  </div>
 
-  <!-- Main card -->
-  <div class="card">
+  <!-- Question card -->
+  <div class="q-card" id="qCard" style="display:none;">
     <div class="q-meta">
-      <div class="q-lbl" id="qLbl">Select a mode and press Read</div>
-      <div class="q-pts hidden" id="qPts"></div>
+      <span class="tag" id="qTopic">—</span>
+      <span class="tag" id="qSource">—</span>
+      <span id="qPts" class="tag pts-label">—</span>
+      <span id="phaseBadge" style="display:none;" class="phase-badge reading">Reading…</span>
+      <span id="blindBadge" style="display:none;" class="blind-badge">🔊 Blind</span>
+      <span class="spacer"></span>
+      <span id="qNum" style="color:var(--text2);font-size:.75rem;"></span>
     </div>
-
-    <div class="prog"><div class="prog-fill" id="progFill"></div></div>
-
-    <div class="q-text" id="qText">
-      Choose a mode above, then press <strong>Read</strong> to hear the question. Buzz — or hit <strong>Space</strong> — the moment you know the answer.
-    </div>
-
-    <div class="ctrls">
-      <button class="btn btn-r" id="btnRead">Read</button>
-      <button class="btn btn-buzz" id="btnBuzz" disabled>Buzz</button>
-      <button class="btn btn-g" id="btnSkip">Skip</button>
-      <div class="sp-r"></div>
-      <button class="btn btn-g hidden" id="btnReview" style="font-size:.76rem">
-        Review due <span id="dueBadge" style="display:none;background:var(--red);color:#fff;border-radius:999px;padding:1px 7px;margin-left:3px;font-size:.68rem;font-weight:700"></span>
-      </button>
-    </div>
-
-    <div class="settings">
-      <div class="set">
-        Speed
-        <input type="range" id="speedSlider" min=".6" max="1.8" step=".05" value="1.0">
-        <span class="set-v" id="speedVal">1.0×</span>
-      </div>
-      <label class="tog set">
-        <input type="checkbox" id="chkVoice" checked>
-        Answer aloud
-      </label>
-    </div>
-
-    <!-- Answer phase -->
-    <div class="ans-phase" id="ansPhase">
-      <div class="ans-row">
-        <input class="ans-input" id="ansInput" placeholder="Your answer…" autocomplete="off" spellcheck="false">
-        <button class="mic-btn" id="micBtn" title="Speak answer">🎤</button>
-        <button class="btn btn-sub" id="btnSubmit">Submit</button>
-      </div>
-      <div class="trans" id="trans"></div>
-    </div>
-
-    <div class="fb" id="fb"></div>
+    <div id="qText"></div>
   </div>
 
-  <!-- Add article -->
-  <details class="add">
-    <summary>Add your own article</summary>
-    <div class="add-body">
-      <div class="field">
-        <label>Source</label>
-        <input id="addSrc" placeholder="e.g. Britannica, CFR…">
-      </div>
-      <div class="field">
-        <label>Topic</label>
-        <input id="addTopic" placeholder="e.g. Water, Sudan, Current Events">
-      </div>
-      <div class="field">
-        <label>Article text</label>
-        <textarea id="addText" placeholder="Paste article here…"></textarea>
-      </div>
-      <div class="field">
-        <label>Anthropic API key</label>
-        <input id="addKey" type="password" placeholder="sk-ant-…">
-        <div class="field-note">Saved locally in your browser only. Used to call Claude to generate tossups.</div>
-      </div>
-      <button class="btn btn-sub" id="btnGen">Generate tossups</button>
-      <div class="gen-st" id="genSt"></div>
-    </div>
-  </details>
+  <!-- Buzz button -->
+  <button id="buzzBtn" style="display:none;" disabled>BUZZ &nbsp;<span style="font-size:.7rem;font-weight:400;opacity:.6;">(or press Space)</span></button>
 
-  <!-- Miss log (practice only) -->
-  <div class="miss-wrap" id="missWrap">
-    <div class="sec-lbl">Miss log</div>
-    <ul class="miss-list" id="missList"></ul>
-    <button class="btn btn-g" id="btnCopy" style="width:fit-content;font-size:.76rem">Copy log</button>
+  <!-- Answer row -->
+  <div class="ans-row" id="ansRow" style="display:none;">
+    <span id="micDot" style="display:none;"><span class="mic-dot"></span></span>
+    <input type="text" id="ansInput" placeholder="Type or say your answer…" autocomplete="off" />
+    <span id="ansTimer" class="ans-timer"></span>
+    <button id="submitBtn" class="primary">Submit</button>
   </div>
 
-</div>
+  <!-- R1 part 2 hint -->
+  <div id="part2Hint" style="display:none;font-size:.8rem;color:var(--text2);margin-bottom:14px;padding:10px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);">
+    <span style="color:var(--yellow);font-weight:600;">FOR 50 POINTS — </span><span id="part2Text"></span>
+  </div>
+
+  <!-- Feedback -->
+  <div class="feedback" id="feedback">
+    <div id="fbMsg"></div>
+    <div class="ans-reveal" id="fbReveal" style="display:none;"></div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav-row" id="navRow" style="display:none;">
+    <button id="nextBtn">Next Question →</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="statsBar" style="display:none;">
+    <div>Questions: <b id="stTotal">0</b></div>
+    <div>Correct: <b id="stRight" style="color:var(--green);">0</b></div>
+    <div>Wrong: <b id="stWrong" style="color:var(--red);">0</b></div>
+    <div>Score: <b id="stScore">0</b></div>
+  </div>
+</main>
+
 <script>
-// ═══════════════════════════════════════════════════════════
-// QUESTION BANK
-// ═══════════════════════════════════════════════════════════
-// Each question has:
-//   tossup   – full pyramidal text (Practice / R2/3 / Finals)
-//   part1    – hard clue, before "for 50 points" (Round 1)
-//   part2    – easier clue, after "for 50 points" (Round 1)
-//   earlyClue – text describing the earliest buzz point
+// ─── QUESTION BANK ──────────────────────────────────────────────────────────
+const QB = [
+  // ── WATER ──
+  {id:'w01',topic:'Water',source:'WHO',answer:'schistosomiasis',alternates:['bilharzia','snail fever','bilharziasis'],
+   tossup:`This disease is caused by parasitic flatworms of the genus Schistosoma and is contracted through skin contact with contaminated freshwater — NOT through drinking it. The WHO reported that 251 million people required preventive treatment for this disease in 2021. It is second only to malaria in terms of devastating parasitic diseases worldwide. For 10 points — name this disease, also called bilharzia or snail fever.`,
+   part1:`This disease caused by Schistosoma flatworms required 251 million people to receive preventive treatment from the WHO in 2021. For 100 points — name it.`,
+   part2:`For 50 points — this disease, also called bilharzia, is contracted through skin contact with contaminated freshwater, not drinking it.`},
 
-const BANK = [
-// ── WATER ─────────────────────────────────────────────────
-{id:'w01',topic:'Water',answer:'schistosomiasis',alternates:['bilharzia','snail fever'],
- tossup:`Skin contact — not ingestion — with freshwater where infected snails shed larvae is the transmission route for this disease, which the WHO classifies as a neglected tropical disease. In 2021, over 251 million people required preventive treatment for it. It damages internal organs and stunts children's development in both its acute and chronic forms. For 10 points — name this parasitic disease also called bilharzia or snail fever.`,
- part1:`Caused by parasitic worms whose larvae are shed by freshwater snails, this WHO-classified neglected tropical disease is acquired through skin contact with infested water — not through drinking it. Over 251 million people required preventive treatment in 2021.`,
- part2:`For 50 points: also known as bilharzia, name this waterborne parasitic disease sometimes called snail fever.`,
- earlyClue:'skin contact with freshwater, snail larvae, NOT ingestion'},
+  {id:'w02',topic:'Water',source:'WHO',answer:'safely managed drinking water service',alternates:['safely managed water','jmp safely managed','safely managed'],
+   tossup:`The WHO and UNICEF Joint Monitoring Programme defines five levels of drinking water service, with this at the top. It requires water to be accessible on premises, available when needed, and free from contamination. As of recent WHO data, 2.2 billion people worldwide lack access to this standard. For 10 points — name this highest tier of the JMP drinking water ladder.`,
+   part1:`The JMP defines five levels of drinking water access; 2.2 billion people lack the highest tier, which requires water on premises, available when needed, and free from contamination. For 100 points — name this top tier.`,
+   part2:`For 50 points — this WHO/UNICEF JMP standard sits at the top of the drinking water service ladder.`},
 
-{id:'w02',topic:'Water',answer:'safely managed drinking water service',alternates:['safely managed','safely managed water','safely managed service'],
- tossup:`To qualify for this top tier of the WHO/UNICEF JMP drinking water ladder, a source must be on premises, available when needed, and free from contamination. As of 2022, 2.2 billion people still lacked it despite its being the benchmark for SDG Target 6.1. For 10 points — give the JMP term for this highest household water access tier.`,
- part1:`Sitting at the top of the WHO/UNICEF Joint Monitoring Programme drinking water ladder, this classification requires water to be on premises, available when needed, and free from contamination. 2.2 billion people lacked it as of 2022.`,
- part2:`For 50 points: the benchmark for SDG Target 6.1, give the four-word WHO/JMP term for this highest tier of household water access.`,
- earlyClue:'on premises + available when needed + free from contamination = top of JMP ladder'},
+  {id:'w03',topic:'Water',source:'WHO',answer:'505,000',alternates:['505000','five hundred five thousand','five hundred thousand'],
+   tossup:`The WHO reported this number as the approximate count of children under five who died from diarrheal diseases in 2019, many linked to unsafe water, sanitation, and hygiene. This figure underscores the WHO's argument that water access is a matter of child survival. For 10 points — give this approximate death toll, nearly half a million children under five.`,
+   part1:`According to WHO data, this many children under five died from diarrheal diseases in 2019 due to unsafe WASH conditions. For 100 points — give this figure.`,
+   part2:`For 50 points — approximately 505,000: the WHO's reported under-5 diarrheal death count for 2019.`},
 
-{id:'w03',topic:'Water',answer:'water safety plans',alternates:['WSP','water safety plan'],
- tossup:`The WHO's 2017 Guidelines for Drinking-Water Quality recommend these tools as the most effective means of consistently ensuring a supply's safety. They involve systematic risk assessment from catchment to consumer. A healthcare-facility version called WASH FIT is adapted from them. For 10 points — name this WHO-endorsed risk management framework.`,
- part1:`Recommended by the WHO's 2017 drinking water quality guidelines, these frameworks require systematic risk assessment from catchment to consumer — and are the preferred tool for utilities and community systems.`,
- part2:`For 50 points: a hospital version of this approach is called WASH FIT — name these WHO risk-management tools.`,
- earlyClue:'systematic risk assessment from catchment to consumer, WHO 2017 guidelines'},
+  {id:'w04',topic:'Water',source:'Britannica',answer:'virtual water',alternates:['embedded water','hidden water'],
+   tossup:`Economist Tony Allan coined this term in the 1990s to describe the water embedded in food and other products during their production. For example, producing one kilogram of beef requires roughly 15,000 liters of this resource. Countries that import food are indirectly importing large volumes of it. For 10 points — name this concept coined by Tony Allan referring to water hidden inside traded goods.`,
+   part1:`Tony Allan coined this term for the water embedded in goods during production; beef requires roughly 15,000 liters per kilogram of it. For 100 points — name this concept.`,
+   part2:`For 50 points — Tony Allan's term for water hidden inside food and products during production.`},
 
-{id:'w04',topic:'Water',answer:'human right to water',alternates:['right to water','right to safe water','UN right to water'],
- tossup:`The United Nations General Assembly formally recognized this status in 2010, declaring safe and clean drinking water essential to the full enjoyment of life. The WHO specifies that realizing it requires water to be sufficient, safe, acceptable, accessible, and affordable. For 10 points — name this status declared by the UN in 2010.`,
- part1:`The UN General Assembly issued a landmark 2010 declaration recognizing this formal status for safe drinking water, citing it as essential to life and all human rights.`,
- part2:`For 50 points: the WHO says realizing it requires water to be sufficient, safe, acceptable, physically accessible, and affordable — name this UN-recognized status.`,
- earlyClue:'UN General Assembly 2010, essential to full enjoyment of life'},
+  {id:'w05',topic:'Water',source:'CFR',answer:'agriculture',alternates:['farming','irrigation','agricultural sector'],
+   tossup:`According to both Britannica and the Council on Foreign Relations, this sector accounts for roughly 70 percent of all global freshwater withdrawals. Inefficient irrigation practices in this sector are a leading driver of water scarcity worldwide. For 10 points — name this sector responsible for the majority of global freshwater use.`,
+   part1:`This sector accounts for roughly 70% of global freshwater withdrawals, with inefficient irrigation as a leading cause of scarcity. For 100 points — name it.`,
+   part2:`For 50 points — farming and irrigation: the sector using 70% of the world's freshwater withdrawals.`},
 
-{id:'w05',topic:'Water',answer:'healthcare-associated infections',alternates:['HAI','HAIs','hospital-acquired infections','nosocomial infections'],
- tossup:`The WHO estimates hundreds of millions of patients suffer these conditions annually, driven primarily by inadequate water, sanitation, and hygiene in clinical settings. They are most prevalent in low- and middle-income countries. WASH FIT was developed specifically to reduce their burden. For 10 points — name this category of infections acquired in a medical facility.`,
- part1:`Hundreds of millions of patients annually suffer these conditions, whose primary driver in hospitals — especially in low- and middle-income countries — is inadequate WASH infrastructure, per the WHO.`,
- part2:`For 50 points: the WHO developed WASH FIT specifically to reduce their burden — name this category of infections contracted in a medical facility.`,
- earlyClue:'inadequate WASH in hospitals, hundreds of millions annually'},
+  {id:'w06',topic:'Water',source:'Britannica',answer:'Aral Sea',alternates:['aral'],
+   tossup:`Once the fourth-largest lake in the world, this body of water began shrinking dramatically in the 1960s after Soviet irrigation projects diverted its two main feeder rivers — the Amu Darya and Syr Darya — to grow cotton in Central Asia. By the 2000s it had lost more than 90 percent of its volume. For 10 points — name this Central Asian sea that became an ecological catastrophe due to Soviet irrigation.`,
+   part1:`Soviet irrigation diverted the Amu Darya and Syr Darya away from this once fourth-largest lake, causing it to shrink over 90%. For 100 points — name it.`,
+   part2:`For 50 points — this Central Asian body of water, once fourth-largest in the world, was destroyed by Soviet cotton irrigation.`},
 
-{id:'w06',topic:'Water',answer:'diarrhoeal disease',alternates:['diarrheal disease','diarrhea','diarrhoea'],
- tossup:`Approximately 505,000 children under five died from this illness in 2019, with contaminated drinking water as its primary driver. At least 1.7 billion people use a source contaminated with faeces — the leading vector for it. It is largely preventable through safe water, sanitation, and handwashing. For 10 points — name this leading waterborne cause of child mortality.`,
- part1:`The WHO attributes approximately 505,000 under-five deaths in 2019 to this illness, whose main cause is fecal contamination of drinking water.`,
- part2:`For 50 points: largely preventable through safe water and handwashing, name this waterborne illness responsible for those 505,000 child deaths.`,
- earlyClue:'505,000 children under five, 2019, fecal contamination of drinking water'},
+  {id:'w07',topic:'Water',source:'CFR',answer:'3 to 4 billion',alternates:['three to four billion','3-4 billion','four billion','three billion','3 billion','4 billion'],
+   tossup:`The Council on Foreign Relations reports that this many people — roughly 40 to 50 percent of the global population — experience severe water scarcity for at least one month per year. This figure highlights that water stress is not merely a developing-world problem but a global one. For 10 points — give this approximate number of people experiencing seasonal severe water scarcity.`,
+   part1:`The CFR states this many people, 40–50% of the world population, face severe water scarcity for at least one month per year. For 100 points — give the range.`,
+   part2:`For 50 points — 3 to 4 billion: the CFR's estimate of people experiencing severe water scarcity seasonally.`},
 
-{id:'w07',topic:'Water',answer:'water-stressed countries',alternates:['water stress','water-stressed nations'],
- tossup:`Over 2 billion people lived in countries fitting this WHO description in 2021, a number expected to grow with climate change and population growth. The UN defines this condition as water withdrawals exceeding 25 percent of renewable freshwater supply. For 10 points — give this two-word WHO descriptor for nations where demand outstrips supply.`,
- part1:`In 2021 over 2 billion people lived in countries with this WHO designation, which the agency warns will worsen due to climate change and population growth.`,
- part2:`For 50 points: the UN threshold is withdrawals exceeding 25% of renewable supply — give the two-word phrase for countries with this designation.`,
- earlyClue:'over 2 billion people, 2021, WHO, worsened by climate change'},
+  {id:'w08',topic:'Water',source:'St. Louis Government',answer:'Missouri River',alternates:['missouri'],
+   tossup:`Along with the Mississippi River, this river serves as a primary source of drinking water for the City of St. Louis. The St. Louis Water Division draws from both rivers and treats the water at its Chain of Rocks and Howard Bend facilities. For 10 points — name this river, the longest in the United States, that alongside the Mississippi feeds St. Louis's water supply.`,
+   part1:`This river, the longest in the US, is one of two rivers from which St. Louis draws its drinking water alongside the Mississippi. For 100 points — name it.`,
+   part2:`For 50 points — the Missouri River: one of two rivers that supply drinking water to the City of St. Louis.`},
 
-{id:'w08',topic:'Water',answer:'faecal contamination',alternates:['fecal contamination','faeces','feces','fecal pollution'],
- tossup:`In 2022, at least 1.7 billion people used a drinking source affected by this, which the WHO identifies as the primary microbial hazard in drinking water worldwide. It is the main driver of waterborne diarrhoeal disease globally. For 10 points — name this contamination type that is the number-one drinking-water health threat.`,
- part1:`At least 1.7 billion people globally used drinking water sources affected by this type of contamination in 2022 — the world's leading microbial drinking-water hazard, per the WHO.`,
- part2:`For 50 points: the main driver of waterborne diarrhoeal disease globally, name this contamination type.`,
- earlyClue:'1.7 billion people, 2022, WHO, leading microbial hazard'},
+  {id:'w09',topic:'Water',source:'Channel 5 News',answer:'1 million',alternates:['one million','1000000','a million'],
+   tossup:`According to Channel 5 News reporting on St. Louis's water infrastructure, the city's water system was originally built to serve this many people. However, due to decades of population decline, the city now serves fewer than 300,000 residents, leaving an aging infrastructure dramatically oversized for its current population. For 10 points — give the original design capacity of the St. Louis water system.`,
+   part1:`St. Louis's water system was built for this many people but now serves under 300,000 due to population decline. For 100 points — give the original capacity.`,
+   part2:`For 50 points — 1 million: the original design capacity of the St. Louis water system, now serving fewer than 300,000.`},
 
-{id:'w09',topic:'Water',answer:'WASH',alternates:['water sanitation and hygiene','water, sanitation and hygiene','water, sanitation, and hygiene'],
- tossup:`Sustainable Development Goal 6 is dedicated entirely to ensuring universal access to the three components of this acronym. The WHO assessment tool for healthcare facilities — WASH FIT — is named after it. For 10 points — give this three-letter acronym for water, sanitation, and hygiene.`,
- part1:`This acronym names an interconnected trio of public health priorities that together drive global disease burden. SDG 6 covers them exclusively, and the WHO hospital assessment tool WASH FIT takes its name from them.`,
- part2:`For 50 points: it stands for water, sanitation, and hygiene — give this three-letter acronym.`,
- earlyClue:'SDG 6 / WHO WASH FIT / three-letter acronym'},
+  {id:'w10',topic:'Water',source:'WHO',answer:'water safety plans',alternates:['water safety plan','wsp','wash fit'],
+   tossup:`The WHO identifies these as the most effective means of ensuring drinking water safety in a systematic manner. They involve risk assessment and risk management from catchment to consumer. A specific adaptation of this framework called WASH FIT is designed for use in healthcare facilities. For 10 points — name these WHO-recommended plans, the gold standard for drinking water quality management.`,
+   part1:`The WHO calls these the most effective tool for systematically ensuring drinking water safety, with WASH FIT as a healthcare adaptation. For 100 points — name them.`,
+   part2:`For 50 points — water safety plans: the WHO's recommended risk-management tool from catchment to consumer.`},
 
-{id:'w10',topic:'Water',answer:'30 minutes',alternates:['thirty minutes','30-minute','half an hour'],
- tossup:`The WHO/UNICEF JMP uses this as the maximum acceptable round-trip collection time to classify a drinking water source as "basic service" — anything longer is "limited service." It is a key metric for tracking SDG Target 6.1. For 10 points — give this time threshold used by the JMP.`,
- part1:`The WHO/UNICEF JMP drinking water ladder uses this round-trip travel-time cutoff to distinguish "basic" from "limited" water service — exceeding it places a household below the basic tier.`,
- part2:`For 50 points: used to track SDG 6.1 progress, give this time limit separating basic from limited water service.`,
- earlyClue:'round-trip collection time threshold, JMP, basic vs. limited service'},
+  // ── SUDAN ──
+  {id:'s01',topic:'Sudan',source:'PBS NewsHour',answer:'Christopher Tounsel',alternates:['tounsel'],
+   tossup:`This historian at the University of Washington described the situation in Sudan to PBS NewsHour anchor Geoff Bennett as a "hellscape," offering scholarly context on the ongoing civil war and its devastation on Sudanese cultural heritage. For 10 points — name this historian who appeared on PBS NewsHour to discuss the Sudan crisis.`,
+   part1:`This University of Washington historian described Sudan to PBS NewsHour as a "hellscape." For 100 points — name him.`,
+   part2:`For 50 points — Christopher Tounsel: the University of Washington historian who called Sudan a hellscape on PBS NewsHour.`},
 
-// ── SUDAN ──────────────────────────────────────────────────
-{id:'s01',topic:'Sudan',answer:'Omar al-Bashir',alternates:['al-Bashir','Bashir'],
- tossup:`In 2009 and 2010 this leader became the first sitting head of state ever indicted by the International Criminal Court, charged with genocide, war crimes, and crimes against humanity over the Darfur conflict. He took power in a 1989 Islamist-backed coup and ruled Sudan for thirty years before mass protests led to his removal by the military in April 2019. For 10 points — name this deposed Sudanese president.`,
- part1:`The first sitting head of state ever indicted by the International Criminal Court — charged in 2009 and 2010 with genocide and crimes against humanity related to Darfur — this Sudanese ruler seized power in a 1989 Islamist-backed coup.`,
- part2:`For 50 points: removed by the military in April 2019 following mass street protests, name this long-serving Sudanese president.`,
- earlyClue:'first sitting head of state indicted by ICC, 2009, Darfur charges'},
+  {id:'s02',topic:'Sudan',source:'PBS NewsHour',answer:'150,000',alternates:['150000','one hundred fifty thousand'],
+   tossup:`PBS NewsHour anchor Geoff Bennett reported this as the approximate number of people killed in Sudan's civil war, with approximately 13 million people displaced — the largest displacement crisis in the world. The conflict began April 15, 2023 between the Sudanese Armed Forces and the Rapid Support Forces. For 10 points — give this death toll figure reported by PBS NewsHour.`,
+   part1:`PBS NewsHour reported this many killed in Sudan's civil war, alongside roughly 13 million displaced. For 100 points — give the death toll.`,
+   part2:`For 50 points — 150,000: the approximate death toll in Sudan's civil war reported by PBS, with 13 million displaced.`},
 
-{id:'s02',topic:'Sudan',answer:'Darfur',alternates:['darfur conflict','darfur genocide'],
- tossup:`Beginning in 2003, Janjaweed Arab militias backed by the Sudanese government attacked non-Arab villages in this western region of Sudan, prompting the United States to label the violence a genocide. An estimated 300,000 people were killed and over 2.5 million displaced. The ICC issued its first genocide arrest warrant against a sitting head of state over atrocities committed here. For 10 points — name this Sudanese region.`,
- part1:`Starting in 2003, Janjaweed militias backed by the Sudanese government began attacking non-Arab communities in this western Sudanese region — killing an estimated 300,000 in what the US labeled a genocide.`,
- part2:`For 50 points: the ICC issued its first genocide warrant against a sitting head of state over atrocities committed here — name this Sudanese region.`,
- earlyClue:'2003, Janjaweed, western Sudan, US-labeled genocide, 300,000 killed'},
+  {id:'s03',topic:'Sudan',source:'PBS NewsHour',answer:'Habab Idriss Ahmed',alternates:['habab','habab idriss','idriss ahmed'],
+   tossup:`This senior inspector for Sudan's National Corporation for Antiquities and Museums fled to Scotland in 2023 as the civil war engulfed Khartoum. He appeared on PBS NewsHour to describe the looting and destruction of Sudan's cultural heritage sites. For 10 points — name this Sudanese antiquities official who spoke to PBS NewsHour from Scotland.`,
+   part1:`This senior inspector of Sudan's National Corporation for Antiquities and Museums fled to Scotland in 2023 and spoke with PBS NewsHour about looted heritage. For 100 points — name him.`,
+   part2:`For 50 points — Habab Idriss Ahmed: the Sudanese antiquities inspector who fled to Scotland and appeared on PBS NewsHour.`},
 
-{id:'s03',topic:'Sudan',answer:'Abdalla Hamdok',alternates:['Hamdok'],
- tossup:`This civilian economist became Sudan's prime minister under the August 2019 power-sharing agreement between protest groups and the Transitional Sovereignty Council. Detained in the October 2021 military coup, briefly reinstated under a November deal, he resigned in January 2022 when that deal collapsed. For 10 points — name this civilian prime minister of Sudan's transitional period.`,
- part1:`A civilian economist, this figure became Sudan's prime minister under the 2019 power-sharing deal — was detained in the October 2021 coup and resigned in January 2022 after his reinstatement deal fell apart.`,
- part2:`For 50 points: name this civilian prime minister of Sudan's transitional government.`,
- earlyClue:'civilian economist, prime minister, August 2019 power-sharing deal'},
+  {id:'s04',topic:'Sudan',source:'PBS NewsHour',answer:'Sudan National Museum',alternates:['national museum of sudan','sudanese national museum'],
+   tossup:`Located in Khartoum, this institution houses over 100,000 artifacts and holds the largest collection of Nubian antiquities in the world. PBS NewsHour reported on its endangerment as the 2023 civil war brought fighting directly into the Sudanese capital. For 10 points — name this museum that holds the world's largest Nubian collection.`,
+   part1:`This Khartoum museum holds 100,000+ artifacts and the world's largest Nubian collection, threatened by the 2023 civil war. For 100 points — name it.`,
+   part2:`For 50 points — the Sudan National Museum in Khartoum, home to the world's largest Nubian antiquities collection.`},
 
-{id:'s04',topic:'Sudan',answer:'Rapid Support Forces',alternates:['RSF'],
- tossup:`Commanded by General Mohamed Hamdan Dagalo — known as Hemedti — this paramilitary group evolved directly from the Janjaweed militias. After fighting alongside the Sudanese Armed Forces during the transitional period, it clashed with them in April 2023, triggering a full-scale civil war in Khartoum. For 10 points — name this Sudanese paramilitary force, also known by its initials.`,
- part1:`Commanded by Hemedti and grown from the Janjaweed militias, this Sudanese paramilitary group turned on the national armed forces in April 2023 and sparked civil war in Khartoum.`,
- part2:`For 50 points: give the full name or three-letter initials of this paramilitary force led by Hemedti.`,
- earlyClue:'Hemedti / Dagalo, evolved from Janjaweed, April 2023 civil war in Khartoum'},
+  {id:'s05',topic:'Sudan',source:'PBS NewsHour',answer:'Reem Aljeally',alternates:['aljeally','reem al-jeally','reem'],
+   tossup:`This Sudanese artist and curator based in Cairo founded the Sudan Art Archive and has documented the lives of women in Sudan through her work. She appeared on PBS NewsHour to discuss how the civil war has threatened Sudanese cultural identity and the role of art in preserving it. For 10 points — name this artist who founded the Sudan Art Archive.`,
+   part1:`This Cairo-based Sudanese artist founded the Sudan Art Archive and appeared on PBS NewsHour to discuss culture and women in Sudan. For 100 points — name her.`,
+   part2:`For 50 points — Reem Aljeally: the Sudanese artist in Cairo who founded the Sudan Art Archive.`},
 
-{id:'s05',topic:'Sudan',answer:'South Sudan',alternates:['republic of south sudan'],
- tossup:`A January 2011 independence referendum in which 98.83 percent voted to secede produced this landlocked nation, which formally declared independence in July 2011 as the world's newest country at that time. Its creation was enabled by the 2005 Comprehensive Peace Agreement ending Sudan's Second Civil War. For 10 points — name this country that split from Sudan in 2011.`,
- part1:`A January 2011 referendum in which 98.83% of voters chose secession led to the July 2011 independence of this landlocked nation — the world's newest country at the time.`,
- part2:`For 50 points: created by the 2005 Comprehensive Peace Agreement, name this country that separated from Sudan in 2011.`,
- earlyClue:'January 2011 referendum, 98.83% voted to secede, world\'s newest country'},
+  {id:'s06',topic:'Sudan',source:'Britannica',answer:'Darfur',alternates:['darfour'],
+   tossup:`The name of this region in western Sudan translates as "home of the Fur," referring to the Fur people, its largest ethnic group. Starting in 2003, it became the site of a brutal conflict involving the Janjaweed militia, accused of genocide against non-Arab communities. For 10 points — name this western Sudanese region whose name means "home of the Fur."`,
+   part1:`This western Sudanese region, whose name means "home of the Fur," became site of a 2003 conflict involving the Janjaweed. For 100 points — name it.`,
+   part2:`For 50 points — Darfur: the western Sudanese region meaning "home of the Fur," site of Janjaweed violence since 2003.`},
 
-{id:'s06',topic:'Sudan',answer:'Khartoum',alternates:['khartoum sudan'],
- tossup:`Located at the confluence of the Blue Nile and the White Nile, this city is Sudan's capital and was the main battleground of the April 2023 civil war between the Sudanese Armed Forces and the Rapid Support Forces. Its twin city Omdurman was the site of the 1898 British victory over the Mahdist state. For 10 points — name this Sudanese capital.`,
- part1:`This Sudanese capital, situated where the Blue Nile meets the White Nile, became the primary battleground when civil war erupted between the Sudanese Armed Forces and the Rapid Support Forces in April 2023.`,
- part2:`For 50 points: its twin city Omdurman saw a famous 1898 British victory — name this Sudanese capital.`,
- earlyClue:'confluence of Blue Nile and White Nile, Sudan\'s capital'},
+  {id:'s07',topic:'Sudan',source:'CFR',answer:'Rapid Support Forces',alternates:['rsf','rapid support force'],
+   tossup:`This Sudanese paramilitary organization grew out of the Janjaweed militias and was officially incorporated by Omar al-Bashir in 2013. Led by Mohamed Hamdan Dagalo, known as Hemedti, it clashed with the Sudanese Armed Forces beginning April 15, 2023, sparking the current civil war. For 10 points — name this paramilitary force, abbreviated RSF.`,
+   part1:`Led by Hemedti, this paramilitary force that grew from the Janjaweed launched war against Sudan's Armed Forces on April 15, 2023. For 100 points — name it.`,
+   part2:`For 50 points — the Rapid Support Forces or RSF: Hemedti's paramilitary that sparked Sudan's civil war in April 2023.`},
 
-// ── CURRENT EVENTS ─────────────────────────────────────────
-{id:'c01',topic:'Current Events',answer:'artificial intelligence',alternates:['AI','generative AI','ChatGPT','large language models','LLM'],
- tossup:`The 2023 public release of systems generating fluent text, images, and code from natural language prompts brought this technology into mainstream debate and prompted calls for global regulation. The EU's AI Act, passed in 2024, is the world's first comprehensive legal framework governing it. For 10 points — give this broad term for machine systems that perform tasks typically requiring human intelligence.`,
- part1:`The 2023 public release of systems generating fluent text, images, and code from natural language — by companies including OpenAI and Anthropic — sparked mainstream debate and global regulatory efforts over this technology.`,
- part2:`For 50 points: the EU's AI Act, passed in 2024, is the world's first comprehensive legal framework governing it — name this technology.`,
- earlyClue:'2023, text/image/code from natural language, OpenAI/Anthropic'},
+  {id:'s08',topic:'Sudan',source:'CFR',answer:'Omar al-Bashir',alternates:['bashir','al-bashir','omar bashir'],
+   tossup:`This Sudanese leader ruled for roughly 30 years before being ousted in a 2019 popular uprising. He holds the distinction of being the first sitting head of state to be indicted by the International Criminal Court, facing charges of genocide related to the Darfur conflict. For 10 points — name this long-ruling Sudanese president removed in 2019.`,
+   part1:`This Sudanese president, the first sitting head of state indicted by the ICC for genocide, ruled 30 years before a 2019 uprising removed him. For 100 points — name him.`,
+   part2:`For 50 points — Omar al-Bashir: the Sudanese president ousted in 2019 and the first sitting head of state indicted by the ICC.`},
 
-{id:'c02',topic:'Current Events',answer:'Gaza',alternates:['Gaza Strip','Gaza War','Israel-Hamas war'],
- tossup:`The October 7, 2023 Hamas-led attack on Israel killing approximately 1,200 people and seizing roughly 250 hostages triggered an Israeli military offensive into this Palestinian territory. The UN described the subsequent humanitarian situation as one of the fastest deteriorations on record; its health ministry reported over 37,000 deaths by mid-2024. For 10 points — name this Palestinian territory.`,
- part1:`The October 7, 2023 Hamas attack killing approximately 1,200 Israelis and taking about 250 hostages prompted a prolonged Israeli military campaign in this Palestinian territory — which the UN said saw one of history's fastest humanitarian deteriorations.`,
- part2:`For 50 points: ceasefire negotiations for this territory were mediated by Qatar, Egypt, and the US — name this Palestinian territory.`,
- earlyClue:'October 7, 2023 Hamas attack, ~1,200 killed, ~250 hostages'},
+  {id:'s09',topic:'Sudan',source:'ACRC',answer:'Khartoum',alternates:['khartoum city'],
+   tossup:`This city sits at the confluence of the Blue Nile and White Nile rivers. It is part of a tri-city metropolitan area that also includes Omdurman and the district of Bahri, also known as Khartoum North. It served as Sudan's capital and became a central battleground in the 2023 civil war. For 10 points — name this Sudanese capital.`,
+   part1:`This Sudanese capital at the Blue Nile–White Nile confluence forms a tri-city area with Omdurman and Bahri. For 100 points — name it.`,
+   part2:`For 50 points — Khartoum: Sudan's capital at the confluence of the Blue and White Nile rivers.`},
 
-{id:'c03',topic:'Current Events',answer:'Ukraine',alternates:['ukraine war','russo-ukrainian war'],
- tossup:`Russia's February 2022 full-scale invasion of this country triggered the largest land war in Europe since World War II and sweeping Western sanctions on Moscow. NATO members provided it with artillery, air-defense systems, and eventually F-16 jets. Its president Volodymyr Zelensky became a prominent voice at global forums calling for military aid. For 10 points — name this Eastern European country.`,
- part1:`Russia's February 2022 full-scale invasion of this Eastern European country triggered the largest land war in Europe since World War II and a sweeping package of Western sanctions on Moscow.`,
- part2:`For 50 points: its president Volodymyr Zelensky has repeatedly addressed global forums seeking military aid — name this country.`,
- earlyClue:'February 2022, Russia full-scale invasion, largest land war in Europe since WWII'},
+  {id:'s10',topic:'Sudan',source:'PBS NewsHour',answer:'3',alternates:['three'],
+   tossup:`PBS NewsHour reported that Sudan is home to this many UNESCO World Heritage Sites, all of which are under threat from the ongoing civil war. These sites include the ancient pyramids of Meroe, which outnumber Egypt's pyramids in total count. For 10 points — give the number of UNESCO World Heritage Sites in Sudan.`,
+   part1:`Sudan has this many UNESCO World Heritage Sites, including the pyramids of Meroe, all threatened by the civil war. For 100 points — give the number.`,
+   part2:`For 50 points — 3: the number of UNESCO World Heritage Sites in Sudan, including the Meroe pyramids.`},
 
-{id:'c04',topic:'Current Events',answer:'Supreme Court',alternates:['US Supreme Court','SCOTUS'],
- tossup:`In its 2024 term, this institution ruled in Trump v. United States that former presidents enjoy presumptive immunity from criminal prosecution for official acts — a decision dissenting justices said placed the president above the law. Its 2022 term had overturned Roe v. Wade and curbed EPA authority under the "major questions doctrine." For 10 points — name this highest US court.`,
- part1:`This institution's 2024 term produced a ruling in Trump v. United States granting former presidents presumptive immunity from prosecution for official acts — a decision that drew sharp dissents from legal scholars.`,
- part2:`For 50 points: its 2022 term had already overturned Roe v. Wade — name this highest court in the United States.`,
- earlyClue:'Trump v. United States, presumptive immunity for official acts, 2024 term'},
+  // ── HOUSING INEQUALITY ──
+  {id:'h01',topic:'Housing',source:'WashU',answer:'redlining',alternates:['red lining'],
+   tossup:`Beginning in the 1930s, the Home Owners' Loan Corporation created color-coded maps that outlined certain neighborhoods — predominantly Black ones — in red, marking them as too risky for mortgage lending. Washington University researchers studying St. Louis housing inequality identify this practice as foundational to the city's racial wealth gap. For 10 points — name this discriminatory mapping practice.`,
+   part1:`The HOLC in the 1930s colored Black neighborhoods red on maps to deny them mortgages — a WashU-studied foundation of St. Louis's racial wealth gap. For 100 points — name this practice.`,
+   part2:`For 50 points — redlining: the HOLC practice of outlining minority neighborhoods in red to deny mortgage lending.`},
 
-{id:'c05',topic:'Current Events',answer:'COP28',alternates:['COP 28','28th conference of the parties','cop twenty-eight','UAE climate conference'],
- tossup:`Held in Dubai in late 2023 and chaired by UAE oil executive Sultan Al Jaber, this climate conference produced the first-ever global agreement to "transition away" from fossil fuels. The final text was called the UAE Consensus. For 10 points — name this 2023 UN climate summit.`,
- part1:`Chaired by UAE oil executive Sultan Al Jaber and held in Dubai in late 2023, this climate conference produced the first-ever multilateral agreement calling for a global transition away from fossil fuels.`,
- part2:`For 50 points: its final text was called the UAE Consensus — name this 2023 UN climate summit.`,
- earlyClue:'Dubai, late 2023, Sultan Al Jaber, first-ever agreement to transition away from fossil fuels'},
+  {id:'h02',topic:'Housing',source:'WashU',answer:'Low-Income Housing Tax Credit',alternates:['lihtc','low income housing tax credit','housing tax credit'],
+   tossup:`Washington University housing researchers argue that this federal program, though designed to expand affordable housing, has paradoxically concentrated poverty by placing subsidized units in already low-income, racially segregated neighborhoods. Enacted in 1986, it remains the primary federal tool for incentivizing private affordable housing development. For 10 points — name this tax credit program, abbreviated LIHTC.`,
+   part1:`WashU researchers argue this 1986 federal program concentrates poverty by placing subsidized units in already-segregated neighborhoods. For 100 points — name it.`,
+   part2:`For 50 points — the Low-Income Housing Tax Credit or LIHTC: the 1986 federal program criticized by WashU for concentrating poverty.`},
+
+  {id:'h03',topic:'Housing',source:'WashU',answer:'subsidized housing',alternates:['public housing','affordable housing','subsidized'],
+   tossup:`A Washington University study on St. Louis housing concluded that the city's approach to this type of housing is "still separate and unequal," echoing the language of Brown v. Board of Education. Rather than integrating residents into areas of opportunity, WashU researchers found that it systematically exacerbates racial and economic segregation. For 10 points — name this type of government-assisted housing that WashU calls "still separate and unequal."`,
+   part1:`A WashU study used the phrase "still separate and unequal" to describe St. Louis's approach to this type of housing. For 100 points — name it.`,
+   part2:`For 50 points — subsidized housing: what WashU researchers call "still separate and unequal" in St. Louis.`},
+
+  {id:'h04',topic:'Housing',source:'CDA',answer:'Community Development Administration',alternates:['cda','community development admin'],
+   tossup:`This City of St. Louis agency is responsible for administering housing and community development programs, including managing federal block grants and overseeing affordable housing initiatives. It operates under the city's mayor's office and is central to St. Louis's efforts to address housing inequality. For 10 points — name this St. Louis city agency, abbreviated CDA.`,
+   part1:`This St. Louis city agency, abbreviated CDA, administers federal housing grants and affordable housing programs under the mayor's office. For 100 points — name it.`,
+   part2:`For 50 points — the Community Development Administration: St. Louis's city agency overseeing housing and community development.`},
+
+  {id:'h05',topic:'Housing',source:'Reimagining St. Louis',answer:'St. Louis Realtors Association',alternates:['st louis realtors','stl realtors','realtors association'],
+   tossup:`This organization authored the 2024 "Reimagining St. Louis" report, which analyzed housing market trends, neighborhood revitalization opportunities, and strategies to reverse population decline in the city. The report highlighted vacant properties and structural disinvestment as key challenges. For 10 points — name this organization that published the 2024 Reimagining St. Louis report.`,
+   part1:`This organization published the 2024 Reimagining St. Louis report on housing, vacancy, and population decline. For 100 points — name it.`,
+   part2:`For 50 points — the St. Louis Realtors Association: author of the 2024 Reimagining St. Louis housing report.`},
+
+  {id:'h06',topic:'Housing',source:'WashU',answer:'Section 8',alternates:['housing choice vouchers','housing choice voucher','section eight','vouchers'],
+   tossup:`Washington University researchers point out a critical flaw in this federal rental assistance program: even though recipients can theoretically use their vouchers anywhere, landlords in high-opportunity, low-poverty areas frequently refuse to accept them, undermining the program's stated goal of giving low-income families access to better neighborhoods. For 10 points — name this federal rental assistance program, also called Housing Choice Vouchers.`,
+   part1:`WashU notes that landlords in good neighborhoods often refuse to accept this federal rental subsidy, also called Housing Choice Vouchers. For 100 points — name it.`,
+   part2:`For 50 points — Section 8 or Housing Choice Vouchers: the federal rental assistance program landlords in affluent areas often refuse.`},
+
+  {id:'h07',topic:'Housing',source:'Reimagining St. Louis',answer:'population decline',alternates:['depopulation','population loss','declining population'],
+   tossup:`The 2024 Reimagining St. Louis report highlights this ongoing trend as a root cause of the city's housing challenges. St. Louis peaked at approximately 856,000 residents in 1950 and has since fallen to fewer than 300,000 — less than 35% of its peak — leaving behind vast stretches of vacant land and aging infrastructure. For 10 points — name this demographic trend central to St. Louis's housing challenges.`,
+   part1:`St. Louis peaked at 856,000 residents in 1950 and has fallen below 300,000 — the Reimagining report cites this trend as a root housing challenge. For 100 points — name it.`,
+   part2:`For 50 points — population decline: the trend that dropped St. Louis from 856,000 in 1950 to under 300,000 today.`},
+
+  // ── SEERAH ──
+  {id:'sr01',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Year of Sorrow',alternates:['aam al-huzn','am al huzn','year of grief','aam ul huzn'],
+   tossup:`This name was given to the tenth year of the Prophet Muhammad's mission, during which he suffered the deaths of his most beloved wife Khadijah and his protective uncle Abu Talib within weeks of each other. The Prophet himself gave this Arabic name — Aam al-Huzn — to this devastating year. For 10 points — give the English name of this year, the saddest in the Prophet's life before Hijrah.`,
+   part1:`The Prophet named the tenth year of his mission Aam al-Huzn after losing Khadijah and Abu Talib within weeks. For 100 points — give the English name.`,
+   part2:`For 50 points — the Year of Sorrow: the Prophet's name for the tenth year of his mission, marked by the deaths of Khadijah and Abu Talib.`},
+
+  {id:'sr02',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Thaqif',alternates:['banu thaqif','thaqeef'],
+   tossup:`Following the Year of Sorrow, the Prophet Muhammad traveled to the city of Ta'if seeking support from this tribe. Their three leaders — Abd Yalil, Mas'ud, and Habib — rejected him mockingly, and the tribe's youth pelted him with stones, wounding his feet. For 10 points — name this tribe of Ta'if that stoned the Prophet when he sought their support.`,
+   part1:`The Prophet sought support from this Ta'if tribe; their three leaders Abd Yalil, Mas'ud, and Habib mocked him and their youth stoned him. For 100 points — name the tribe.`,
+   part2:`For 50 points — Thaqif: the tribe of Ta'if whose leaders rejected the Prophet and whose youth stoned him.`},
+
+  {id:'sr03',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Addas',alternates:['addas the slave'],
+   tossup:`After the stoning at Ta'if, the Prophet rested in an orchard belonging to Utbah and Shaybah ibn Rabi'ah. Their Christian slave, originally from Nineveh in present-day Iraq, brought him grapes. When the Prophet mentioned the Prophet Yunus — Jonah — this slave recognized him as a prophet and accepted Islam. For 10 points — name this Christian slave from Nineveh who accepted Islam after the Ta'if incident.`,
+   part1:`This Christian slave from Nineveh served the Prophet grapes in Ta'if, recognized him through the mention of Yunus, and accepted Islam. For 100 points — name him.`,
+   part2:`For 50 points — Addas: the Christian slave from Nineveh who accepted Islam after the Prophet mentioned Yunus.`},
+
+  {id:'sr04',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Angel of the Mountains',alternates:['angel of mountains','malak al jibal','mountain angel'],
+   tossup:`After the brutal experience at Ta'if, the Angel Jibreel appeared to the Prophet alongside this entity, who introduced himself and offered to crush the people of Ta'if between two mountains — the Akhshabayn — as divine punishment. The Prophet declined, expressing hope that their descendants would one day embrace Islam. For 10 points — name this angel who offered to destroy Ta'if by collapsing mountains upon it.`,
+   part1:`This angel appeared after Ta'if and offered to crush the city between the Akhshabayn mountains; the Prophet declined. For 100 points — name this angel.`,
+   part2:`For 50 points — the Angel of the Mountains: the one who offered to destroy Ta'if, refused by the Prophet.`},
+
+  {id:'sr05',topic:'Seerah',source:'Dr. Yasir Qadhi Eps. 21-23',answer:'Buraq',alternates:['al-buraq','buraaq'],
+   tossup:`During the Night Journey and Ascension, the Prophet Muhammad was brought this heavenly mount, described as white, larger than a donkey but smaller than a mule, whose stride reached the furthest point its eye could see. Its name comes from the Arabic word for lightning. It carried the Prophet from Mecca to Jerusalem at the start of the Isra. For 10 points — name this heavenly steed of the Night Journey.`,
+   part1:`This white heavenly steed named for the Arabic word for lightning carried the Prophet from Mecca to Jerusalem during the Isra. For 100 points — name it.`,
+   part2:`For 50 points — Buraq: the lightning-named heavenly mount that carried the Prophet to Jerusalem.`},
+
+  {id:'sr06',topic:'Seerah',source:'Dr. Yasir Qadhi Eps. 21-23',answer:'Bayt al-Maʿmur',alternates:['bayt al mamur','bait al mamur','heavenly kabah','al-bayt al-mamur'],
+   tossup:`During the Miraj, the Prophet Muhammad was shown this structure in the seventh heaven, directly above the Ka'bah in Mecca. The Prophet Ibrahim was found leaning against it. Every day, 70,000 angels enter it to worship, and those who enter never return — so great is the endless supply of angels. For 10 points — name this heavenly Ka'bah in the seventh heaven.`,
+   part1:`The Prophet saw this seventh-heaven structure directly above the Ka'bah, against which Ibrahim leaned, visited by 70,000 new angels daily. For 100 points — name it.`,
+   part2:`For 50 points — Bayt al-Ma'mur: the heavenly Ka'bah in the seventh heaven, visited daily by 70,000 angels who never return.`},
+
+  {id:'sr07',topic:'Seerah',source:'Dr. Yasir Qadhi Eps. 21-23',answer:'50 prayers',alternates:['fifty prayers','fifty salah','50 salah','fifty salat'],
+   tossup:`During the Miraj, Allah initially ordained this number of daily prayers for the Muslim community. As the Prophet descended, Prophet Musa repeatedly advised him to return and request a reduction, arguing that his people could not bear such a burden. Through multiple returns, the number was reduced to five — which still carries the reward of the original figure. For 10 points — give the original number of daily prayers ordained during the Miraj before Musa's intercession.`,
+   part1:`Allah initially ordained this many daily prayers during the Miraj; Musa's repeated advice led to their reduction to five. For 100 points — give the original number.`,
+   part2:`For 50 points — 50 prayers: the original number ordained in the Miraj, reduced to 5 through Musa's advice.`},
+
+  {id:'sr08',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 71',answer:'Heraclius',alternates:['heraclitus','heraklius'],
+   tossup:`This Byzantine emperor received a letter from the Prophet Muhammad inviting him to Islam, delivered by Dihyah al-Kalbi. He responded by summoning Abu Sufyan — then still an enemy of the Muslims — and questioning him about the Prophet's character and lineage. His private responses suggested he believed Muhammad was a true prophet, but political pressure prevented him from converting. For 10 points — name this Byzantine emperor who received the Prophet's letter.`,
+   part1:`This Byzantine emperor received the Prophet's letter via Dihyah al-Kalbi and questioned Abu Sufyan about Muhammad. For 100 points — name him.`,
+   part2:`For 50 points — Heraclius: the Byzantine emperor who received the Prophet's letter and privately questioned Abu Sufyan.`},
+
+  {id:'sr09',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 71',answer:'Khosrow',alternates:['kisra','khusrow','khosrau','chosroes'],
+   tossup:`In stark contrast to Heraclius, this Persian emperor tore up the Prophet Muhammad's letter of invitation to Islam. The Prophet reportedly predicted that his kingdom would be torn up similarly — a prediction that came true when his own son Shirawayh assassinated him and Persia's power subsequently collapsed. For 10 points — name this Persian emperor, also called Kisra, who tore the Prophet's letter.`,
+   part1:`This Persian emperor, also called Kisra, tore the Prophet's letter and was later killed by his own son. For 100 points — name him.`,
+   part2:`For 50 points — Khosrow or Kisra: the Persian emperor who tore the Prophet's letter and was killed by his own son.`},
+
+  {id:'sr10',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 72',answer:'Umrah al-Qadah',alternates:['umrat al qadah','umra al qadha','makeup umrah','compensatory umrah','umrah qadha'],
+   tossup:`This makeup Umrah was performed by the Prophet Muhammad in the month of Dhul-Qa'dah of 7 AH, fulfilling the terms of the Treaty of Hudaybiyyah which had forced the Muslims to turn back the previous year. The Quraysh evacuated Mecca for three days to allow the Muslims to perform it. During this visit, the Prophet also married Maymunah bint al-Harith. For 10 points — name this compensatory Umrah performed in 7 AH.`,
+   part1:`In Dhul-Qa'dah 7 AH, the Prophet performed this makeup Umrah per the Treaty of Hudaybiyyah; the Quraysh vacated Mecca for 3 days. For 100 points — name it.`,
+   part2:`For 50 points — Umrah al-Qadah: the makeup Umrah in 7 AH during which the Quraysh vacated Mecca and the Prophet married Maymunah.`},
+
+  // ── CURRENT EVENTS ──
+  {id:'c01',topic:'Current Events',source:'2026',answer:'FIFA World Cup 2026',alternates:['world cup 2026','2026 world cup','fifa world cup','world cup'],
+   tossup:`This sporting tournament officially kicked off on June 11, 2026, hosted jointly by the United States, Canada, and Mexico. For the first time, it features an expanded format of 48 teams, up from the previous 32, making it the largest World Cup in history by team count. For 10 points — name this 2026 international football tournament.`,
+   part1:`This June 11, 2026 tournament hosted by the US, Canada, and Mexico is the first FIFA World Cup with 48 teams. For 100 points — name it.`,
+   part2:`For 50 points — the 2026 FIFA World Cup: the first 48-team World Cup, hosted jointly by the United States, Canada, and Mexico.`},
+
+  {id:'c02',topic:'Current Events',source:'2026',answer:'Mark Carney',alternates:['carney'],
+   tossup:`This former governor of both the Bank of Canada and the Bank of England became Canada's Prime Minister after Justin Trudeau announced his resignation in January 2025. He led the Liberal Party to victory in the subsequent federal election. For 10 points — name this Canadian Prime Minister who succeeded Trudeau.`,
+   part1:`This former Bank of Canada and Bank of England governor succeeded Justin Trudeau as Canadian Prime Minister. For 100 points — name him.`,
+   part2:`For 50 points — Mark Carney: the former central bank governor who became Canadian Prime Minister after Trudeau's resignation.`},
+
+  {id:'c03',topic:'Current Events',source:'2026',answer:'Department of Government Efficiency',alternates:['doge','d.o.g.e.'],
+   tossup:`This advisory body was established early in Donald Trump's second term with Elon Musk as a key figure, tasked with identifying and eliminating wasteful federal spending. It generated significant controversy over its legal authority and access to government systems. For 10 points — name this body, abbreviated DOGE.`,
+   part1:`Elon Musk led this Trump second-term advisory body tasked with cutting federal waste, abbreviated DOGE. For 100 points — name it in full.`,
+   part2:`For 50 points — the Department of Government Efficiency or DOGE: Trump's second-term initiative led by Elon Musk.`},
+
+  {id:'c04',topic:'Current Events',source:'2026',answer:'Pope Leo XIV',alternates:['leo xiv','robert prevost','robert francis prevost','pope leo'],
+   tossup:`Elected in May 2025, this man became the first American-born pope in the history of the Catholic Church. Born Robert Francis Prevost, he had served as a bishop in Peru and later as Prefect of the Dicastery for Bishops at the Vatican before his historic election. For 10 points — name this American-born pope who took the name Leo XIV.`,
+   part1:`Born Robert Francis Prevost, this man elected in May 2025 became the first American-born pope, taking the name Leo XIV. For 100 points — name him.`,
+   part2:`For 50 points — Pope Leo XIV, born Robert Francis Prevost: the first American-born pope, elected May 2025.`},
+
+  {id:'c05',topic:'Current Events',source:'2026',answer:'Donald Trump',alternates:['trump','donald j trump'],
+   tossup:`This individual was inaugurated as the 47th President of the United States on January 20, 2025, making him only the second person in American history to serve two non-consecutive presidential terms. His second administration has pursued major shifts in trade policy, immigration enforcement, and executive power. For 10 points — name this current U.S. president.`,
+   part1:`Inaugurated January 20, 2025 as the 47th president, this man became only the second to serve two non-consecutive terms. For 100 points — name him.`,
+   part2:`For 50 points — Donald Trump: the 47th U.S. president inaugurated January 20, 2025, serving his second non-consecutive term.`},
 ];
 
-// ═══════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════
-const TOPICS = [...new Set(BANK.map(q=>q.topic))];
-const M = {PRACTICE:'practice',R1:'round1',R23:'round23',FINALS:'finals'};
-const FR = {R1:'fr1',R2:'fr2',R3:'fr3'};
-const J_VALS = [100,200,300,400,500];
-const R23_VALS = [20,40,60,80,100,120,140];
+// ─── MODES & STATE ───────────────────────────────────────────────────────────
+const M = { PRACTICE:'practice', R1:'round1', R23:'round23', FINALS:'finals' };
+const FR = { R1:'fr1', R2:'fr2', R3:'fr3' };
+const J_VALS = [100, 200, 300, 400, 500];
+const TOPICS = ['Water','Sudan','Housing','Seerah','Current Events'];
 
 let mode = M.PRACTICE;
 let finRound = FR.R1;
-let activeTopic = null;
-let queue = [];
-let currentQ = null;
-let currentPts = 0;
-let reviewMode = false;
-let score = 0, nRight = 0, nWrong = 0, r23Idx = 0;
+let blindMode = false;
+let revealed = false;
+let score = 0, nRight = 0, nWrong = 0;
+
+let pool = [], poolIdx = 0, curQ = null;
+let waitingAns = false;
+let curPts = 10;
 
 // TTS
+let words = [], wordIdx = 0, utt = null;
 const synth = window.speechSynthesis;
-let utt = null;
-let words = [], wordIdx = 0;
-let buzzed = false, buzzWordIdx = 0;
-let waitingAns = false, reading = false;
-let inPart2 = false, part2Start = 0;
 
-// Recognition
-let recog = null, recogActive = false, heardFinal = '';
+// STT
+let recog = null, heardFinal = '', autoSubTimer = null;
 
-// Storage
-const SK = 'mist_v4';
-let store = (() => { try { return JSON.parse(localStorage.getItem(SK))||{}; } catch { return {}; } })();
-['misses','addedQ','jUsed','pStats'].forEach(k => { if (!store[k]) store[k] = k==='pStats'?{c:0,l:0,w:0}:{}; });
-function save() { try { localStorage.setItem(SK,JSON.stringify(store)); } catch {} }
+// Timer
+let timerInterval = null, timerLeft = 0;
 
-// ═══════════════════════════════════════════════════════════
-// DOM
-// ═══════════════════════════════════════════════════════════
-const $ = id => document.getElementById(id);
-function el(tag,cls,html=''){const e=document.createElement(tag);e.className=cls;if(html)e.innerHTML=html;return e;}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// Board
+let boardUsed = {};
 
-const topicBar=$('topicBar'), finalsTabs=$('finalsTabs'), jBoard=$('jBoard');
-const scoreStrip=$('scoreStrip'), hdScore=$('hdScore');
-const qLbl=$('qLbl'), qPts=$('qPts'), progFill=$('progFill'), qText=$('qText');
-const btnRead=$('btnRead'), btnBuzz=$('btnBuzz'), btnSkip=$('btnSkip'), btnReview=$('btnReview');
-const ansPhase=$('ansPhase'), ansInput=$('ansInput'), micBtn=$('micBtn'), btnSubmit=$('btnSubmit');
-const trans=$('trans'), fb=$('fb'), missWrap=$('missWrap'), missList=$('missList');
+// ─── DOM ────────────────────────────────────────────────────────────────────
+const qCard = document.getElementById('qCard');
+const qText = document.getElementById('qText');
+const qTopic = document.getElementById('qTopic');
+const qSource = document.getElementById('qSource');
+const qPts = document.getElementById('qPts');
+const qNum = document.getElementById('qNum');
+const blindBadge = document.getElementById('blindBadge');
+const phaseBadge = document.getElementById('phaseBadge');
+const buzzBtn = document.getElementById('buzzBtn');
+const ansRow = document.getElementById('ansRow');
+const ansInput = document.getElementById('ansInput');
+const ansTimer = document.getElementById('ansTimer');
+const submitBtn = document.getElementById('submitBtn');
+const feedback = document.getElementById('feedback');
+const fbMsg = document.getElementById('fbMsg');
+const fbReveal = document.getElementById('fbReveal');
+const navRow = document.getElementById('navRow');
+const micDot = document.getElementById('micDot');
+const statsBar = document.getElementById('statsBar');
+const boardWrap = document.getElementById('boardWrap');
+const boardGrid = document.getElementById('boardGrid');
+const blindPill = document.getElementById('blindPill');
+const part2Hint = document.getElementById('part2Hint');
+const part2Text = document.getElementById('part2Text');
+const finalsRow = document.getElementById('finalsRow');
+const hScore = document.getElementById('hScore');
+const hRight = document.getElementById('hRight');
+const hWrong = document.getElementById('hWrong');
 
-// ═══════════════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════════════
-const NUM_MAP = {
-  zero:'0',one:'1',two:'2',three:'3',four:'4',five:'5',six:'6',
-  seven:'7',eight:'8',nine:'9',ten:'10',eleven:'11',twelve:'12',
-  thirteen:'13',fourteen:'14',fifteen:'15',sixteen:'16',seventeen:'17',
-  eighteen:'18',nineteen:'19',twenty:'20',thirty:'30',forty:'40',
-  fifty:'50',sixty:'60',seventy:'70',eighty:'80',ninety:'90',
-  hundred:'100','two thousand':'2000','twenty twenty':'2020',
-  'twenty twenty one':'2021','twenty twenty two':'2022',
-  'twenty twenty three':'2023','twenty twenty four':'2024'
-};
-const STOP = new Set(['a','an','the','of','in','on','at','to','for','and','or','its','it','this','that','is','are','was','were','by']);
-
-function norm(s) {
-  let r = String(s).toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
-  // multi-word numbers first
-  Object.entries(NUM_MAP).filter(([k])=>k.includes(' ')).forEach(([k,v])=>{ r=r.replaceAll(k,v); });
-  // single-word numbers
-  r = r.split(' ').map(w=>NUM_MAP[w]||w).join(' ');
-  // remove stop words
-  r = r.split(' ').filter(w=>!STOP.has(w)).join(' ');
-  return r;
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+function loadStorage() {
+  score = +localStorage.getItem('mist_score') || 0;
+  nRight = +localStorage.getItem('mist_right') || 0;
+  nWrong = +localStorage.getItem('mist_wrong') || 0;
+  boardUsed = JSON.parse(localStorage.getItem('mist_board') || '{}');
+  blindMode = localStorage.getItem('mist_blind') === '1';
+  updateBlindUI();
+  updateScoreUI();
 }
 
-function levenshtein(a,b) {
-  if (!a.length) return b.length;
-  if (!b.length) return a.length;
-  const dp=Array.from({length:a.length+1},(_,i)=>[i]);
-  for(let j=0;j<=b.length;j++) dp[0][j]=j;
-  for(let i=1;i<=a.length;i++)
-    for(let j=1;j<=b.length;j++)
-      dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
-  return dp[a.length][b.length];
+function saveStorage() {
+  localStorage.setItem('mist_score', score);
+  localStorage.setItem('mist_right', nRight);
+  localStorage.setItem('mist_wrong', nWrong);
+  localStorage.setItem('mist_board', JSON.stringify(boardUsed));
+  localStorage.setItem('mist_blind', blindMode ? '1' : '0');
+}
+
+// ─── MODE BUTTONS ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    finalsRow.style.display = mode === M.FINALS ? '' : 'none';
+  });
+});
+
+document.querySelectorAll('.mode-btn[data-fin]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    finRound = btn.dataset.fin;
+  });
+});
+
+document.getElementById('blindBtn').addEventListener('click', () => {
+  blindMode = !blindMode;
+  updateBlindUI();
+  saveStorage();
+});
+
+function updateBlindUI() {
+  blindPill.textContent = blindMode ? 'ON' : 'OFF';
+  blindPill.className = 'pill ' + (blindMode ? 'on' : 'off');
+}
+
+document.getElementById('rulesBtn').addEventListener('click', () => {
+  const rb = document.getElementById('rulesBox');
+  rb.style.display = rb.style.display === 'none' ? '' : 'none';
+});
+
+// ─── START / RESET ────────────────────────────────────────────────────────────
+document.getElementById('startBtn').addEventListener('click', startSession);
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset all stats?')) return;
+  score = nRight = nWrong = 0;
+  boardUsed = {};
+  saveStorage();
+  updateScoreUI();
+});
+
+function startSession() {
+  stopTTS(); clearTimer();
+  const topicFilter = document.getElementById('topicSel').value;
+
+  if (mode === M.FINALS && finRound === FR.R3) {
+    buildBoard(topicFilter);
+    return;
+  }
+
+  let filtered = QB.filter(q => topicFilter === 'all' || q.topic === topicFilter || (topicFilter === 'Housing' && q.topic === 'Housing'));
+  pool = filtered.sort(() => Math.random() - .5);
+  poolIdx = 0;
+  boardWrap.style.display = 'none';
+  loadQuestion();
+}
+
+// ─── JEOPARDY BOARD ───────────────────────────────────────────────────────────
+function buildBoard(topicFilter) {
+  boardWrap.style.display = '';
+  qCard.style.display = 'none';
+  buzzBtn.style.display = 'none';
+  ansRow.style.display = 'none';
+  feedback.style.display = 'none';
+  navRow.style.display = 'none';
+  part2Hint.style.display = 'none';
+  statsBar.style.display = '';
+  updateStatsBar();
+
+  boardGrid.innerHTML = '';
+  TOPICS.forEach(t => {
+    const h = document.createElement('div');
+    h.className = 'board-cell topic-header';
+    h.textContent = t;
+    boardGrid.appendChild(h);
+  });
+
+  J_VALS.forEach(val => {
+    TOPICS.forEach(topic => {
+      const key = topic + '_' + val;
+      const cell = document.createElement('div');
+      cell.className = 'board-cell' + (boardUsed[key] ? ' used' : '');
+      cell.textContent = '$' + val;
+      cell.dataset.topic = topic;
+      cell.dataset.val = val;
+      if (!boardUsed[key]) {
+        cell.addEventListener('click', () => selectBoardCell(topic, val, key));
+      }
+      boardGrid.appendChild(cell);
+    });
+  });
+}
+
+function selectBoardCell(topic, val, key) {
+  boardUsed[key] = true;
+  saveStorage();
+  const candidates = QB.filter(q => q.topic === topic || (topic === 'Housing' && q.topic === 'Housing'));
+  if (!candidates.length) { alert('No questions for this topic!'); return; }
+  curQ = candidates[Math.floor(Math.random() * candidates.length)];
+  pool = [curQ]; poolIdx = 1;
+  boardWrap.style.display = 'none';
+  loadQuestion(+val);
+}
+
+// ─── LOAD QUESTION ────────────────────────────────────────────────────────────
+function loadQuestion(overridePts) {
+  stopTTS(); clearTimer(); stopRecog();
+  revealed = false;
+  heardFinal = '';
+
+  if (!(mode === M.FINALS && finRound === FR.R3 && overridePts)) {
+    if (poolIdx >= pool.length) {
+      pool = pool.sort(() => Math.random() - .5);
+      poolIdx = 0;
+    }
+    curQ = pool[poolIdx++];
+  }
+
+  curPts = overridePts || getBasePts();
+
+  qPts.textContent = curPts + ' pts';
+  qTopic.textContent = curQ.topic;
+  qSource.textContent = curQ.source;
+  qNum.textContent = pool.length > 1 ? `Q${poolIdx}/${pool.length}` : '';
+  blindBadge.style.display = blindMode ? '' : 'none';
+  phaseBadge.textContent = 'Reading…';
+  phaseBadge.className = 'phase-badge reading';
+  phaseBadge.style.display = '';
+
+  qCard.style.display = '';
+  buzzBtn.style.display = '';
+  ansRow.style.display = 'none';
+  feedback.style.display = 'none';
+  navRow.style.display = 'none';
+  part2Hint.style.display = 'none';
+  statsBar.style.display = '';
+  waitingAns = false;
+
+  buzzBtn.disabled = false;
+  buzzBtn.classList.remove('active');
+  buzzBtn.textContent = 'BUZZ   (or press Space)';
+
+  updateStatsBar();
+  renderQText();
+
+  // In MIST, judge reads point value first — announce it via TTS then read question
+  const preamble = `For ${curPts} points: `;
+  const questionText = getTossupText();
+  startTTS(preamble + questionText);
+}
+
+function getBasePts() {
+  if (mode === M.PRACTICE) return 10;
+  if (mode === M.R1) return 100;
+  if (mode === M.R23) return 300;
+  if (mode === M.FINALS) {
+    if (finRound === FR.R1) return 100;
+    if (finRound === FR.R2) return 200;
+    return 300;
+  }
+  return 10;
+}
+
+function calcPenalty(pts) {
+  if (mode === M.PRACTICE) return 0;
+  if (mode === M.R1) return pts;
+  if (mode === M.R23) return Math.max(1, Math.round(pts * 0.1));
+  if (mode === M.FINALS) {
+    if (finRound === FR.R1) return 0;
+    return Math.max(1, Math.round(pts * 0.1));
+  }
+  return 0;
+}
+
+// ─── TTS ──────────────────────────────────────────────────────────────────────
+function getTossupText() {
+  if (mode === M.R1) return (curQ.part1 || '') + ' ' + (curQ.part2 || '');
+  return curQ.tossup;
+}
+
+function startTTS(fullText) {
+  words = fullText.split(/\s+/);
+  wordIdx = 0;
+  renderQText();
+
+  utt = new SpeechSynthesisUtterance(fullText);
+  utt.rate = 1.05;
+  utt.onboundary = e => {
+    if (e.name !== 'word') return;
+    const ci = e.charIndex;
+    let counted = 0, w = 0;
+    for (let i = 0; i < words.length; i++) {
+      if (counted >= ci) { w = i; break; }
+      counted += words[i].length + 1;
+      w = i + 1;
+    }
+    wordIdx = w;
+    renderQText();
+  };
+  utt.onend = () => {
+    phaseBadge.style.display = 'none';
+    if (!waitingAns) promptAnswer();
+  };
+  synth.speak(utt);
+}
+
+function stopTTS() {
+  if (utt) { utt.onend = null; utt.onboundary = null; }
+  synth.cancel();
+  utt = null;
+}
+
+function renderQText() {
+  if (blindMode && !revealed) {
+    qText.innerHTML = '<span class="blind-hint">🔊 Listening — buzz when you know the answer</span>';
+    return;
+  }
+  // Show the question text portion only (skip preamble words like "For X points:")
+  const questionStart = words.findIndex((w, i) => {
+    const joined = words.slice(i, i+2).join(' ').toLowerCase();
+    return joined.match(/^(this|the|a |an |during|after|beginning|located|according|named|known|once|in\b)/);
+  });
+  const dispWords = questionStart > 0 ? words.slice(questionStart) : words;
+  const dispIdx = Math.max(0, wordIdx - (questionStart > 0 ? questionStart : 0));
+  const sp = esc(dispWords.slice(0, dispIdx).join(' '));
+  const un = esc(dispWords.slice(dispIdx).join(' '));
+  qText.innerHTML = `<span class="sp">${sp}</span>${un ? `<span class="un">${dispIdx > 0 ? ' ' : ''}${un}</span>` : ''}`;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── BUZZ ─────────────────────────────────────────────────────────────────────
+buzzBtn.addEventListener('click', doBuzz);
+
+function doBuzz() {
+  if (waitingAns) return;
+  stopTTS(); // Judge stops reading immediately
+  phaseBadge.textContent = 'Answering…';
+  phaseBadge.className = 'phase-badge answer';
+  phaseBadge.style.display = '';
+  promptAnswer();
+}
+
+function promptAnswer() {
+  waitingAns = true;
+  buzzBtn.disabled = true;
+  buzzBtn.classList.add('active');
+  buzzBtn.textContent = '🎙 Buzzed — answer now!';
+  ansRow.style.display = 'flex';
+  ansInput.value = '';
+  heardFinal = '';
+  ansInput.focus();
+  part2Hint.style.display = 'none';
+
+  if (mode === M.R1 && curQ.part2) {
+    part2Text.textContent = curQ.part2;
+    part2Hint.style.display = '';
+  }
+
+  startTimer(10);
+  startRecog();
+}
+
+// ─── TIMER ────────────────────────────────────────────────────────────────────
+function startTimer(s) {
+  clearTimer();
+  timerLeft = s;
+  ansTimer.textContent = timerLeft;
+  ansTimer.className = 'ans-timer';
+  timerInterval = setInterval(() => {
+    timerLeft--;
+    if (timerLeft <= 0) {
+      ansTimer.textContent = '';
+      clearTimer();
+      if (waitingAns) { heardFinal = heardFinal || ansInput.value; submitAnswer(); }
+    } else {
+      ansTimer.textContent = timerLeft;
+      ansTimer.className = 'ans-timer' + (timerLeft <= 3 ? ' urgent' : '');
+    }
+  }, 1000);
+}
+
+function clearTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  ansTimer.textContent = '';
+}
+
+// ─── SPEECH RECOGNITION ───────────────────────────────────────────────────────
+function setupRecog() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  recog = new SR();
+  recog.maxAlternatives = 10;
+  recog.continuous = false;
+  recog.interimResults = true;
+  recog.lang = 'en-US';
+
+  recog.onresult = e => {
+    let best = '', finalSeen = false;
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        finalSeen = true;
+        for (let j = 0; j < e.results[i].length; j++) {
+          const t = e.results[i][j].transcript.trim();
+          if (!best || isCorrect(t, curQ)) best = t;
+        }
+      } else {
+        ansInput.value = e.results[i][0].transcript;
+      }
+    }
+    if (finalSeen) {
+      heardFinal = best || heardFinal;
+      ansInput.value = heardFinal;
+      clearTimeout(autoSubTimer);
+      autoSubTimer = setTimeout(() => { if (waitingAns) submitAnswer(); }, 500);
+    }
+  };
+  recog.onerror = () => {};
+  recog.onend = () => { micDot.style.display = 'none'; };
+}
+
+function startRecog() {
+  if (!recog) return;
+  micDot.style.display = '';
+  try { recog.start(); } catch(e) {}
+}
+
+function stopRecog() {
+  micDot.style.display = 'none';
+  if (!recog) return;
+  try { recog.stop(); } catch(e) {}
+  clearTimeout(autoSubTimer);
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+submitBtn.addEventListener('click', submitAnswer);
+ansInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitAnswer(); });
+
+function submitAnswer() {
+  if (!waitingAns) return;
+  waitingAns = false;
+  clearTimer();
+  stopRecog();
+  phaseBadge.style.display = 'none';
+
+  const typed = (heardFinal || ansInput.value).trim();
+  const correct = !!typed && isCorrect(typed, curQ);
+
+  // Reveal in blind mode
+  if (blindMode) {
+    revealed = true;
+    const fullText = getTossupText();
+    words = fullText.split(/\s+/);
+    wordIdx = words.length;
+    renderQText();
+  }
+
+  buzzBtn.disabled = true;
+  ansRow.style.display = 'none';
+  part2Hint.style.display = 'none';
+  navRow.style.display = 'flex';
+
+  feedback.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  feedback.style.display = '';
+
+  if (correct) {
+    score += curPts;
+    nRight++;
+    fbMsg.innerHTML = `✓ Correct! <b>+${curPts}</b> points`;
+  } else {
+    const pen = calcPenalty(curPts);
+    score -= pen;
+    nWrong++;
+    if (pen > 0) {
+      fbMsg.innerHTML = `✗ ${typed ? `You said "<i>${esc(typed)}</i>"` : 'No answer'}. <b>−${pen}</b> points`;
+    } else {
+      fbMsg.innerHTML = `✗ ${typed ? `You said "<i>${esc(typed)}</i>"` : 'No answer'}. No penalty.`;
+    }
+  }
+
+  fbReveal.innerHTML = `Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length ? ` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>` : ''}`;
+  fbReveal.style.display = '';
+
+  saveStorage();
+  updateScoreUI();
+  updateStatsBar();
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (mode === M.FINALS && finRound === FR.R3) {
+    buildBoard(document.getElementById('topicSel').value);
+  } else {
+    loadQuestion();
+  }
+});
+
+// ─── FUZZY MATCHING ───────────────────────────────────────────────────────────
+const STOP = new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','these','those','for','with','from','by','as','be','been','being']);
+const NUM_MAP = {zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,hundred:100,thousand:1000,million:1000000,billion:1000000000};
+
+function norm(s) {
+  if (!s) return '';
+  return s.toLowerCase()
+    .replace(/[^a-z0-9\s]/g,'')
+    .split(/\s+/)
+    .filter(w => w && !STOP.has(w))
+    .map(w => NUM_MAP[w] !== undefined ? String(NUM_MAP[w]) : w)
+    .join(' ').trim();
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1}, (_, i) => Array.from({length:n+1}, (_, j) => i || j));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
 }
 
 function isCorrect(typed, q) {
   const t = norm(typed);
   if (!t) return false;
-  const targets = [q.answer,...(q.alternates||[])].map(norm).filter(Boolean);
+  const targets = [q.answer, ...(q.alternates || [])].map(norm).filter(Boolean);
   return targets.some(ans => {
-    if (t===ans) return true;
-    if (t.includes(ans)||ans.includes(t)) return true;
-    // fuzzy: ≤20% edit distance of longer string, min 2
-    const maxD = Math.max(2, Math.floor(Math.max(t.length,ans.length)*.22));
-    return levenshtein(t,ans)<=maxD;
+    if (t === ans) return true;
+    if (t.includes(ans) || ans.includes(t)) return true;
+    const maxD = Math.max(2, Math.floor(Math.max(t.length, ans.length) * 0.22));
+    return levenshtein(t, ans) <= maxD;
   });
 }
 
-function allQ() { return [...BANK,...Object.values(store.addedQ)]; }
-function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
-function humanDelta(ms){const d=Math.floor(ms/86400000);if(d>=1)return d+'d';const h=Math.floor(ms/3600000);if(h>=1)return h+'h';return Math.floor(ms/60000)+'m';}
-function getDue(){const now=Date.now();return Object.entries(store.misses).filter(([,m])=>m.nextDue<=now).map(([id])=>allQ().find(q=>q.id===id)).filter(Boolean);}
-
-// ═══════════════════════════════════════════════════════════
-// UI SYNC
-// ═══════════════════════════════════════════════════════════
-function syncScoreUI() {
-  $('scScore').textContent=score;
-  $('scRight').textContent=nRight;
-  $('scWrong').textContent=nWrong;
-  $('scLeft').textContent=queue.length;
-  $('hdScoreVal').textContent=score;
+// ─── UI ──────────────────────────────────────────────────────────────────────
+function updateScoreUI() {
+  hScore.textContent = score;
+  hRight.textContent = nRight;
+  hWrong.textContent = nWrong;
 }
 
-function syncDueBadge() {
-  const n=getDue().length;
-  const b=$('dueBadge');
-  b.textContent=n; b.style.display=n>0?'':'none';
+function updateStatsBar() {
+  statsBar.style.display = '';
+  document.getElementById('stTotal').textContent = nRight + nWrong;
+  document.getElementById('stRight').textContent = nRight;
+  document.getElementById('stWrong').textContent = nWrong;
+  document.getElementById('stScore').textContent = score;
 }
 
-function syncMissLog() {
-  const entries=Object.values(store.misses);
-  const show=mode===M.PRACTICE&&entries.length>0;
-  missWrap.classList.toggle('vis',show);
-  missList.innerHTML='';
-  const now=Date.now();
-  entries.sort((a,b)=>a.nextDue-b.nextDue).forEach(m=>{
-    const li=el('li','mi');
-    const due=m.nextDue<=now?'DUE NOW':'in '+humanDelta(m.nextDue-now);
-    li.innerHTML=`<div class="mi-top"><span class="mi-ans">${esc(m.answer)}</span><span class="mi-due">${esc(due)}</span></div><div class="mi-clue">${esc(m.earlyClue||'')}</div>`;
-    missList.appendChild(li);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════
-// MODE SWITCHING
-// ═══════════════════════════════════════════════════════════
-function setMode(m) {
-  mode=m; score=0; nRight=0; nWrong=0; r23Idx=0;
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
-
-  const isPractice=m===M.PRACTICE;
-  const isFinals=m===M.FINALS;
-  const isR1=m===M.R1;
-  const showTopics=isPractice||(m===M.R23);
-
-  topicBar.style.display=showTopics?'':'none';
-  btnReview.classList.toggle('hidden',!isPractice);
-  scoreStrip.classList.toggle('vis',!isPractice);
-  hdScore.classList.toggle('hidden',isPractice);
-  finalsTabs.classList.toggle('vis',isFinals);
-  jBoard.classList.remove('vis'); jBoard.style.display='none';
-  syncMissLog();
-  syncDueBadge();
-
-  if (isFinals) setFinalsRound(finRound);
-  else { buildQueue(); }
-}
-
-function setFinalsRound(fr) {
-  finRound=fr;
-  document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('on',b.dataset.fr===fr));
-  if (fr===FR.R3) {
-    buildJeopardy();
-    jBoard.style.display='flex'; jBoard.classList.add('vis');
-    stopSpeech(); clearAns(); fb.className='fb';
-    setQText('Select a category and value from the board above to begin.');
-    qLbl.textContent='Finals · Round 3 · Jeopardy'; qPts.classList.add('hidden');
-    btnRead.disabled=true; btnBuzz.disabled=true;
-  } else {
-    jBoard.style.display='none'; jBoard.classList.remove('vis');
-    buildQueue();
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// QUEUE
-// ═══════════════════════════════════════════════════════════
-function buildQueue() {
-  stopSpeech(); clearAns(); fb.className='fb';
-  reviewMode=false; r23Idx=0;
-  const all=allQ();
-  if (mode===M.PRACTICE) {
-    queue=shuffle(all.filter(q=>!activeTopic||q.topic===activeTopic));
-  } else if (mode===M.R1) {
-    queue=shuffle(all.filter(q=>q.topic==='Current Events'));
-  } else if (mode===M.R23) {
-    queue=shuffle(all.filter(q=>!activeTopic||q.topic===activeTopic));
-  } else if (mode===M.FINALS) {
-    queue=shuffle(all);
-  }
-  loadNext(); syncScoreUI();
-}
-
-function buildReview() {
-  reviewMode=true;
-  queue=shuffle(getDue());
-  if (!queue.length){showFb('info','No reviews due right now!');return;}
-  loadNext(); syncScoreUI();
-}
-
-// ═══════════════════════════════════════════════════════════
-// POINT VALUE
-// ═══════════════════════════════════════════════════════════
-function getBasePoints() {
-  if (mode===M.PRACTICE) return 0;
-  if (mode===M.R1) return 100;
-  if (mode===M.R23) return R23_VALS[r23Idx%R23_VALS.length];
-  if (mode===M.FINALS) {
-    if (finRound===FR.R1) return 100;
-    if (finRound===FR.R2) return 200;
-    return 0;
-  }
-  return 0;
-}
-
-// ═══════════════════════════════════════════════════════════
-// QUESTION LOADING
-// ═══════════════════════════════════════════════════════════
-function loadNext() {
-  stopSpeech(); clearAns(); fb.className='fb';
-  btnBuzz.classList.remove('live');
-  if (!queue.length) {
-    if (mode===M.PRACTICE||mode===M.R23){buildQueue();return;}
-    setQText('All questions done. Check your score above!');
-    qLbl.textContent='Round complete'; qPts.classList.add('hidden');
-    btnRead.disabled=true; btnBuzz.disabled=true;
-    return;
-  }
-  currentQ=queue.shift();
-  currentPts=getBasePoints();
-  if (mode===M.R23) r23Idx++;
-  buzzed=false; waitingAns=false; inPart2=false; wordIdx=0; buzzWordIdx=0;
-
-  const txt=getQFullText();
-  words=txt.split(/\s+/);
-  part2Start=mode===M.R1&&currentQ.part1
-    ? currentQ.part1.trim().split(/\s+/).length : words.length;
-
-  setQText(txt);
-  progFill.style.width='0%';
-
-  const labels={
-    practice:`Practice · ${currentQ.topic}`,
-    round1:`Round 1 · Current Events · ${currentPts} / 50 pts`,
-    round23:`Round 2/3 · ${currentQ.topic} · ${currentPts} pts`,
-    finals:`Finals ${finRound==='fr1'?'R1':finRound==='fr2'?'R2':'R3'} · ${currentQ.topic}`
-  };
-  qLbl.textContent=labels[mode];
-  if (mode!==M.PRACTICE){qPts.textContent=currentPts+' pts';qPts.classList.remove('hidden');}
-  else qPts.classList.add('hidden');
-
-  btnRead.textContent='Read'; btnRead.disabled=false;
-  btnBuzz.disabled=false;
-  syncScoreUI();
-}
-
-function getQFullText() {
-  if (mode===M.R1&&currentQ.part1)
-    return currentQ.part1.trim()+' '+( currentQ.part2||'');
-  return currentQ.tossup||currentQ.part1||'';
-}
-
-function setQText(txt){qText.innerHTML=`<span class="un">${esc(txt)}</span>`;}
-
-// ═══════════════════════════════════════════════════════════
-// TTS
-// ═══════════════════════════════════════════════════════════
-function startReading() {
-  if (!currentQ) return;
-  stopSpeech(); clearAns(); fb.className='fb';
-  buzzed=false; waitingAns=false; inPart2=false; wordIdx=0;
-  const txt=getQFullText();
-  words=txt.split(/\s+/);
-
-  utt=new SpeechSynthesisUtterance(txt);
-  utt.rate=parseFloat($('speedSlider').value);
-  reading=true;
-
-  utt.onboundary=e=>{
-    if (e.name!=='word') return;
-    const spoken=txt.slice(0,e.charIndex);
-    wordIdx=spoken.trim().split(/\s+/).filter(Boolean).length;
-    renderProgress(txt);
-    progFill.style.width=(wordIdx/words.length*100)+'%';
-    // R1: detect part2 boundary
-    if (mode===M.R1&&!inPart2&&wordIdx>=part2Start){
-      inPart2=true; currentPts=50;
-      qPts.textContent='50 pts';
-    }
-  };
-  utt.onend=()=>{
-    reading=false;
-    if (!buzzed){wordIdx=words.length;renderProgress(txt);progFill.style.width='100%';openAns(true);}
-  };
-  utt.onerror=()=>{reading=false;};
-  btnRead.textContent='Re-read';
-  btnBuzz.disabled=false; btnBuzz.classList.add('live');
-  synth.speak(utt);
-}
-
-function stopSpeech(){synth.cancel();utt=null;reading=false;btnBuzz.classList.remove('live');}
-
-function renderProgress(txt) {
-  const sp=words.slice(0,wordIdx).join(' ');
-  const un=words.slice(wordIdx).join(' ');
-  let html=`<span class="sp">${esc(sp)}</span>`;
-  if (un) html+=`<span class="un"> ${esc(un)}</span>`;
-  qText.innerHTML=html;
-}
-
-// ═══════════════════════════════════════════════════════════
-// BUZZ & ANSWER
-// ═══════════════════════════════════════════════════════════
-function doBuzz() {
-  if (!currentQ||buzzed) return;
-  buzzed=true; buzzWordIdx=wordIdx;
-  stopSpeech();
-  const txt=getQFullText();
-  renderProgress(txt);
-  openAns(false);
-}
-
-function openAns(dead) {
-  waitingAns=true;
-  ansPhase.classList.add('vis');
-  ansInput.value=''; trans.textContent=''; trans.className='trans';
-  heardFinal=''; ansInput.focus(); btnBuzz.disabled=true;
-  if (!dead&&$('chkVoice').checked&&recog) startMic();
-}
-
-function clearAns() {
-  waitingAns=false; ansPhase.classList.remove('vis');
-  ansInput.value=''; trans.textContent=''; trans.className='trans';
-  stopMic(); heardFinal='';
-}
-
-function submitAnswer() {
-  if (!currentQ||!waitingAns) return;
-  waitingAns=false; stopMic();
-
-  const typed=(ansInput.value.trim()||heardFinal).trim();
-  const correct=isCorrect(typed,currentQ);
-  const pts=currentPts;
-
-  // Find "for N points" break index
-  const txt=getQFullText();
-  const lower=txt.toLowerCase();
-  const forIdx=lower.search(/for (10|50) points/);
-  const forWordIdx=forIdx<0?words.length:txt.slice(0,forIdx).trim().split(/\s+/).filter(Boolean).length;
-  const early=buzzWordIdx<forWordIdx;
-
-  if (correct) {
-    if (mode===M.PRACTICE) {
-      if (early){store.pStats.c++;recordCorrect(currentQ);showFb('ok',`<strong>✓ Early buzz!</strong> ${esc(currentQ.answer)}`);}
-      else{store.pStats.l++;recordMiss(currentQ);showFb('ok',`<strong>✓ Correct — but late.</strong><div class="note">Buzz earlier on: ${esc(currentQ.earlyClue||'')}`);}
-    } else {
-      score+=pts; nRight++; recordCorrect(currentQ);
-      showFb('ok',`<strong>✓ +${pts} pts</strong>  ${esc(currentQ.answer)}`);
-    }
-  } else {
-    if (mode===M.PRACTICE){
-      store.pStats.w++; recordMiss(currentQ);
-      showFb('bad',`<strong>✗ ${esc(currentQ.answer)}</strong><div class="note">Early clue: ${esc(currentQ.earlyClue||'')}</div>`);
-    } else {
-      score-=pts; nWrong++; recordMiss(currentQ);
-      showFb('bad',`<strong>✗ −${pts} pts</strong>  Answer: ${esc(currentQ.answer)}`);
-    }
-  }
-
-  save(); syncScoreUI(); syncDueBadge(); syncMissLog();
-  ansPhase.classList.remove('vis');
-
-  const advance=()=>{
-    fb.className='fb';
-    if (mode===M.FINALS&&finRound===FR.R3){
-      setQText('Select a category and value from the board above.');
-      qLbl.textContent='Finals · Round 3 · Jeopardy'; qPts.classList.add('hidden');
-      btnRead.disabled=true; btnBuzz.disabled=true;
-    } else loadNext();
-  };
-  setTimeout(advance,2800);
-}
-
-function showFb(type,html){fb.className=`fb ${type} vis`;fb.innerHTML=html;}
-
-// ═══════════════════════════════════════════════════════════
-// SPACED REP
-// ═══════════════════════════════════════════════════════════
-const IVLS=[1,3,7,16,35];
-function recordMiss(q){store.misses[q.id]={answer:q.answer,earlyClue:q.earlyClue||'',topic:q.topic,lastSeen:Date.now(),nextDue:Date.now()+IVLS[0]*86400000,streak:0};}
-function recordCorrect(q){
-  const m=store.misses[q.id]; if(!m)return;
-  const ns=Math.min((m.streak||0)+1,IVLS.length-1);
-  if(ns>=IVLS.length-1){delete store.misses[q.id];return;}
-  store.misses[q.id]={...m,streak:ns,nextDue:Date.now()+IVLS[ns]*86400000,lastSeen:Date.now()};
-}
-
-// ═══════════════════════════════════════════════════════════
-// VOICE RECOGNITION  (improved)
-// ═══════════════════════════════════════════════════════════
-function setupRecog() {
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if (!SR){micBtn.style.display='none';return;}
-  recog=new SR();
-  recog.lang='en-US';
-  recog.interimResults=true;
-  recog.continuous=false;
-  recog.maxAlternatives=10; // get as many alternatives as possible
-
-  recog.onstart=()=>{recogActive=true;micBtn.classList.add('hot');};
-  recog.onend=()=>{
-    recogActive=false; micBtn.classList.remove('hot');
-    // auto-submit if we got something
-    if (waitingAns&&heardFinal) {
-      ansInput.value=heardFinal;
-      setTimeout(()=>{if(waitingAns)submitAnswer();},400);
-    }
-  };
-  recog.onerror=e=>{
-    recogActive=false; micBtn.classList.remove('hot');
-    if (e.error!=='no-speech'&&e.error!=='aborted')
-      trans.textContent='Mic error — type instead.';
-  };
-  recog.onresult=e=>{
-    let interim='';
-    for (let i=e.resultIndex;i<e.results.length;i++) {
-      if (e.results[i].isFinal) {
-        // collect all alternatives
-        const alts=Array.from({length:e.results[i].length},(_,j)=>e.results[i][j].transcript.trim());
-        // prefer whichever alternative is a correct match
-        const best=alts.find(a=>isCorrect(a,currentQ))||alts[0];
-        heardFinal=best;
-        trans.textContent=`Heard: "${best}"`;
-        trans.className='trans done';
-        ansInput.value=best;
-      } else {
-        interim=e.results[i][0].transcript;
-        trans.textContent=`Hearing: "${interim}"…`;
-        trans.className='trans live';
-      }
-    }
-  };
-}
-
-function startMic(){if(!recog)return;heardFinal='';try{recog.start();}catch{}}
-function stopMic(){if(recog&&recogActive){try{recog.stop();}catch{}}recogActive=false;micBtn.classList.remove('hot');}
-
-// ═══════════════════════════════════════════════════════════
-// JEOPARDY BOARD
-// ═══════════════════════════════════════════════════════════
-function buildJeopardy() {
-  jBoard.innerHTML='';
-  const hRow=el('div','j-row');
-  hRow.appendChild(el('div','j-hd',''));
-  TOPICS.forEach(t=>hRow.appendChild(el('div','j-hd',esc(t))));
-  jBoard.appendChild(hRow);
-
-  J_VALS.forEach(val=>{
-    const row=el('div','j-row');
-    row.appendChild(el('div','j-hd',`<strong>${val}</strong>`));
-    TOPICS.forEach(topic=>{
-      const key=`${topic}_${val}`;
-      const used=store.jUsed[key];
-      const cell=el('div','j-cell'+(used?' done':''),used?'·':String(val));
-      if (!used) cell.onclick=()=>selectJCell(topic,val,key,cell);
-      row.appendChild(cell);
-    });
-    jBoard.appendChild(row);
-  });
-}
-
-function selectJCell(topic,val,key,cell){
-  store.jUsed[key]=true; save();
-  cell.classList.add('done'); cell.textContent='·'; cell.onclick=null;
-  const pool=allQ().filter(q=>q.topic===topic);
-  if (!pool.length){showFb('info','No questions for that topic yet.');return;}
-  currentQ=pool[Math.floor(Math.random()*pool.length)];
-  currentPts=val; buzzed=false; waitingAns=false; inPart2=false; wordIdx=0; buzzWordIdx=0;
-  const txt=currentQ.tossup||currentQ.part1||'';
-  words=txt.split(/\s+/); setQText(txt); progFill.style.width='0%';
-  fb.className='fb';
-  qLbl.textContent=`Finals R3 · Jeopardy · ${topic}`;
-  qPts.textContent=val+' pts'; qPts.classList.remove('hidden');
-  btnRead.textContent='Read'; btnRead.disabled=false; btnBuzz.disabled=false;
-}
-
-// ═══════════════════════════════════════════════════════════
-// GENERATE TOSSUPS (API)
-// ═══════════════════════════════════════════════════════════
-$('btnGen').onclick=async()=>{
-  const src=$('addSrc').value.trim(), topic=$('addTopic').value.trim();
-  const text=$('addText').value.trim(), key=$('addKey').value.trim();
-  const st=$('genSt');
-  if (!text){st.textContent='Paste article text first.';return;}
-  if (!key){st.textContent='Enter your Anthropic API key.';return;}
-  store.apiKey=key; save();
-  st.textContent='Generating…';
-  const prompt=`Write exactly 4 pyramidal quiz bowl tossup questions from the article.
-Rules:
-- Hard/specific clues first, giveaway last.
-- Include "For 10 points —" before the final answer prompt.
-- Format each block:
-TOSSUP: [question text]
-ANSWER: [exact answer]
-EARLY: [earliest clue to buzz on]
-ALTS: [alt1, alt2] (blank if none)
-- Separate blocks with blank lines.
-- Clues must come ONLY from the article.
-Source: ${src||'Unknown'}  Topic: ${topic||'General'}
-Article:
-${text.slice(0,5500)}`;
-  try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-calls':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2200,messages:[{role:'user',content:prompt}]})
-    });
-    if (!res.ok){const e=await res.json().catch(()=>({}));st.textContent=`API error: ${res.status}`;return;}
-    const data=await res.json();
-    const parsed=parseGen(data.content[0].text,topic||src||'Added');
-    if (!parsed.length){st.textContent='Parse failed — try again.';return;}
-    parsed.forEach(q=>{store.addedQ[q.id]=q;});
-    save(); st.textContent=`Added ${parsed.length} tossup(s)!`;
-    if (mode===M.PRACTICE) buildQueue();
-  } catch(e){st.textContent='Network error: '+e.message;}
-};
-
-function parseGen(text,topic){
-  const blocks=text.trim().split(/\n\s*\n/);
-  return blocks.map((block,i)=>{
-    const lines=block.split('\n').map(l=>l.trim()).filter(Boolean);
-    let tossup=[],answer='',early='',alts=[];
-    lines.forEach(l=>{
-      if (l.startsWith('ANSWER:')) answer=l.slice(7).trim();
-      else if (l.startsWith('EARLY:')) early=l.slice(6).trim();
-      else if (l.startsWith('ALTS:')) alts=l.slice(5).split(',').map(a=>a.trim()).filter(Boolean);
-      else tossup.push(l.replace(/^TOSSUP:\s*/,''));
-    });
-    if (!answer||!tossup.length) return null;
-    return {id:'gen_'+Date.now()+'_'+i,topic,answer,alternates:alts,tossup:tossup.join(' '),part1:tossup.join(' '),earlyClue:early||tossup[0]};
-  }).filter(Boolean);
-}
-
-// ═══════════════════════════════════════════════════════════
-// EVENTS
-// ═══════════════════════════════════════════════════════════
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
-document.querySelectorAll('.stab').forEach(b=>b.onclick=()=>setFinalsRound(b.dataset.fr));
-
-btnRead.onclick=startReading;
-btnBuzz.onclick=doBuzz;
-btnSkip.onclick=()=>{stopSpeech();clearAns();fb.className='fb';loadNext();};
-btnReview.onclick=buildReview;
-btnSubmit.onclick=submitAnswer;
-ansInput.onkeydown=e=>{if(e.key==='Enter')submitAnswer();};
-micBtn.onclick=()=>{if(recogActive)stopMic();else startMic();};
-
-$('speedSlider').oninput=function(){$('speedVal').textContent=parseFloat(this.value).toFixed(1)+'×';};
-
-document.addEventListener('keydown',e=>{
-  const tag=document.activeElement.tagName;
-  if (e.code==='Space'&&tag!=='INPUT'&&tag!=='TEXTAREA'&&tag!=='BUTTON'){
+// Space to buzz
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !waitingAns && !buzzBtn.disabled && buzzBtn.style.display !== 'none') {
     e.preventDefault();
-    if (!buzzed&&currentQ&&reading) doBuzz();
+    doBuzz();
   }
 });
 
-// Topic bar
-function buildTopicBar(){
-  topicBar.innerHTML='';
-  const all=el('button','chip'+(activeTopic===null?' on':''),'All');
-  all.onclick=()=>{activeTopic=null;buildTopicBar();buildQueue();};
-  topicBar.appendChild(all);
-  TOPICS.forEach(t=>{
-    const c=el('button','chip'+(activeTopic===t?' on':''),esc(t));
-    c.onclick=()=>{activeTopic=t;buildTopicBar();buildQueue();};
-    topicBar.appendChild(c);
-  });
-}
-
-$('btnCopy').onclick=()=>{
-  const lines=Object.values(store.misses).map(m=>`[MISS] ${m.answer} | ${m.topic} | due: ${new Date(m.nextDue).toLocaleDateString()} | ${m.earlyClue}`);
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
-    $('btnCopy').textContent='Copied!';setTimeout(()=>$('btnCopy').textContent='Copy log',1500);
-  });
-};
-
-if (store.apiKey) $('addKey').value=store.apiKey;
-
-// ═══════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+loadStorage();
 setupRecog();
-buildTopicBar();
-setMode(M.PRACTICE);
 </script>
 </body>
 </html>
