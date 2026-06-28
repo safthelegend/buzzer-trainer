@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buzzer Trainer</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2e3147;
+    --accent: #6c63ff;
+    --accent2: #00c9a7;
+    --red: #ff5c5c;
+    --yellow: #ffd166;
+    --text: #e8eaf6;
+    --muted: #7b7f9e;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+  h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; color: #fff; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+
+  /* Topic selector */
+  .topic-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
+  }
+  .topic-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: 6px 16px; border-radius: 999px;
+    font-size: 0.85rem; cursor: pointer; transition: all .15s;
+  }
+  .topic-btn:hover { border-color: var(--accent); color: var(--text); }
+  .topic-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;
+  }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px 18px; text-align: center; min-width: 80px; }
+  .stat-num { font-size: 1.5rem; font-weight: 700; }
+  .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .stat-num.green { color: var(--accent2); }
+  .stat-num.red { color: var(--red); }
+  .stat-num.yellow { color: var(--yellow); }
+
+  /* Main card */
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; width: 100%; max-width: 760px; margin-bottom: 16px;
+  }
+  .q-meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .07em; }
+  .tossup-text {
+    font-size: 1.05rem; line-height: 1.75; min-height: 120px;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .tossup-text .spoken { color: var(--text); }
+  .tossup-text .unspoken { color: var(--muted); }
+  .tossup-text .highlight { background: rgba(108,99,255,.25); border-radius: 3px; padding: 0 2px; }
+
+  /* Controls */
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; align-items: center; }
+  .btn {
+    padding: 10px 22px; border-radius: 8px; border: none; font-size: 0.95rem;
+    font-weight: 600; cursor: pointer; transition: all .15s; outline: none;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { filter: brightness(1.15); }
+  .btn-buzz { background: var(--red); color: #fff; font-size: 1.1rem; padding: 12px 32px; }
+  .btn-buzz:hover { filter: brightness(1.15); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Answer row */
+  .answer-row {
+    display: flex; gap: 8px; margin-top: 16px; align-items: center;
+  }
+  .answer-input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 14px; border-radius: 8px; font-size: 0.95rem; outline: none;
+  }
+  .answer-input:focus { border-color: var(--accent); }
+  .mic-btn {
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 1rem;
+    transition: all .15s;
+  }
+  .mic-btn.listening { background: var(--red); border-color: var(--red); color: #fff; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 16px; padding: 14px 18px; border-radius: 8px; font-weight: 600;
+    display: none;
+  }
+  .feedback.correct { background: rgba(0,201,167,.15); border: 1px solid var(--accent2); color: var(--accent2); }
+  .feedback.wrong { background: rgba(255,92,92,.15); border: 1px solid var(--red); color: var(--red); }
+  .feedback.info { background: rgba(108,99,255,.15); border: 1px solid var(--accent); color: #a9a4ff; }
+  .early-clue { margin-top: 10px; font-size: 0.85rem; color: var(--muted); font-weight: 400; }
+
+  /* Speed control */
+  .speed-row {
+    display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap;
+  }
+  .speed-row label { font-size: 0.82rem; color: var(--muted); }
+  input[type=range] { accent-color: var(--accent); width: 120px; }
+
+  /* Miss log */
+  .section-head {
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin-bottom: 10px;
+  }
+  .miss-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .miss-item {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 0.88rem; line-height: 1.5;
+  }
+  .miss-item .mi-answer { font-weight: 700; color: var(--red); }
+  .miss-item .mi-clue { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+  .miss-item .mi-due { float: right; font-size: 0.75rem; color: var(--muted); }
+
+  /* Voice transcript badge */
+  .transcript-badge {
+    font-size: 0.82rem; color: var(--muted); margin-top: 6px; min-height: 18px;
+    font-style: italic;
+  }
+
+  /* Add article panel */
+  .add-panel { border: 1px dashed var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; width: 100%; max-width: 760px; }
+  .add-panel summary { cursor: pointer; font-weight: 600; color: var(--muted); user-select: none; }
+  .add-panel summary:hover { color: var(--text); }
+  .add-fields { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .add-fields input, .add-fields textarea {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none; width: 100%;
+  }
+  .add-fields input:focus, .add-fields textarea:focus { border-color: var(--accent); }
+  .add-fields textarea { height: 140px; resize: vertical; font-family: inherit; }
+  .api-note { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  /* Queue badge */
+  .queue-badge {
+    display: inline-block; background: var(--accent); color: #fff;
+    font-size: 0.72rem; font-weight: 700; border-radius: 999px; padding: 1px 7px;
+    margin-left: 6px; vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<h1>Buzzer Trainer</h1>
+<p class="subtitle">Quiz bowl — buzz early, answer out loud</p>
+
+<div class="topic-bar" id="topicBar"></div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num green" id="sCorrect">0</div><div class="stat-label">Correct</div></div>
+  <div class="stat"><div class="stat-num yellow" id="sLate">0</div><div class="stat-label">Late</div></div>
+  <div class="stat"><div class="stat-num red" id="sWrong">0</div><div class="stat-label">Wrong/Dead</div></div>
+  <div class="stat"><div class="stat-num" id="sQueue">0</div><div class="stat-label">In deck</div></div>
+</div>
+
+<div class="card" id="mainCard">
+  <div class="q-meta" id="qMeta">Press "Read" to start</div>
+  <div class="tossup-text" id="tossupText">Your tossup will appear here. Hit <strong>Read</strong> to have it read aloud, or <strong>Buzz</strong> (or <kbd>Space</kbd>) at any point to stop and answer.</div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="btnRead">Read</button>
+    <button class="btn btn-buzz" id="btnBuzz" disabled>Buzz</button>
+    <button class="btn btn-ghost" id="btnSkip">Skip →</button>
+    <button class="btn btn-ghost" id="btnReview">Due for review <span id="reviewBadge" class="queue-badge" style="display:none">0</span></button>
+  </div>
+
+  <div class="speed-row">
+    <label>Speed</label>
+    <input type="range" id="speedSlider" min="0.6" max="1.8" step="0.05" value="1.1">
+    <span id="speedLabel" style="font-size:.82rem;color:var(--muted)">1.1×</span>
+    <label style="margin-left:16px">
+      <input type="checkbox" id="chkVoice" checked style="accent-color:var(--accent)"> Answer out loud
+    </label>
+  </div>
+
+  <div class="answer-row" id="answerRow" style="display:none">
+    <input class="answer-input" id="answerInput" placeholder="Your answer…" autocomplete="off">
+    <button class="mic-btn" id="micBtn" title="Speak answer">🎤</button>
+    <button class="btn btn-primary" id="btnSubmit">Submit</button>
+  </div>
+  <div class="transcript-badge" id="transcriptBadge"></div>
+
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<!-- Add article panel -->
+<details class="add-panel" id="addPanel">
+  <summary>＋ Add your own article (paste text → get tossups)</summary>
+  <div class="add-fields">
+    <input id="addSource" placeholder="Source name (e.g. Britannica, CFR…)">
+    <input id="addTopic" placeholder="Topic (e.g. Water, Sudan, Current Events)">
+    <textarea id="addText" placeholder="Paste the article text here…"></textarea>
+    <input id="addApiKey" type="password" placeholder="Anthropic API key (sk-ant-…) — stored in your browser only">
+    <p class="api-note">Your key is saved in localStorage and never leaves your browser. It's used only to call the Claude API to generate tossups from the pasted article.</p>
+    <button class="btn btn-primary" id="btnGenerate">Write tossups</button>
+    <div id="generateStatus" style="font-size:.85rem;color:var(--muted);margin-top:4px"></div>
+  </div>
+</details>
+
+<!-- Miss log -->
+<div class="card" id="missCard" style="display:none">
+  <div class="section-head">Miss log — due for review</div>
+  <ul class="miss-list" id="missList"></ul>
+  <button class="btn btn-ghost" id="btnCopyLog" style="margin-top:14px;font-size:.82rem">Copy log</button>
+</div>
+
+<script>
+// ─── QUESTION BANK ───────────────────────────────────────────────────────────
+// Each question: { id, topic, answer, alternates[], tossup (string), earlyClue (string) }
+// "earlyClue" = the earliest clue a well-prepared player should buzz on.
+
+const BANK = [
+  // ── TOPIC 1: WATER (WHO source) ──────────────────────────────────────────
+  {
+    id: "w01", topic: "Water",
+    answer: "schistosomiasis",
+    alternates: ["bilharzia","snail fever"],
+    tossup: `This disease is transmitted through contact with freshwater contaminated by parasitic worms whose larvae are released by freshwater snails — not through drinking the water but through skin contact with it. In 2021, more than 251 million people required preventive treatment for this affliction. The WHO classifies it as a neglected tropical disease. It causes both acute and chronic illness, damaging internal organs and impairing children's growth and cognitive development. For 10 points — name this disease also known as bilharzia or snail fever.`,
+    earlyClue: "parasitic worms released by freshwater snails (first sentence)"
+  },
+  {
+    id: "w02", topic: "Water",
+    answer: "safely managed drinking water service",
+    alternates: ["safely managed","safely managed service","safely managed water"],
+    tossup: `This type of water service, defined by the WHO/UNICEF Joint Monitoring Programme, requires that the water source be located on the premises, available when needed, and free from contamination. As of 2022, 2.2 billion people still lacked access to it. It sits at the top of the WHO's drinking water service ladder, above "basic service," which merely requires a round-trip collection time of 30 minutes or less. For 10 points — give the WHO term for this highest tier of household water access.`,
+    earlyClue: "on premises, available when needed, free from contamination (first sentence)"
+  },
+  {
+    id: "w03", topic: "Water",
+    answer: "water safety plans",
+    alternates: ["WSP","water safety plan"],
+    tossup: `The WHO's 2017 guidelines for drinking-water quality recommend these management tools as the most effective means of consistently ensuring the safety of a drinking-water supply. They involve a systematic assessment of risks from catchment to consumer and are used by utilities, regulators, and community systems alike. A healthcare-facility version of this approach is called WASH FIT. For 10 points — name this WHO-recommended risk-management framework for water suppliers.`,
+    earlyClue: "systematic assessment of risks from catchment to consumer"
+  },
+  {
+    id: "w04", topic: "Water",
+    answer: "human right to water",
+    alternates: ["right to water","right to safe water","UN right to water"],
+    tossup: `This recognition, passed by the United Nations General Assembly in 2010, declares that access to safe and clean drinking water is essential to the full enjoyment of life and all human rights. The WHO notes it entails water that is sufficient, safe, acceptable, physically accessible, and affordable. For 10 points — name this 2010 UN declaration establishing what access to water is.`,
+    earlyClue: "United Nations General Assembly, 2010"
+  },
+  {
+    id: "w05", topic: "Water",
+    answer: "healthcare-associated infections",
+    alternates: ["HAI","HAIs","hospital-acquired infections","nosocomial infections"],
+    tossup: `Inadequate water, sanitation, and hygiene in healthcare facilities are a key driver of these infections, which the WHO estimates affect hundreds of millions of patients annually. They are a leading cause of patient harm worldwide and are especially prevalent in low- and middle-income countries where WASH infrastructure is weakest. The WHO's WASH FIT tool was developed specifically to reduce their burden in clinical settings. For 10 points — name this category of infections acquired in a medical facility rather than in the community.`,
+    earlyClue: "inadequate WASH in healthcare facilities (first sentence)"
+  },
+  {
+    id: "w06", topic: "Water",
+    answer: "diarrhoeal disease",
+    alternates: ["diarrheal disease","diarrhea","diarrhoea"],
+    tossup: `This cause of death, strongly linked to contaminated drinking water, claimed approximately 505,000 children under age five in 2019 according to the WHO — making contaminated water one of the leading preventable causes of child mortality. It is largely preventable through safe water, sanitation, and handwashing. The WHO notes that at least 1.7 billion people use a drinking source contaminated with faeces, which is the primary vector for this illness. For 10 points — name this waterborne illness responsible for over half a million child deaths in 2019.`,
+    earlyClue: "505,000 children under five in 2019 (WHO figure)"
+  },
+  {
+    id: "w07", topic: "Water",
+    answer: "water-stressed countries",
+    alternates: ["water stress","water-stressed nations"],
+    tossup: `In 2021, over 2 billion people lived in countries fitting this description, a situation the WHO warns will worsen due to climate change and population growth. The UN uses this term for countries where water withdrawals exceed 25 percent of renewable freshwater supply. For 10 points — give this two-word WHO/UN term for nations where demand for fresh water outstrips sustainable supply.`,
+    earlyClue: "over 2 billion people, 2021 (WHO stat)"
+  },
+  {
+    id: "w08", topic: "Water",
+    answer: "faecal contamination",
+    alternates: ["fecal contamination","faeces","feces","faecal pollution"],
+    tossup: `Globally in 2022, at least 1.7 billion people used a drinking water source affected by this type of contamination, the WHO reports. It is the primary microbial hazard in drinking water worldwide and the main driver of waterborne diarrhoeal disease. The WHO's water safety plans specifically target its elimination from source to tap. For 10 points — name this type of microbial contamination, the leading drinking-water health risk globally.`,
+    earlyClue: "1.7 billion people, 2022, drinking water source (WHO)"
+  },
+  {
+    id: "w09", topic: "Water",
+    answer: "WASH",
+    alternates: ["water sanitation and hygiene","water, sanitation and hygiene","water, sanitation, and hygiene"],
+    tossup: `The WHO WASH FIT assessment tool is named for this acronym, which stands for a cluster of three interlinked public health priorities that together determine a population's baseline disease burden. It encompasses everything from piped water systems to hand-hygiene promotion in hospitals. Sustainable Development Goal 6 is dedicated entirely to ensuring universal access to all three components of this acronym. For 10 points — give this three-letter acronym used by the WHO for water, sanitation, and hygiene.`,
+    earlyClue: "WHO WASH FIT / SDG 6 (first two sentences)"
+  },
+  {
+    id: "w10", topic: "Water",
+    answer: "30 minutes",
+    alternates: ["thirty minutes","30-minute","half an hour"],
+    tossup: `The WHO/UNICEF Joint Monitoring Programme uses this threshold as the maximum acceptable round-trip collection time to qualify as a "basic" drinking water service — anything longer is classified as "limited service." Households below this threshold but not on-premises are still considered to lack a safely managed supply. It is used globally to track progress toward SDG Target 6.1. For 10 points — give this time limit that separates basic from limited water service under the JMP ladder.`,
+    earlyClue: "round-trip collection time, JMP, basic drinking water service"
+  },
+
+  // ── TOPIC 2: SUDAN ───────────────────────────────────────────────────────
+  {
+    id: "s01", topic: "Sudan",
+    answer: "Omar al-Bashir",
+    alternates: ["al-Bashir","Bashir"],
+    tossup: `This leader was indicted by the International Criminal Court in 2009 and 2010 on charges of genocide, war crimes, and crimes against humanity related to the Darfur conflict — making him the first sitting head of state indicted by the ICC. He came to power in Sudan in a 1989 Islamist-backed military coup and ruled for three decades. Mass protests beginning in December 2018 led to his removal by the Sudanese military in April 2019. For 10 points — name this long-serving Sudanese president ousted after street demonstrations.`,
+    earlyClue: "ICC indictment 2009, first sitting head of state indicted"
+  },
+  {
+    id: "s02", topic: "Sudan",
+    answer: "Darfur",
+    alternates: ["darfur conflict","darfur genocide"],
+    tossup: `Beginning in 2003, this western region of Sudan became the site of what the United States government labeled a genocide, with Arab Janjaweed militias, backed by the Sudanese government, attacking non-Arab villages. The conflict displaced over 2.5 million people and killed an estimated 300,000. The International Criminal Court issued its first-ever genocide arrest warrant against a sitting head of state over atrocities committed here. For 10 points — name this conflict-ridden region of Sudan.`,
+    earlyClue: "2003, western region of Sudan, Janjaweed militias"
+  },
+  {
+    id: "s03", topic: "Sudan",
+    answer: "Abdalla Hamdok",
+    alternates: ["Hamdok"],
+    tossup: `This civilian economist became Sudan's prime minister following the power-sharing deal struck between protest groups and the Transitional Sovereignty Council in August 2019. He was detained in the October 2021 military coup led by General Abdel Fattah al-Burhan, briefly reinstated under a November 2021 agreement, then resigned in January 2022 after the deal collapsed amid continued protests. For 10 points — name this civilian head of government of Sudan's transitional period.`,
+    earlyClue: "civilian economist, prime minister, power-sharing deal 2019"
+  },
+  {
+    id: "s04", topic: "Sudan",
+    answer: "Rapid Support Forces",
+    alternates: ["RSF","paramilitary RSF"],
+    tossup: `This paramilitary group, commanded by General Mohamed Hamdan Dagalo — known as Hemedti — evolved from the Janjaweed militias that carried out atrocities in Darfur. It fought alongside the Sudanese Armed Forces during the transitional period but turned against them in April 2023, sparking a full-scale civil war in Khartoum and across Sudan. The United States and others have accused it of renewed ethnic cleansing in Darfur. For 10 points — name this Sudanese paramilitary force led by Hemedti.`,
+    earlyClue: "Hemedti / Dagalo, evolved from Janjaweed (first sentence)"
+  },
+  {
+    id: "s05", topic: "Sudan",
+    answer: "South Sudan",
+    alternates: ["south sudan independence","republic of south sudan"],
+    tossup: `After a January 2011 independence referendum in which 98.83 percent voted to secede, this nation formally declared independence from Sudan in July 2011, becoming the world's newest country at that time. Its independence was the product of the 2005 Comprehensive Peace Agreement that ended Sudan's Second Civil War. It is landlocked and contains significant oil reserves that both it and its northern neighbor contest. For 10 points — name this country that separated from Sudan in 2011.`,
+    earlyClue: "January 2011 referendum, 98.83 percent voted to secede"
+  },
+  {
+    id: "s06", topic: "Sudan",
+    answer: "Khartoum",
+    alternates: ["khartoum sudan"],
+    tossup: `This city, located at the confluence of the Blue Nile and White Nile, serves as Sudan's capital and was the primary battleground when fighting erupted between the Sudanese Armed Forces and the Rapid Support Forces in April 2023. Its twin city Omdurman, just across the Nile, was the site of the 1898 Battle of Omdurman in which British forces under Kitchener defeated the Mahdist state. For 10 points — name this Sudanese capital at the junction of the two Niles.`,
+    earlyClue: "confluence of Blue Nile and White Nile, Sudan's capital"
+  },
+
+  // ── TOPIC 5: CURRENT EVENTS (general) ─────────────────────────────────────
+  {
+    id: "c01", topic: "Current Events",
+    answer: "artificial intelligence",
+    alternates: ["AI","generative AI","large language models","LLM"],
+    tossup: `In 2023, the release of publicly available systems capable of generating text, images, and code from natural language prompts brought this technology to mainstream attention, prompting calls for regulation from the EU, the United States, and the United Nations. The EU's AI Act, passed in 2024, is the world's first comprehensive legal framework governing it. Companies racing to develop frontier versions of this technology include OpenAI, Anthropic, and Google DeepMind. For 10 points — give this broad term for machine systems that perform tasks typically requiring human intelligence.`,
+    earlyClue: "systems generating text, images, code from natural language prompts, 2023"
+  },
+  {
+    id: "c02", topic: "Current Events",
+    answer: "Gaza",
+    alternates: ["gaza strip","gaza war","israel-hamas war","hamas"],
+    tossup: `Following the October 7, 2023 Hamas-led attack on Israel that killed approximately 1,200 people and took roughly 250 hostages, Israel launched a military offensive into this Palestinian territory that the UN described as causing one of the fastest deteriorations of humanitarian conditions on record. By mid-2024, the territory's health ministry reported over 37,000 Palestinian deaths. Ceasefire negotiations were mediated by Qatar, Egypt, and the United States. For 10 points — name this Palestinian territory that became the site of a prolonged conflict beginning in October 2023.`,
+    earlyClue: "October 7, 2023 Hamas-led attack, approximately 1,200 killed"
+  },
+  {
+    id: "c03", topic: "Current Events",
+    answer: "Ukraine",
+    alternates: ["ukraine war","russo-ukrainian war","russia-ukraine war"],
+    tossup: `Russia's full-scale invasion of this country in February 2022, following years of conflict in its eastern Donbas region, triggered the largest land war in Europe since World War II and a sweeping package of Western sanctions on Moscow. NATO members supplied this country with artillery, air-defense systems, and eventually F-16 fighter jets. Its president, Volodymyr Zelensky, became a prominent figure calling for greater military aid in global forums. For 10 points — name this Eastern European country defending itself against Russian invasion.`,
+    earlyClue: "Russia's full-scale invasion, February 2022, largest land war in Europe since WWII"
+  },
+  {
+    id: "c04", topic: "Current Events",
+    answer: "Supreme Court",
+    alternates: ["US Supreme Court","SCOTUS","supreme court of the united states"],
+    tossup: `In its 2024 term, this institution issued a ruling in Trump v. United States holding that former presidents enjoy presumptive immunity from criminal prosecution for official acts — a decision described by dissenting justices as placing the president above the law. Earlier rulings from its 2022 term overturned Roe v. Wade and struck down the EPA's broad authority to regulate carbon emissions under the "major questions doctrine." For 10 points — name this highest court in the United States.`,
+    earlyClue: "Trump v. United States, presumptive immunity for official acts, 2024"
+  },
+  {
+    id: "c05", topic: "Current Events",
+    answer: "COP28",
+    alternates: ["COP 28","28th conference of the parties","cop twenty-eight"],
+    tossup: `Held in Dubai in late 2023, this climate conference produced the first-ever global agreement to "transition away" from fossil fuels — a historic but nonbinding commitment seen as a diplomatic breakthrough. It was presided over by UAE oil executive Sultan Al Jaber, whose role drew criticism from environmental groups. Nearly 200 countries signed the final text known as the UAE Consensus. For 10 points — name this 2023 UN climate summit held in the United Arab Emirates.`,
+    earlyClue: "Dubai, late 2023, first-ever global agreement to transition away from fossil fuels"
+  }
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const TOPICS = [...new Set(BANK.map(q => q.topic))];
+let activeTopic = null; // null = all
+let queue = [];
+let currentQ = null;
+let reviewMode = false;
+let synth = window.speechSynthesis;
+let utterance = null;
+let wordIndex = 0;
+let words = [];
+let buzzed = false;
+let buzzWordIndex = 0;
+let waitingAnswer = false;
+let stats = { correct: 0, late: 0, wrong: 0 };
+let recognition = null;
+let recognizing = false;
+let heardTranscript = "";
+
+const STORAGE_KEY = "buzzer_trainer_v2";
+
+function loadStorage() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveStorage(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+}
+
+let store = loadStorage();
+// store.misses: { [id]: { answer, earlyClue, topic, lastSeen, interval, nextDue, streak } }
+// store.addedQuestions: [] of question objects
+// store.apiKey: string
+if (!store.misses) store.misses = {};
+if (!store.addedQuestions) store.addedQuestions = {};
+if (!store.stats) store.stats = { correct: 0, late: 0, wrong: 0 };
+stats = store.stats;
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const topicBar = $("topicBar");
+const tossupText = $("tossupText");
+const qMeta = $("qMeta");
+const btnRead = $("btnRead");
+const btnBuzz = $("btnBuzz");
+const btnSkip = $("btnSkip");
+const btnReview = $("btnReview");
+const answerRow = $("answerRow");
+const answerInput = $("answerInput");
+const micBtn = $("micBtn");
+const btnSubmit = $("btnSubmit");
+const feedback = $("feedback");
+const reviewBadge = $("reviewBadge");
+const missCard = $("missCard");
+const missList = $("missList");
+const transcriptBadge = $("transcriptBadge");
+const speedSlider = $("speedSlider");
+const speedLabel = $("speedLabel");
+const chkVoice = $("chkVoice");
+
+function updateStatsUI() {
+  $("sCorrect").textContent = stats.correct;
+  $("sLate").textContent = stats.late;
+  $("sWrong").textContent = stats.wrong;
+  $("sQueue").textContent = queue.length;
+  store.stats = stats;
+  saveStorage(store);
+}
+
+function getDueCount() {
+  const now = Date.now();
+  return Object.values(store.misses).filter(m => m.nextDue <= now).length;
+}
+
+function updateReviewBadge() {
+  const n = getDueCount();
+  reviewBadge.textContent = n;
+  reviewBadge.style.display = n > 0 ? "" : "none";
+}
+
+function buildTopicBar() {
+  topicBar.innerHTML = "";
+  const all = document.createElement("button");
+  all.className = "topic-btn" + (activeTopic === null ? " active" : "");
+  all.textContent = "All topics";
+  all.onclick = () => { activeTopic = null; buildTopicBar(); buildQueue(); };
+  topicBar.appendChild(all);
+
+  TOPICS.forEach(t => {
+    const btn = document.createElement("button");
+    btn.className = "topic-btn" + (activeTopic === t ? " active" : "");
+    btn.textContent = t;
+    btn.onclick = () => { activeTopic = t; buildTopicBar(); buildQueue(); };
+    topicBar.appendChild(btn);
+  });
+}
+
+function allQuestions() {
+  const added = Object.values(store.addedQuestions || {});
+  return [...BANK, ...added];
+}
+
+function buildQueue() {
+  reviewMode = false;
+  const pool = allQuestions().filter(q => !activeTopic || q.topic === activeTopic);
+  queue = shuffle([...pool]);
+  loadNextQuestion();
+  updateStatsUI();
+}
+
+function buildReviewQueue() {
+  reviewMode = true;
+  const now = Date.now();
+  const due = Object.entries(store.misses)
+    .filter(([, m]) => m.nextDue <= now)
+    .map(([id]) => allQuestions().find(q => q.id === id))
+    .filter(Boolean);
+  queue = shuffle(due);
+  if (queue.length === 0) {
+    showFeedback("info", "No reviews due right now. Come back later!");
+    return;
+  }
+  loadNextQuestion();
+  updateStatsUI();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ─── MISS LOG UI ─────────────────────────────────────────────────────────────
+function renderMissLog() {
+  const entries = Object.values(store.misses);
+  if (entries.length === 0) { missCard.style.display = "none"; return; }
+  missCard.style.display = "";
+  missList.innerHTML = "";
+  const now = Date.now();
+  entries.sort((a, b) => a.nextDue - b.nextDue).forEach(m => {
+    const li = document.createElement("li");
+    li.className = "miss-item";
+    const due = m.nextDue <= now ? "DUE NOW" : "in " + humanDelta(m.nextDue - now);
+    li.innerHTML = `<span class="mi-due">${due}</span><span class="mi-answer">${m.answer}</span><div class="mi-clue">Early clue: ${m.earlyClue}</div>`;
+    missList.appendChild(li);
+  });
+}
+
+function humanDelta(ms) {
+  const d = Math.floor(ms / 86400000);
+  if (d >= 1) return d + "d";
+  const h = Math.floor(ms / 3600000);
+  if (h >= 1) return h + "h";
+  return Math.floor(ms / 60000) + "m";
+}
+
+// ─── SPACED REPETITION ───────────────────────────────────────────────────────
+const INTERVALS = [1, 3, 7, 16, 35]; // days
+function recordMiss(q) {
+  const existing = store.misses[q.id];
+  const streak = existing ? 0 : 0;
+  store.misses[q.id] = {
+    answer: q.answer,
+    earlyClue: q.earlyClue || "(see tossup)",
+    topic: q.topic,
+    lastSeen: Date.now(),
+    interval: INTERVALS[0],
+    nextDue: Date.now() + INTERVALS[0] * 86400000,
+    streak: 0
+  };
+  saveStorage(store);
+}
+
+function recordCorrect(q) {
+  const existing = store.misses[q.id];
+  if (!existing) return;
+  const nextStreak = Math.min((existing.streak || 0) + 1, INTERVALS.length - 1);
+  const nextInterval = INTERVALS[nextStreak];
+  if (nextStreak >= INTERVALS.length - 1) {
+    // graduated — remove from miss log
+    delete store.misses[q.id];
+  } else {
+    store.misses[q.id] = {
+      ...existing,
+      streak: nextStreak,
+      interval: nextInterval,
+      nextDue: Date.now() + nextInterval * 86400000,
+      lastSeen: Date.now()
+    };
+  }
+  saveStorage(store);
+}
+
+// ─── TTS ─────────────────────────────────────────────────────────────────────
+function loadQuestion(q) {
+  currentQ = q;
+  buzzed = false;
+  waitingAnswer = false;
+  wordIndex = 0;
+  words = q.tossup.split(/\s+/);
+  tossupText.innerHTML = `<span class="unspoken">${escHtml(q.tossup)}</span>`;
+  qMeta.textContent = `Topic: ${q.topic} | ${queue.length} remaining`;
+  feedback.style.display = "none";
+  answerRow.style.display = "none";
+  transcriptBadge.textContent = "";
+  answerInput.value = "";
+  btnBuzz.disabled = false;
+  btnRead.textContent = "Read";
+  btnRead.disabled = false;
+}
+
+function loadNextQuestion() {
+  stopSpeech();
+  if (queue.length === 0) {
+    tossupText.innerHTML = `<em>All done! Hit a topic to reshuffle.</em>`;
+    qMeta.textContent = "";
+    btnRead.disabled = true;
+    btnBuzz.disabled = true;
+    return;
+  }
+  const q = queue.shift();
+  loadQuestion(q);
+  updateStatsUI();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function stopSpeech() {
+  synth.cancel();
+  utterance = null;
+}
+
+function renderProgress(upTo) {
+  const spoken = words.slice(0, upTo).join(" ");
+  const rest = words.slice(upTo).join(" ");
+  tossupText.innerHTML =
+    `<span class="spoken">${escHtml(spoken)}</span>` +
+    (rest ? `<span class="unspoken"> ${escHtml(rest)}</span>` : "");
+}
+
+function startReading() {
+  if (!currentQ) return;
+  stopSpeech();
+  buzzed = false;
+  waitingAnswer = false;
+  answerRow.style.display = "none";
+  feedback.style.display = "none";
+  wordIndex = 0;
+
+  utterance = new SpeechSynthesisUtterance(currentQ.tossup);
+  utterance.rate = parseFloat(speedSlider.value);
+
+  utterance.onboundary = e => {
+    if (e.name !== "word") return;
+    // count words spoken so far
+    const spoken = currentQ.tossup.slice(0, e.charIndex);
+    wordIndex = spoken.split(/\s+/).filter(Boolean).length;
+    renderProgress(wordIndex);
+  };
+
+  utterance.onend = () => {
+    if (!buzzed) {
+      wordIndex = words.length;
+      renderProgress(wordIndex);
+      openAnswerPhase(true /* dead — never buzzed */);
+    }
+  };
+
+  utterance.onerror = () => {};
+  btnRead.textContent = "Re-read";
+  synth.speak(utterance);
+  btnBuzz.disabled = false;
+}
+
+function doBuzz() {
+  if (!currentQ || buzzed) return;
+  buzzed = true;
+  buzzWordIndex = wordIndex;
+  stopSpeech();
+  renderProgress(buzzWordIndex);
+  openAnswerPhase(false);
+}
+
+function openAnswerPhase(dead) {
+  waitingAnswer = true;
+  answerRow.style.display = "flex";
+  answerInput.value = "";
+  transcriptBadge.textContent = "";
+  answerInput.focus();
+  btnBuzz.disabled = true;
+
+  if (!dead && chkVoice.checked && "webkitSpeechRecognition" in window) {
+    startMic();
+  }
+}
+
+// ─── ANSWER CHECKING ─────────────────────────────────────────────────────────
+function normalize(s) {
+  return s.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isCorrect(typed, q) {
+  const t = normalize(typed);
+  const targets = [q.answer, ...(q.alternates || [])].map(normalize);
+  return targets.some(ans => t === ans || t.includes(ans) || ans.includes(t));
+}
+
+function submitAnswer() {
+  if (!currentQ || !waitingAnswer) return;
+  waitingAnswer = false;
+  stopMic();
+
+  const typed = answerInput.value.trim() || heardTranscript;
+  const correct = isCorrect(typed, currentQ);
+
+  // Determine timing
+  const totalWords = words.length;
+  const forTenIdx = (() => {
+    const lower = currentQ.tossup.toLowerCase();
+    const idx = lower.indexOf("for 10 points");
+    if (idx < 0) return totalWords;
+    return currentQ.tossup.slice(0, idx).split(/\s+/).filter(Boolean).length;
+  })();
+  const early = buzzWordIndex < forTenIdx;
+  const dead = !buzzWordIndex && buzzWordIndex !== 0 ? true : (buzzWordIndex === 0 && !buzzed);
+
+  if (correct) {
+    if (early) {
+      stats.correct++;
+      showFeedback("correct", `✓ Early buzz! Answer: ${currentQ.answer}`);
+      recordCorrect(currentQ);
+    } else {
+      stats.late++;
+      showFeedback("correct", `✓ Correct — but late (buzzed after "For 10 points"). Answer: ${currentQ.answer}<div class="early-clue">Early clue to learn: ${currentQ.earlyClue}</div>`);
+      recordMiss(currentQ);
+    }
+  } else {
+    stats.wrong++;
+    showFeedback("wrong", `✗ Wrong. Answer: ${currentQ.answer}<div class="early-clue">Early clue to learn: ${currentQ.earlyClue}</div>`);
+    recordMiss(currentQ);
+    if (!buzzed) {
+      // dead — add back to end of queue
+      queue.push(currentQ);
+    }
+  }
+
+  updateStatsUI();
+  updateReviewBadge();
+  renderMissLog();
+  answerRow.style.display = "none";
+
+  // Auto-advance after 2.5s
+  setTimeout(() => {
+    feedback.style.display = "none";
+    loadNextQuestion();
+  }, 3000);
+}
+
+function showFeedback(type, html) {
+  feedback.className = "feedback " + type;
+  feedback.innerHTML = html;
+  feedback.style.display = "block";
+}
+
+// ─── MIC / SPEECH RECOGNITION ─────────────────────────────────────────────────
+function setupRecognition() {
+  const SR = window.webkitSpeechRecognition || window.SpeechRecognition;
+  if (!SR) return;
+  recognition = new SR();
+  recognition.lang = "en-US";
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 5;
+
+  recognition.onstart = () => { recognizing = true; micBtn.classList.add("listening"); };
+  recognition.onend = () => {
+    recognizing = false;
+    micBtn.classList.remove("listening");
+  };
+  recognition.onerror = () => {
+    recognizing = false;
+    micBtn.classList.remove("listening");
+  };
+  recognition.onresult = e => {
+    let final = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        // collect all alternatives
+        const alts = [];
+        for (let j = 0; j < e.results[i].length; j++) alts.push(e.results[i][j].transcript);
+        final = alts[0];
+        heardTranscript = alts[0];
+        transcriptBadge.textContent = `Heard: "${alts[0]}"`;
+        answerInput.value = alts[0];
+        // auto-submit after brief pause
+        setTimeout(() => { if (waitingAnswer) submitAnswer(); }, 600);
+      } else {
+        transcriptBadge.textContent = `Hearing: "${e.results[i][0].transcript}"`;
+      }
+    }
+  };
+}
+
+function startMic() {
+  heardTranscript = "";
+  if (!recognition) return;
+  try { recognition.start(); } catch {}
+}
+function stopMic() {
+  if (recognition && recognizing) { try { recognition.stop(); } catch {} }
+}
+
+// ─── ADD ARTICLE / API ────────────────────────────────────────────────────────
+$("btnGenerate").onclick = async () => {
+  const source = $("addSource").value.trim();
+  const topic = $("addTopic").value.trim();
+  const text = $("addText").value.trim();
+  const apiKey = $("addApiKey").value.trim();
+
+  if (!text) { $("generateStatus").textContent = "Paste an article first."; return; }
+  if (!apiKey) { $("generateStatus").textContent = "Enter your Anthropic API key."; return; }
+
+  // save key
+  store.apiKey = apiKey;
+  saveStorage(store);
+
+  $("generateStatus").textContent = "Calling Claude API…";
+
+  const prompt = `You are a quiz bowl question writer. Given the article below, write exactly 4 pyramidal tossup questions.
+
+Rules:
+- Each question starts with the hardest, most specific clue and progresses to the giveaway.
+- Clues should be factual, from the article only.
+- Include "For 10 points —" before the final direct clue/answer prompt.
+- After each question, on a new line starting with ANSWER: write the exact answer.
+- After that, on a line starting with EARLY: write the single earliest clue a knowledgeable player should buzz on.
+- After that, on a line starting with ALTS: write comma-separated acceptable alternate answers (or leave blank).
+- Separate the 4 questions with a blank line.
+
+Source: ${source || "Unknown"}
+Topic: ${topic || "General"}
+
+Article:
+${text.slice(0, 6000)}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "anthropic-dangerous-direct-browser-calls": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 2000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      $("generateStatus").textContent = `API error: ${res.status} ${err.error?.message || ""}`;
+      return;
+    }
+
+    const data = await res.json();
+    const rawText = data.content[0].text;
+    const parsed = parseGeneratedQuestions(rawText, topic || source || "Added");
+    if (parsed.length === 0) { $("generateStatus").textContent = "Couldn't parse questions — try again."; return; }
+
+    parsed.forEach(q => {
+      store.addedQuestions[q.id] = q;
+    });
+    saveStorage(store);
+
+    $("generateStatus").textContent = `Added ${parsed.length} tossup(s) to the deck!`;
+    buildQueue(); // refresh
+  } catch (e) {
+    $("generateStatus").textContent = "Network error: " + e.message;
+  }
+};
+
+function parseGeneratedQuestions(text, topic) {
+  const blocks = text.trim().split(/\n\s*\n/).filter(b => b.trim());
+  const questions = [];
+  let i = 0;
+  for (const block of blocks) {
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+    let tossup = [], answer = "", early = "", alts = [];
+    for (const line of lines) {
+      if (line.startsWith("ANSWER:")) answer = line.slice(7).trim();
+      else if (line.startsWith("EARLY:")) early = line.slice(6).trim();
+      else if (line.startsWith("ALTS:")) alts = line.slice(5).split(",").map(a => a.trim()).filter(Boolean);
+      else tossup.push(line);
+    }
+    if (answer && tossup.length) {
+      questions.push({
+        id: "added_" + Date.now() + "_" + i++,
+        topic,
+        answer,
+        alternates: alts,
+        tossup: tossup.join(" "),
+        earlyClue: early || tossup[0]
+      });
+    }
+  }
+  return questions;
+}
+
+// ─── COPY LOG ────────────────────────────────────────────────────────────────
+$("btnCopyLog").onclick = () => {
+  const lines = Object.values(store.misses).map(m =>
+    `[MISS] ${m.answer} | ${m.topic} | due: ${new Date(m.nextDue).toLocaleDateString()} | early clue: ${m.earlyClue}`
+  );
+  navigator.clipboard.writeText(lines.join("\n")).then(() => {
+    $("btnCopyLog").textContent = "Copied!";
+    setTimeout(() => $("btnCopyLog").textContent = "Copy log", 1500);
+  });
+};
+
+// ─── EVENT WIRING ─────────────────────────────────────────────────────────────
+btnRead.onclick = startReading;
+btnBuzz.onclick = doBuzz;
+btnSkip.onclick = () => { stopSpeech(); loadNextQuestion(); };
+btnReview.onclick = buildReviewQueue;
+btnSubmit.onclick = submitAnswer;
+answerInput.onkeydown = e => { if (e.key === "Enter") submitAnswer(); };
+
+micBtn.onclick = () => {
+  if (recognizing) stopMic();
+  else startMic();
+};
+
+speedSlider.oninput = () => {
+  speedLabel.textContent = parseFloat(speedSlider.value).toFixed(2) + "×";
+};
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && !waitingAnswer && !e.target.matches("input,textarea,button")) {
+    e.preventDefault();
+    if (!buzzed && currentQ) doBuzz();
+  }
+});
+
+// Load saved API key
+if (store.apiKey) $("addApiKey").value = store.apiKey;
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+setupRecognition();
+buildTopicBar();
+buildQueue();
+updateReviewBadge();
+renderMissLog();
+</script>
+</body>
+</html>
