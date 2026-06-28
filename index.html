@@ -6,136 +6,98 @@
 <title>MIST Buzzer Trainer</title>
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #2e2e2e;
-    --text: #e8e8e8;
-    --text2: #888;
-    --accent: #7c6ef7;
-    --accent2: #5b4dd6;
-    --green: #4caf83;
-    --red: #e05c5c;
-    --yellow: #d4a843;
-    --radius: 10px;
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --border: #2e2e2e;
+    --text: #e8e8e8; --text2: #888; --accent: #7c6ef7; --accent2: #5b4dd6;
+    --green: #4caf83; --red: #e05c5c; --yellow: #d4a843; --radius: 10px;
     --font: 'Segoe UI', system-ui, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
   header { padding: 18px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
-  header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: .02em; }
+  header h1 { font-size: 1.1rem; font-weight: 600; }
   header .sub { color: var(--text2); font-size: .82rem; }
   .score-bar { margin-left: auto; display: flex; gap: 20px; font-size: .85rem; }
-  .score-bar span { color: var(--text2); }
-  .score-bar b { color: var(--text); }
-
+  .score-bar span { color: var(--text2); } .score-bar b { color: var(--text); }
   main { max-width: 820px; margin: 0 auto; padding: 28px 20px; }
-
-  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; align-items: center; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
   select, button { font-family: var(--font); font-size: .85rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
-  select { padding: 8px 12px; }
-  button { padding: 8px 16px; transition: background .15s, border-color .15s; }
+  select { padding: 8px 12px; } button { padding: 8px 16px; transition: background .15s; }
   button:hover { background: var(--surface2); }
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   button.primary:hover { background: var(--accent2); border-color: var(--accent2); }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: .72rem; font-weight: 600; letter-spacing: .05em; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: .72rem; font-weight: 600; }
   .pill.on { background: rgba(124,110,247,.25); color: var(--accent); border: 1px solid rgba(124,110,247,.4); }
   .pill.off { background: rgba(100,100,100,.15); color: var(--text2); border: 1px solid var(--border); }
-
-  .mode-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .mode-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
   .mode-btn { padding: 7px 14px; border-radius: 99px; font-size: .8rem; border: 1px solid var(--border); background: var(--surface); color: var(--text2); }
   .mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; min-height: 160px; margin-bottom: 20px; }
-  .q-meta { display: flex; gap: 12px; margin-bottom: 14px; font-size: .75rem; color: var(--text2); align-items: center; flex-wrap: wrap; }
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; min-height: 120px; margin-bottom: 16px; }
+  .q-meta { display: flex; gap: 10px; margin-bottom: 14px; font-size: .75rem; color: var(--text2); align-items: center; flex-wrap: wrap; }
   .q-meta .tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; }
-  .pts-label { color: var(--yellow); font-weight: 700; font-size: 1rem; }
+  .pts-label { color: var(--yellow); font-weight: 700; font-size: .95rem; }
   #qText { font-size: 1.08rem; line-height: 1.75; }
-  #qText .sp { color: var(--text2); }
-  #qText .un { color: var(--text); }
-  .blind-hint { color: var(--accent); font-style: italic; font-size: 1rem; }
-
-  .ans-row { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+  #qText .sp { color: var(--text2); } #qText .un { color: var(--text); }
+  .blind-hint { color: var(--accent); font-style: italic; }
+  .ans-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
   #ansInput { flex: 1; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: .95rem; font-family: var(--font); }
   #ansInput:focus { outline: none; border-color: var(--accent); }
   .ans-timer { font-size: 1.1rem; font-weight: 700; color: var(--yellow); min-width: 28px; text-align: center; }
   .ans-timer.urgent { color: var(--red); }
-
-  .feedback { border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; font-size: .93rem; line-height: 1.6; display: none; }
+  .feedback { border-radius: var(--radius); padding: 16px 20px; margin-bottom: 16px; font-size: .93rem; line-height: 1.6; display: none; }
   .feedback.correct { background: rgba(76,175,131,.12); border: 1px solid rgba(76,175,131,.3); color: var(--green); }
   .feedback.wrong { background: rgba(224,92,92,.1); border: 1px solid rgba(224,92,92,.25); color: var(--red); }
   .feedback .ans-reveal { margin-top: 10px; color: var(--text); font-size: .88rem; border-top: 1px solid var(--border); padding-top: 10px; }
-
-  #buzzBtn { width: 100%; padding: 22px; font-size: 1.3rem; font-weight: 700; letter-spacing: .05em; border-radius: var(--radius); background: var(--surface); border: 2px solid var(--border); color: var(--text); transition: all .12s; margin-bottom: 14px; }
+  #buzzBtn { width: 100%; padding: 20px; font-size: 1.3rem; font-weight: 700; letter-spacing: .05em; border-radius: var(--radius); background: var(--surface); border: 2px solid var(--border); color: var(--text); transition: all .12s; margin-bottom: 12px; }
   #buzzBtn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #fff; }
   #buzzBtn:disabled { opacity: .4; cursor: default; }
   #buzzBtn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
   .nav-row { display: flex; gap: 10px; justify-content: flex-end; }
-
   #boardWrap { display: none; }
-  .board-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 18px; }
-  .board-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 8px; text-align: center; cursor: pointer; transition: background .12s; font-weight: 700; font-size: .9rem; }
+  .board-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
+  .board-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 8px; text-align: center; cursor: pointer; transition: background .12s; font-weight: 700; font-size: .9rem; }
   .board-cell:hover:not(.used) { background: var(--accent); border-color: var(--accent); color: #fff; }
   .board-cell.used { opacity: .3; cursor: default; pointer-events: none; }
-  .board-cell.topic-header { background: var(--surface2); cursor: default; font-size: .7rem; font-weight: 600; letter-spacing: .05em; color: var(--text2); text-transform: uppercase; padding: 10px 4px; }
+  .board-cell.topic-header { background: var(--surface2); cursor: default; font-size: .68rem; font-weight: 600; letter-spacing: .05em; color: var(--text2); text-transform: uppercase; padding: 8px 4px; }
   .board-cell.topic-header:hover { background: var(--surface2); color: var(--text2); }
-
   .mic-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); display: inline-block; animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
-
-  .stats { display: flex; gap: 18px; font-size: .8rem; padding: 10px 0; border-top: 1px solid var(--border); color: var(--text2); }
+  .stats { display: flex; gap: 16px; font-size: .8rem; padding: 10px 0; border-top: 1px solid var(--border); color: var(--text2); flex-wrap: wrap; }
   .stats b { color: var(--text); }
-
-  .blind-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(124,110,247,.15); border: 1px solid rgba(124,110,247,.35); border-radius: 99px; padding: 3px 10px; font-size: .75rem; color: var(--accent); }
-
-  .rules-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; font-size: .8rem; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
-  .rules-box b { color: var(--text); }
-  .rules-box ul { padding-left: 18px; margin-top: 4px; }
-
-  .phase-badge { font-size: .8rem; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+  .phase-badge { font-size: .78rem; font-weight: 600; padding: 2px 9px; border-radius: 99px; }
   .phase-badge.answer { background: rgba(212,168,67,.15); border: 1px solid rgba(212,168,67,.3); color: var(--yellow); }
   .phase-badge.reading { background: rgba(76,175,131,.12); border: 1px solid rgba(76,175,131,.25); color: var(--green); }
-
+  .blind-badge { display: inline-flex; gap: 5px; background: rgba(124,110,247,.15); border: 1px solid rgba(124,110,247,.35); border-radius: 99px; padding: 2px 9px; font-size: .75rem; color: var(--accent); }
+  .rules-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; font-size: .8rem; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
+  .rules-box b { color: var(--text); } .rules-box ul { padding-left: 18px; margin-top: 4px; }
   .spacer { flex: 1; }
+  .qcount { color: var(--text2); font-size: .8rem; }
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <h1>MIST Buzzer Trainer</h1>
-    <div class="sub">MIST 2026 Nationals Prep</div>
-  </div>
+  <div><h1>MIST Buzzer Trainer</h1><div class="sub">MIST 2026 Nationals Prep</div></div>
   <div class="score-bar">
     <div><span>Score </span><b id="hScore">0</b></div>
     <div><span>✓ </span><b id="hRight">0</b></div>
     <div><span>✗ </span><b id="hWrong">0</b></div>
   </div>
 </header>
-
 <main>
-  <!-- Mode row -->
   <div class="mode-row">
     <button class="mode-btn active" data-mode="practice">Practice</button>
     <button class="mode-btn" data-mode="round1">Round 1</button>
     <button class="mode-btn" data-mode="round23">Round 2 / 3</button>
     <button class="mode-btn" data-mode="finals">Finals</button>
     <div class="spacer"></div>
-    <button id="blindBtn" title="Hide question text — audio only">
-      Blind Mode <span id="blindPill" class="pill off">OFF</span>
-    </button>
+    <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
   </div>
-
-  <!-- Finals sub-round -->
-  <div id="finalsRow" style="display:none;margin-bottom:14px;">
+  <div id="finalsRow" style="display:none;margin-bottom:12px;">
     <div class="mode-row">
       <button class="mode-btn active" data-fin="fr1">Finals R1 — 100 pts, no penalty</button>
       <button class="mode-btn" data-fin="fr2">Finals R2 — 200 pts, −10%</button>
-      <button class="mode-btn" data-fin="fr3">Jeopardy — choose value, −10%</button>
+      <button class="mode-btn" data-fin="fr3">Jeopardy — pick value</button>
     </div>
   </div>
-
-  <!-- Controls -->
   <div class="controls">
     <select id="topicSel">
       <option value="all">All Topics</option>
@@ -146,30 +108,27 @@
       <option value="Current Events">Current Events</option>
     </select>
     <button id="startBtn" class="primary">Start</button>
+    <button id="shuffleBtn">Shuffle</button>
     <button id="resetBtn">Reset Stats</button>
     <button id="rulesBtn">Rules</button>
+    <span class="qcount" id="qcount"></span>
   </div>
-
-  <!-- Rules box (hidden by default) -->
   <div id="rulesBox" class="rules-box" style="display:none;">
     <b>MIST Quiz Bowl Rules</b>
     <ul>
-      <li>Judge reads the <b>point value first</b>, then the question. You may buzz at any time.</li>
-      <li>Buzzing <b>stops the reader</b> immediately — the question is not repeated.</li>
-      <li>After buzzing: <b>10 seconds</b> to answer. If reading was still in progress when you buzzed, you get up to <b>10 more seconds</b> once your answer is judged incorrect (for other teams to steal).</li>
-      <li><b>Wrong answer:</b> floor opens to all other teams who may buzz to steal.</li>
-      <li><b>Penalties:</b> Practice = none · Round 1 = full deduction · Round 2/3 = −10% · Finals R1 = none · Finals R2/R3 = −10%</li>
+      <li>Judge reads the <b>point value first</b>, then the question. Buzz at any time.</li>
+      <li>Buzzing <b>immediately stops the reader</b> — judge does not repeat the question.</li>
+      <li>After buzzing: <b>10 seconds</b> to answer.</li>
+      <li>Wrong answer: floor opens to all other teams to steal.</li>
+      <li><b>Penalties:</b> Practice = 0 · Round 1 = full deduction · Round 2/3 = −10% · Finals R1 = 0 · Finals R2/R3 = −10%</li>
+      <li><b>Topics 1–4:</b> Direct factual questions. <b>Topic 5:</b> Pyramid-style tossups.</li>
     </ul>
   </div>
-
-  <!-- Jeopardy board -->
   <div id="boardWrap">
-    <div style="font-size:.8rem;color:var(--text2);margin-bottom:6px;">Select a question from the Jeopardy board:</div>
+    <div style="font-size:.8rem;color:var(--text2);margin-bottom:6px;">Pick a cell:</div>
     <div class="board-grid" id="boardGrid"></div>
-    <div style="height:16px;"></div>
+    <div style="height:14px;"></div>
   </div>
-
-  <!-- Question card -->
   <div class="q-card" id="qCard" style="display:none;">
     <div class="q-meta">
       <span class="tag" id="qTopic">—</span>
@@ -182,803 +141,1114 @@
     </div>
     <div id="qText"></div>
   </div>
-
-  <!-- Buzz button -->
-  <button id="buzzBtn" style="display:none;" disabled>BUZZ &nbsp;<span style="font-size:.7rem;font-weight:400;opacity:.6;">(or press Space)</span></button>
-
-  <!-- Answer row -->
+  <button id="buzzBtn" style="display:none;" disabled>BUZZ &nbsp;<span style="font-size:.7rem;font-weight:400;opacity:.6;">(Space)</span></button>
   <div class="ans-row" id="ansRow" style="display:none;">
     <span id="micDot" style="display:none;"><span class="mic-dot"></span></span>
     <input type="text" id="ansInput" placeholder="Type or say your answer…" autocomplete="off" />
     <span id="ansTimer" class="ans-timer"></span>
     <button id="submitBtn" class="primary">Submit</button>
   </div>
-
-  <!-- R1 part 2 hint -->
-  <div id="part2Hint" style="display:none;font-size:.8rem;color:var(--text2);margin-bottom:14px;padding:10px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);">
+  <div id="part2Hint" style="display:none;font-size:.8rem;color:var(--text2);margin-bottom:12px;padding:10px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);">
     <span style="color:var(--yellow);font-weight:600;">FOR 50 POINTS — </span><span id="part2Text"></span>
   </div>
-
-  <!-- Feedback -->
   <div class="feedback" id="feedback">
     <div id="fbMsg"></div>
     <div class="ans-reveal" id="fbReveal" style="display:none;"></div>
   </div>
-
-  <!-- Nav -->
   <div class="nav-row" id="navRow" style="display:none;">
-    <button id="nextBtn">Next Question →</button>
+    <button id="nextBtn">Next →</button>
   </div>
-
-  <!-- Stats -->
   <div class="stats" id="statsBar" style="display:none;">
-    <div>Questions: <b id="stTotal">0</b></div>
+    <div>Answered: <b id="stTotal">0</b></div>
     <div>Correct: <b id="stRight" style="color:var(--green);">0</b></div>
     <div>Wrong: <b id="stWrong" style="color:var(--red);">0</b></div>
     <div>Score: <b id="stScore">0</b></div>
   </div>
 </main>
-
 <script>
-// ─── QUESTION BANK ──────────────────────────────────────────────────────────
+// ── QUESTION BANK ────────────────────────────────────────────────────────────
+// Topics 1-4: direct factual questions. Topic 5: pyramid tossup style.
+// tossup = what TTS reads (Practice / R2/R3 / Finals modes)
+// part1 + part2 = what TTS reads in Round 1
 const QB = [
-  // ── WATER ──
-  {id:'w01',topic:'Water',source:'WHO',answer:'schistosomiasis',alternates:['bilharzia','snail fever','bilharziasis'],
-   tossup:`This disease is caused by parasitic flatworms of the genus Schistosoma and is contracted through skin contact with contaminated freshwater — NOT through drinking it. The WHO reported that 251 million people required preventive treatment for this disease in 2021. It is second only to malaria in terms of devastating parasitic diseases worldwide. For 10 points — name this disease, also called bilharzia or snail fever.`,
-   part1:`This disease caused by Schistosoma flatworms required 251 million people to receive preventive treatment from the WHO in 2021. For 100 points — name it.`,
-   part2:`For 50 points — this disease, also called bilharzia, is contracted through skin contact with contaminated freshwater, not drinking it.`},
 
-  {id:'w02',topic:'Water',source:'WHO',answer:'safely managed drinking water service',alternates:['safely managed water','jmp safely managed','safely managed'],
-   tossup:`The WHO and UNICEF Joint Monitoring Programme defines five levels of drinking water service, with this at the top. It requires water to be accessible on premises, available when needed, and free from contamination. As of recent WHO data, 2.2 billion people worldwide lack access to this standard. For 10 points — name this highest tier of the JMP drinking water ladder.`,
-   part1:`The JMP defines five levels of drinking water access; 2.2 billion people lack the highest tier, which requires water on premises, available when needed, and free from contamination. For 100 points — name this top tier.`,
-   part2:`For 50 points — this WHO/UNICEF JMP standard sits at the top of the drinking water service ladder.`},
+// ════════════════════════════════════════════════════════
+//  WATER
+// ════════════════════════════════════════════════════════
 
-  {id:'w03',topic:'Water',source:'WHO',answer:'505,000',alternates:['505000','five hundred five thousand','five hundred thousand'],
-   tossup:`The WHO reported this number as the approximate count of children under five who died from diarrheal diseases in 2019, many linked to unsafe water, sanitation, and hygiene. This figure underscores the WHO's argument that water access is a matter of child survival. For 10 points — give this approximate death toll, nearly half a million children under five.`,
-   part1:`According to WHO data, this many children under five died from diarrheal diseases in 2019 due to unsafe WASH conditions. For 100 points — give this figure.`,
-   part2:`For 50 points — approximately 505,000: the WHO's reported under-5 diarrheal death count for 2019.`},
+// WHO
+{id:'w01',topic:'Water',source:'WHO',
+ answer:'universal and equitable access to safe and affordable drinking water',
+ alternates:['sdg 6.1','safe and affordable drinking water','universal access to safe drinking water'],
+ tossup:'What is SDG target 6.1, according to the WHO?',
+ part1:'According to the WHO, what does SDG target 6.1 call for achieving by 2030? For 100 points.',
+ part2:'For 50 points — SDG target 6.1 calls for universal and equitable access to what?'},
 
-  {id:'w04',topic:'Water',source:'Britannica',answer:'virtual water',alternates:['embedded water','hidden water'],
-   tossup:`Economist Tony Allan coined this term in the 1990s to describe the water embedded in food and other products during their production. For example, producing one kilogram of beef requires roughly 15,000 liters of this resource. Countries that import food are indirectly importing large volumes of it. For 10 points — name this concept coined by Tony Allan referring to water hidden inside traded goods.`,
-   part1:`Tony Allan coined this term for the water embedded in goods during production; beef requires roughly 15,000 liters per kilogram of it. For 100 points — name this concept.`,
-   part2:`For 50 points — Tony Allan's term for water hidden inside food and products during production.`},
+{id:'w02',topic:'Water',source:'WHO',
+ answer:'2.2 billion',alternates:['2.2 billion people','2200000000'],
+ tossup:'According to the WHO, how many people lacked safely managed drinking water services in 2022?',
+ part1:'Per the WHO, this many people still lacked safely managed drinking water as of 2022. For 100 points — give the figure.',
+ part2:'For 50 points — 2.2 billion: the WHO\'s count of people lacking safely managed drinking water.'},
 
-  {id:'w05',topic:'Water',source:'CFR',answer:'agriculture',alternates:['farming','irrigation','agricultural sector'],
-   tossup:`According to both Britannica and the Council on Foreign Relations, this sector accounts for roughly 70 percent of all global freshwater withdrawals. Inefficient irrigation practices in this sector are a leading driver of water scarcity worldwide. For 10 points — name this sector responsible for the majority of global freshwater use.`,
-   part1:`This sector accounts for roughly 70% of global freshwater withdrawals, with inefficient irrigation as a leading cause of scarcity. For 100 points — name it.`,
-   part2:`For 50 points — farming and irrigation: the sector using 70% of the world's freshwater withdrawals.`},
+{id:'w03',topic:'Water',source:'WHO',
+ answer:'4.2 billion',alternates:['4.2 billion people','4200000000'],
+ tossup:'According to the WHO, how many people lacked safely managed sanitation services?',
+ part1:'The WHO reports this many people lacked safely managed sanitation — more than half the world. For 100 points.',
+ part2:'For 50 points — 4.2 billion: the WHO\'s figure for people lacking safely managed sanitation.'},
 
-  {id:'w06',topic:'Water',source:'Britannica',answer:'Aral Sea',alternates:['aral'],
-   tossup:`Once the fourth-largest lake in the world, this body of water began shrinking dramatically in the 1960s after Soviet irrigation projects diverted its two main feeder rivers — the Amu Darya and Syr Darya — to grow cotton in Central Asia. By the 2000s it had lost more than 90 percent of its volume. For 10 points — name this Central Asian sea that became an ecological catastrophe due to Soviet irrigation.`,
-   part1:`Soviet irrigation diverted the Amu Darya and Syr Darya away from this once fourth-largest lake, causing it to shrink over 90%. For 100 points — name it.`,
-   part2:`For 50 points — this Central Asian body of water, once fourth-largest in the world, was destroyed by Soviet cotton irrigation.`},
+{id:'w04',topic:'Water',source:'WHO',
+ answer:'3 billion',alternates:['3 billion people','three billion'],
+ tossup:'Per the WHO, how many people lacked basic handwashing facilities with soap and water at home?',
+ part1:'The WHO says this many people lack basic handwashing facilities at home. For 100 points.',
+ part2:'For 50 points — 3 billion: the WHO count of people without basic handwashing at home.'},
 
-  {id:'w07',topic:'Water',source:'CFR',answer:'3 to 4 billion',alternates:['three to four billion','3-4 billion','four billion','three billion','3 billion','4 billion'],
-   tossup:`The Council on Foreign Relations reports that this many people — roughly 40 to 50 percent of the global population — experience severe water scarcity for at least one month per year. This figure highlights that water stress is not merely a developing-world problem but a global one. For 10 points — give this approximate number of people experiencing seasonal severe water scarcity.`,
-   part1:`The CFR states this many people, 40–50% of the world population, face severe water scarcity for at least one month per year. For 100 points — give the range.`,
-   part2:`For 50 points — 3 to 4 billion: the CFR's estimate of people experiencing severe water scarcity seasonally.`},
+{id:'w05',topic:'Water',source:'WHO',
+ answer:'diarrhoea, cholera, dysentery, typhoid, and polio',
+ alternates:['cholera','typhoid','diarrhea cholera dysentery typhoid polio','diarrheal diseases'],
+ tossup:'According to the WHO, what diseases can microbiologically contaminated water transmit?',
+ part1:'The WHO lists five diseases spread by microbiologically contaminated water. For 100 points — name them.',
+ part2:'For 50 points — diarrhea, cholera, dysentery, typhoid, and polio: diseases spread by contaminated water.'},
 
-  {id:'w08',topic:'Water',source:'St. Louis Government',answer:'Missouri River',alternates:['missouri'],
-   tossup:`Along with the Mississippi River, this river serves as a primary source of drinking water for the City of St. Louis. The St. Louis Water Division draws from both rivers and treats the water at its Chain of Rocks and Howard Bend facilities. For 10 points — name this river, the longest in the United States, that alongside the Mississippi feeds St. Louis's water supply.`,
-   part1:`This river, the longest in the US, is one of two rivers from which St. Louis draws its drinking water alongside the Mississippi. For 100 points — name it.`,
-   part2:`For 50 points — the Missouri River: one of two rivers that supply drinking water to the City of St. Louis.`},
+{id:'w06',topic:'Water',source:'WHO',
+ answer:'505,000',alternates:['505000','approximately 505,000','five hundred five thousand'],
+ tossup:'According to the WHO, how many people die from diarrheal disease caused by unsafe drinking water each year?',
+ part1:'The WHO attributes approximately this many annual deaths to diarrheal disease from unsafe water. For 100 points.',
+ part2:'For 50 points — approximately 505,000: WHO\'s annual diarrheal death toll linked to unsafe water.'},
 
-  {id:'w09',topic:'Water',source:'Channel 5 News',answer:'1 million',alternates:['one million','1000000','a million'],
-   tossup:`According to Channel 5 News reporting on St. Louis's water infrastructure, the city's water system was originally built to serve this many people. However, due to decades of population decline, the city now serves fewer than 300,000 residents, leaving an aging infrastructure dramatically oversized for its current population. For 10 points — give the original design capacity of the St. Louis water system.`,
-   part1:`St. Louis's water system was built for this many people but now serves under 300,000 due to population decline. For 100 points — give the original capacity.`,
-   part2:`For 50 points — 1 million: the original design capacity of the St. Louis water system, now serving fewer than 300,000.`},
+{id:'w07',topic:'Water',source:'WHO',
+ answer:'395,000',alternates:['395000','three hundred ninety five thousand'],
+ tossup:'Per the WHO, how many child deaths under age 5 could be prevented each year by addressing water, sanitation, and hygiene risk factors?',
+ part1:'The WHO says addressing WASH risk factors could prevent this many under-5 deaths per year. For 100 points.',
+ part2:'For 50 points — 395,000: the WHO\'s estimate of preventable under-5 deaths through improved WASH.'},
 
-  {id:'w10',topic:'Water',source:'WHO',answer:'water safety plans',alternates:['water safety plan','wsp','wash fit'],
-   tossup:`The WHO identifies these as the most effective means of ensuring drinking water safety in a systematic manner. They involve risk assessment and risk management from catchment to consumer. A specific adaptation of this framework called WASH FIT is designed for use in healthcare facilities. For 10 points — name these WHO-recommended plans, the gold standard for drinking water quality management.`,
-   part1:`The WHO calls these the most effective tool for systematically ensuring drinking water safety, with WASH FIT as a healthcare adaptation. For 100 points — name them.`,
-   part2:`For 50 points — water safety plans: the WHO's recommended risk-management tool from catchment to consumer.`},
+{id:'w08',topic:'Water',source:'WHO',
+ answer:'malaria',alternates:['malaria and dengue','dengue'],
+ tossup:'According to the WHO, what disease is primarily transmitted by water-breeding insects like mosquitoes?',
+ part1:'The WHO notes that water-breeding insects are a primary vector for this deadly disease. For 100 points.',
+ part2:'For 50 points — malaria: the disease the WHO identifies as transmitted by water-breeding insects.'},
 
-  // ── SUDAN ──
-  {id:'s01',topic:'Sudan',source:'PBS NewsHour',answer:'Christopher Tounsel',alternates:['tounsel'],
-   tossup:`This historian at the University of Washington described the situation in Sudan to PBS NewsHour anchor Geoff Bennett as a "hellscape," offering scholarly context on the ongoing civil war and its devastation on Sudanese cultural heritage. For 10 points — name this historian who appeared on PBS NewsHour to discuss the Sudan crisis.`,
-   part1:`This University of Washington historian described Sudan to PBS NewsHour as a "hellscape." For 100 points — name him.`,
-   part2:`For 50 points — Christopher Tounsel: the University of Washington historian who called Sudan a hellscape on PBS NewsHour.`},
+{id:'w09',topic:'Water',source:'WHO',
+ answer:'microbial contamination',alternates:['biological contamination','microbiological contamination','bacteria viruses parasites'],
+ tossup:'According to the WHO, what type of contamination poses the greatest risk to drinking water safety?',
+ part1:'The WHO identifies this type of contamination — from bacteria, viruses, and parasites — as the greatest threat to drinking water safety. For 100 points.',
+ part2:'For 50 points — microbial contamination: what the WHO calls the greatest risk to drinking water safety.'},
 
-  {id:'s02',topic:'Sudan',source:'PBS NewsHour',answer:'150,000',alternates:['150000','one hundred fifty thousand'],
-   tossup:`PBS NewsHour anchor Geoff Bennett reported this as the approximate number of people killed in Sudan's civil war, with approximately 13 million people displaced — the largest displacement crisis in the world. The conflict began April 15, 2023 between the Sudanese Armed Forces and the Rapid Support Forces. For 10 points — give this death toll figure reported by PBS NewsHour.`,
-   part1:`PBS NewsHour reported this many killed in Sudan's civil war, alongside roughly 13 million displaced. For 100 points — give the death toll.`,
-   part2:`For 50 points — 150,000: the approximate death toll in Sudan's civil war reported by PBS, with 13 million displaced.`},
+{id:'w10',topic:'Water',source:'WHO',
+ answer:'schistosomiasis',alternates:['bilharzia','snail fever','bilharziasis'],
+ tossup:'According to the WHO, what parasitic disease is contracted through skin contact with contaminated water — not through drinking it?',
+ part1:'The WHO describes this disease, caused by Schistosoma flatworms, which is caught by skin contact with water. For 100 points — name it.',
+ part2:'For 50 points — schistosomiasis, also called bilharzia: the WHO-highlighted disease caught through skin contact, not drinking.'},
 
-  {id:'s03',topic:'Sudan',source:'PBS NewsHour',answer:'Habab Idriss Ahmed',alternates:['habab','habab idriss','idriss ahmed'],
-   tossup:`This senior inspector for Sudan's National Corporation for Antiquities and Museums fled to Scotland in 2023 as the civil war engulfed Khartoum. He appeared on PBS NewsHour to describe the looting and destruction of Sudan's cultural heritage sites. For 10 points — name this Sudanese antiquities official who spoke to PBS NewsHour from Scotland.`,
-   part1:`This senior inspector of Sudan's National Corporation for Antiquities and Museums fled to Scotland in 2023 and spoke with PBS NewsHour about looted heritage. For 100 points — name him.`,
-   part2:`For 50 points — Habab Idriss Ahmed: the Sudanese antiquities inspector who fled to Scotland and appeared on PBS NewsHour.`},
+{id:'w11',topic:'Water',source:'WHO',
+ answer:'251 million',alternates:['251.4 million','251,000,000','two hundred fifty one million'],
+ tossup:'How many people required preventive treatment for schistosomiasis in 2021, according to the WHO?',
+ part1:'The WHO reported this many people needed schistosomiasis preventive treatment in 2021. For 100 points.',
+ part2:'For 50 points — 251 million: the number requiring schistosomiasis treatment in 2021 per the WHO.'},
 
-  {id:'s04',topic:'Sudan',source:'PBS NewsHour',answer:'Sudan National Museum',alternates:['national museum of sudan','sudanese national museum'],
-   tossup:`Located in Khartoum, this institution houses over 100,000 artifacts and holds the largest collection of Nubian antiquities in the world. PBS NewsHour reported on its endangerment as the 2023 civil war brought fighting directly into the Sudanese capital. For 10 points — name this museum that holds the world's largest Nubian collection.`,
-   part1:`This Khartoum museum holds 100,000+ artifacts and the world's largest Nubian collection, threatened by the 2023 civil war. For 100 points — name it.`,
-   part2:`For 50 points — the Sudan National Museum in Khartoum, home to the world's largest Nubian antiquities collection.`},
+{id:'w12',topic:'Water',source:'WHO',
+ answer:'water safety plans',alternates:['water safety plan','wsp'],
+ tossup:'According to the WHO, what are the most effective means of consistently ensuring the safety of a drinking water supply?',
+ part1:'The WHO identifies these as the most effective tool for managing drinking water safety from catchment to consumer. For 100 points.',
+ part2:'For 50 points — water safety plans: the WHO\'s recommended tool for drinking water quality management.'},
 
-  {id:'s05',topic:'Sudan',source:'PBS NewsHour',answer:'Reem Aljeally',alternates:['aljeally','reem al-jeally','reem'],
-   tossup:`This Sudanese artist and curator based in Cairo founded the Sudan Art Archive and has documented the lives of women in Sudan through her work. She appeared on PBS NewsHour to discuss how the civil war has threatened Sudanese cultural identity and the role of art in preserving it. For 10 points — name this artist who founded the Sudan Art Archive.`,
-   part1:`This Cairo-based Sudanese artist founded the Sudan Art Archive and appeared on PBS NewsHour to discuss culture and women in Sudan. For 100 points — name her.`,
-   part2:`For 50 points — Reem Aljeally: the Sudanese artist in Cairo who founded the Sudan Art Archive.`},
+{id:'w13',topic:'Water',source:'WHO',
+ answer:'WASH FIT',alternates:['water and sanitation for health facility improvement tool'],
+ tossup:'What is the name of the WHO tool adapted from water safety plans specifically for healthcare facilities?',
+ part1:'The WHO adapted water safety plans into this tool designed for healthcare facility water and sanitation improvement. For 100 points — name it.',
+ part2:'For 50 points — WASH FIT: the WHO\'s Water and Sanitation for Health Facility Improvement Tool.'},
 
-  {id:'s06',topic:'Sudan',source:'Britannica',answer:'Darfur',alternates:['darfour'],
-   tossup:`The name of this region in western Sudan translates as "home of the Fur," referring to the Fur people, its largest ethnic group. Starting in 2003, it became the site of a brutal conflict involving the Janjaweed militia, accused of genocide against non-Arab communities. For 10 points — name this western Sudanese region whose name means "home of the Fur."`,
-   part1:`This western Sudanese region, whose name means "home of the Fur," became site of a 2003 conflict involving the Janjaweed. For 100 points — name it.`,
-   part2:`For 50 points — Darfur: the western Sudanese region meaning "home of the Fur," site of Janjaweed violence since 2003.`},
+{id:'w14',topic:'Water',source:'WHO',
+ answer:'2010',alternates:['two thousand ten'],
+ tossup:'In what year did the United Nations General Assembly formally recognize the human right to water and sanitation?',
+ part1:'The UN General Assembly recognized the human right to water and sanitation in this year. For 100 points.',
+ part2:'For 50 points — 2010: the year the UN General Assembly recognized water and sanitation as a human right.'},
 
-  {id:'s07',topic:'Sudan',source:'CFR',answer:'Rapid Support Forces',alternates:['rsf','rapid support force'],
-   tossup:`This Sudanese paramilitary organization grew out of the Janjaweed militias and was officially incorporated by Omar al-Bashir in 2013. Led by Mohamed Hamdan Dagalo, known as Hemedti, it clashed with the Sudanese Armed Forces beginning April 15, 2023, sparking the current civil war. For 10 points — name this paramilitary force, abbreviated RSF.`,
-   part1:`Led by Hemedti, this paramilitary force that grew from the Janjaweed launched war against Sudan's Armed Forces on April 15, 2023. For 100 points — name it.`,
-   part2:`For 50 points — the Rapid Support Forces or RSF: Hemedti's paramilitary that sparked Sudan's civil war in April 2023.`},
+{id:'w15',topic:'Water',source:'WHO',
+ answer:'2014',alternates:['two thousand fourteen'],
+ tossup:'According to the WHO source, since what year has the WHO been testing household water treatment products through its international scheme?',
+ part1:'The WHO International Scheme to Evaluate Household Water Treatment Technologies has been running since this year. For 100 points.',
+ part2:'For 50 points — 2014: the year WHO began its scheme to evaluate household water treatment technologies.'},
 
-  {id:'s08',topic:'Sudan',source:'CFR',answer:'Omar al-Bashir',alternates:['bashir','al-bashir','omar bashir'],
-   tossup:`This Sudanese leader ruled for roughly 30 years before being ousted in a 2019 popular uprising. He holds the distinction of being the first sitting head of state to be indicted by the International Criminal Court, facing charges of genocide related to the Darfur conflict. For 10 points — name this long-ruling Sudanese president removed in 2019.`,
-   part1:`This Sudanese president, the first sitting head of state indicted by the ICC for genocide, ruled 30 years before a 2019 uprising removed him. For 100 points — name him.`,
-   part2:`For 50 points — Omar al-Bashir: the Sudanese president ousted in 2019 and the first sitting head of state indicted by the ICC.`},
+// BRITANNICA
+{id:'w16',topic:'Water',source:'Britannica',
+ answer:'70 percent',alternates:['70%','seventy percent','about 70 percent'],
+ tossup:'According to Britannica, approximately what percentage of global freshwater withdrawals does agriculture account for?',
+ part1:'Britannica states that agriculture accounts for this share of global freshwater withdrawals. For 100 points.',
+ part2:'For 50 points — 70 percent: Britannica\'s figure for agriculture\'s share of global freshwater withdrawals.'},
 
-  {id:'s09',topic:'Sudan',source:'ACRC',answer:'Khartoum',alternates:['khartoum city'],
-   tossup:`This city sits at the confluence of the Blue Nile and White Nile rivers. It is part of a tri-city metropolitan area that also includes Omdurman and the district of Bahri, also known as Khartoum North. It served as Sudan's capital and became a central battleground in the 2023 civil war. For 10 points — name this Sudanese capital.`,
-   part1:`This Sudanese capital at the Blue Nile–White Nile confluence forms a tri-city area with Omdurman and Bahri. For 100 points — name it.`,
-   part2:`For 50 points — Khartoum: Sudan's capital at the confluence of the Blue and White Nile rivers.`},
+{id:'w17',topic:'Water',source:'Britannica',
+ answer:'virtual water',alternates:['embedded water','hidden water'],
+ tossup:'What term, coined by Tony Allan, refers to the water embedded in food and other products during their production?',
+ part1:'Tony Allan coined this term for water that is embedded invisibly in goods during production. For 100 points.',
+ part2:'For 50 points — virtual water: Tony Allan\'s term for water embedded in products during production.'},
 
-  {id:'s10',topic:'Sudan',source:'PBS NewsHour',answer:'3',alternates:['three'],
-   tossup:`PBS NewsHour reported that Sudan is home to this many UNESCO World Heritage Sites, all of which are under threat from the ongoing civil war. These sites include the ancient pyramids of Meroe, which outnumber Egypt's pyramids in total count. For 10 points — give the number of UNESCO World Heritage Sites in Sudan.`,
-   part1:`Sudan has this many UNESCO World Heritage Sites, including the pyramids of Meroe, all threatened by the civil war. For 100 points — give the number.`,
-   part2:`For 50 points — 3: the number of UNESCO World Heritage Sites in Sudan, including the Meroe pyramids.`},
+{id:'w18',topic:'Water',source:'Britannica',
+ answer:'Tony Allan',alternates:['john anthony allan','j. a. allan'],
+ tossup:'According to Britannica, which economist coined the term "virtual water" in the 1990s?',
+ part1:'This economist, working in the 1990s, coined the concept of "virtual water" to describe water embedded in traded goods. For 100 points.',
+ part2:'For 50 points — Tony Allan: the economist who coined the term "virtual water."'},
 
-  // ── HOUSING INEQUALITY ──
-  {id:'h01',topic:'Housing',source:'WashU',answer:'redlining',alternates:['red lining'],
-   tossup:`Beginning in the 1930s, the Home Owners' Loan Corporation created color-coded maps that outlined certain neighborhoods — predominantly Black ones — in red, marking them as too risky for mortgage lending. Washington University researchers studying St. Louis housing inequality identify this practice as foundational to the city's racial wealth gap. For 10 points — name this discriminatory mapping practice.`,
-   part1:`The HOLC in the 1930s colored Black neighborhoods red on maps to deny them mortgages — a WashU-studied foundation of St. Louis's racial wealth gap. For 100 points — name this practice.`,
-   part2:`For 50 points — redlining: the HOLC practice of outlining minority neighborhoods in red to deny mortgage lending.`},
+{id:'w19',topic:'Water',source:'Britannica',
+ answer:'Aral Sea',alternates:['the aral sea','aral'],
+ tossup:'According to Britannica, what body of water was once the fourth-largest lake in the world before Soviet irrigation projects caused it to shrink by over 90 percent?',
+ part1:'Soviet irrigation of cotton crops diverted two rivers away from this once-massive Central Asian lake. For 100 points — name it.',
+ part2:'For 50 points — the Aral Sea: once the world\'s fourth-largest lake, destroyed by Soviet irrigation.'},
 
-  {id:'h02',topic:'Housing',source:'WashU',answer:'Low-Income Housing Tax Credit',alternates:['lihtc','low income housing tax credit','housing tax credit'],
-   tossup:`Washington University housing researchers argue that this federal program, though designed to expand affordable housing, has paradoxically concentrated poverty by placing subsidized units in already low-income, racially segregated neighborhoods. Enacted in 1986, it remains the primary federal tool for incentivizing private affordable housing development. For 10 points — name this tax credit program, abbreviated LIHTC.`,
-   part1:`WashU researchers argue this 1986 federal program concentrates poverty by placing subsidized units in already-segregated neighborhoods. For 100 points — name it.`,
-   part2:`For 50 points — the Low-Income Housing Tax Credit or LIHTC: the 1986 federal program criticized by WashU for concentrating poverty.`},
+{id:'w20',topic:'Water',source:'Britannica',
+ answer:'Amu Darya and Syr Darya',alternates:['amu darya','syr darya','amu darya syr darya'],
+ tossup:'According to Britannica, which two rivers were diverted by Soviet irrigation projects, causing the Aral Sea to shrink?',
+ part1:'The Aral Sea shrank after Soviet projects diverted these two feeder rivers for cotton irrigation. For 100 points — name them.',
+ part2:'For 50 points — the Amu Darya and Syr Darya: the rivers diverted from the Aral Sea.'},
 
-  {id:'h03',topic:'Housing',source:'WashU',answer:'subsidized housing',alternates:['public housing','affordable housing','subsidized'],
-   tossup:`A Washington University study on St. Louis housing concluded that the city's approach to this type of housing is "still separate and unequal," echoing the language of Brown v. Board of Education. Rather than integrating residents into areas of opportunity, WashU researchers found that it systematically exacerbates racial and economic segregation. For 10 points — name this type of government-assisted housing that WashU calls "still separate and unequal."`,
-   part1:`A WashU study used the phrase "still separate and unequal" to describe St. Louis's approach to this type of housing. For 100 points — name it.`,
-   part2:`For 50 points — subsidized housing: what WashU researchers call "still separate and unequal" in St. Louis.`},
+// CFR
+{id:'w21',topic:'Water',source:'CFR',
+ answer:'3 to 4 billion',alternates:['three to four billion','3-4 billion','four billion','three billion'],
+ tossup:'According to the CFR, how many people experience severe water scarcity for at least one month per year?',
+ part1:'The CFR reports this many people — roughly 40 to 50 percent of the global population — face severe water scarcity at least one month per year. For 100 points.',
+ part2:'For 50 points — 3 to 4 billion: the CFR\'s estimate of people facing severe seasonal water scarcity.'},
 
-  {id:'h04',topic:'Housing',source:'CDA',answer:'Community Development Administration',alternates:['cda','community development admin'],
-   tossup:`This City of St. Louis agency is responsible for administering housing and community development programs, including managing federal block grants and overseeing affordable housing initiatives. It operates under the city's mayor's office and is central to St. Louis's efforts to address housing inequality. For 10 points — name this St. Louis city agency, abbreviated CDA.`,
-   part1:`This St. Louis city agency, abbreviated CDA, administers federal housing grants and affordable housing programs under the mayor's office. For 100 points — name it.`,
-   part2:`For 50 points — the Community Development Administration: St. Louis's city agency overseeing housing and community development.`},
+{id:'w22',topic:'Water',source:'CFR',
+ answer:'water stress',alternates:['water stressed'],
+ tossup:'According to the CFR, what condition occurs when demand for water exceeds the available supply?',
+ part1:'The CFR defines this condition as occurring when demand exceeds available water supply. For 100 points.',
+ part2:'For 50 points — water stress: the CFR term for when demand exceeds available water supply.'},
 
-  {id:'h05',topic:'Housing',source:'Reimagining St. Louis',answer:'St. Louis Realtors Association',alternates:['st louis realtors','stl realtors','realtors association'],
-   tossup:`This organization authored the 2024 "Reimagining St. Louis" report, which analyzed housing market trends, neighborhood revitalization opportunities, and strategies to reverse population decline in the city. The report highlighted vacant properties and structural disinvestment as key challenges. For 10 points — name this organization that published the 2024 Reimagining St. Louis report.`,
-   part1:`This organization published the 2024 Reimagining St. Louis report on housing, vacancy, and population decline. For 100 points — name it.`,
-   part2:`For 50 points — the St. Louis Realtors Association: author of the 2024 Reimagining St. Louis housing report.`},
+// ST. LOUIS GOV
+{id:'w23',topic:'Water',source:'St. Louis Gov',
+ answer:'Mississippi River and Missouri River',alternates:['mississippi and missouri','mississippi river','missouri river'],
+ tossup:'According to the St. Louis Gov source, which two rivers does the City of St. Louis draw its drinking water from?',
+ part1:'St. Louis draws its drinking water from two rivers — one of which is the longest in the US. For 100 points — name both.',
+ part2:'For 50 points — the Mississippi River and Missouri River: the two sources of St. Louis\'s drinking water.'},
 
-  {id:'h06',topic:'Housing',source:'WashU',answer:'Section 8',alternates:['housing choice vouchers','housing choice voucher','section eight','vouchers'],
-   tossup:`Washington University researchers point out a critical flaw in this federal rental assistance program: even though recipients can theoretically use their vouchers anywhere, landlords in high-opportunity, low-poverty areas frequently refuse to accept them, undermining the program's stated goal of giving low-income families access to better neighborhoods. For 10 points — name this federal rental assistance program, also called Housing Choice Vouchers.`,
-   part1:`WashU notes that landlords in good neighborhoods often refuse to accept this federal rental subsidy, also called Housing Choice Vouchers. For 100 points — name it.`,
-   part2:`For 50 points — Section 8 or Housing Choice Vouchers: the federal rental assistance program landlords in affluent areas often refuse.`},
+{id:'w24',topic:'Water',source:'St. Louis Gov',
+ answer:'Chain of Rocks and Howard Bend',alternates:['chain of rocks','howard bend'],
+ tossup:'According to the St. Louis Gov source, what are the names of the two water treatment plants serving the City of St. Louis?',
+ part1:'St. Louis operates two water treatment facilities named after local landmarks. For 100 points — name them.',
+ part2:'For 50 points — Chain of Rocks and Howard Bend: the two St. Louis water treatment plants.'},
 
-  {id:'h07',topic:'Housing',source:'Reimagining St. Louis',answer:'population decline',alternates:['depopulation','population loss','declining population'],
-   tossup:`The 2024 Reimagining St. Louis report highlights this ongoing trend as a root cause of the city's housing challenges. St. Louis peaked at approximately 856,000 residents in 1950 and has since fallen to fewer than 300,000 — less than 35% of its peak — leaving behind vast stretches of vacant land and aging infrastructure. For 10 points — name this demographic trend central to St. Louis's housing challenges.`,
-   part1:`St. Louis peaked at 856,000 residents in 1950 and has fallen below 300,000 — the Reimagining report cites this trend as a root housing challenge. For 100 points — name it.`,
-   part2:`For 50 points — population decline: the trend that dropped St. Louis from 856,000 in 1950 to under 300,000 today.`},
+// CHANNEL 5 NEWS
+{id:'w25',topic:'Water',source:'Channel 5 News',
+ answer:'1 million',alternates:['one million','a million','1,000,000'],
+ tossup:'According to Channel 5 News, what population was St. Louis\'s water system originally built to serve?',
+ part1:'Channel 5 News reports that St. Louis built its water infrastructure to serve this many people. For 100 points.',
+ part2:'For 50 points — 1 million: the population St. Louis\'s water system was built to serve, per Channel 5 News.'},
 
-  // ── SEERAH ──
-  {id:'sr01',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Year of Sorrow',alternates:['aam al-huzn','am al huzn','year of grief','aam ul huzn'],
-   tossup:`This name was given to the tenth year of the Prophet Muhammad's mission, during which he suffered the deaths of his most beloved wife Khadijah and his protective uncle Abu Talib within weeks of each other. The Prophet himself gave this Arabic name — Aam al-Huzn — to this devastating year. For 10 points — give the English name of this year, the saddest in the Prophet's life before Hijrah.`,
-   part1:`The Prophet named the tenth year of his mission Aam al-Huzn after losing Khadijah and Abu Talib within weeks. For 100 points — give the English name.`,
-   part2:`For 50 points — the Year of Sorrow: the Prophet's name for the tenth year of his mission, marked by the deaths of Khadijah and Abu Talib.`},
+{id:'w26',topic:'Water',source:'Channel 5 News',
+ answer:'fewer than 300,000',alternates:['under 300,000','less than 300000','about 300000'],
+ tossup:'According to Channel 5 News, approximately how many people actually use St. Louis\'s water system today?',
+ part1:'Channel 5 News reports that despite being built for a million, only this many people use St. Louis\'s water system now. For 100 points.',
+ part2:'For 50 points — fewer than 300,000: the number of people currently served by St. Louis\'s water system.'},
 
-  {id:'sr02',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Thaqif',alternates:['banu thaqif','thaqeef'],
-   tossup:`Following the Year of Sorrow, the Prophet Muhammad traveled to the city of Ta'if seeking support from this tribe. Their three leaders — Abd Yalil, Mas'ud, and Habib — rejected him mockingly, and the tribe's youth pelted him with stones, wounding his feet. For 10 points — name this tribe of Ta'if that stoned the Prophet when he sought their support.`,
-   part1:`The Prophet sought support from this Ta'if tribe; their three leaders Abd Yalil, Mas'ud, and Habib mocked him and their youth stoned him. For 100 points — name the tribe.`,
-   part2:`For 50 points — Thaqif: the tribe of Ta'if whose leaders rejected the Prophet and whose youth stoned him.`},
+{id:'w27',topic:'Water',source:'Channel 5 News',
+ answer:'population decline',alternates:['depopulation','loss of population','shrinking population'],
+ tossup:'According to Channel 5 News, what demographic trend has left St. Louis\'s water system dramatically oversized for its current users?',
+ part1:'Channel 5 News identifies this trend — the city losing two-thirds of its peak residents — as the reason St. Louis\'s water system is financially strained. For 100 points.',
+ part2:'For 50 points — population decline: the trend Channel 5 News blames for St. Louis\'s oversized, underfunded water system.'},
 
-  {id:'sr03',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Addas',alternates:['addas the slave'],
-   tossup:`After the stoning at Ta'if, the Prophet rested in an orchard belonging to Utbah and Shaybah ibn Rabi'ah. Their Christian slave, originally from Nineveh in present-day Iraq, brought him grapes. When the Prophet mentioned the Prophet Yunus — Jonah — this slave recognized him as a prophet and accepted Islam. For 10 points — name this Christian slave from Nineveh who accepted Islam after the Ta'if incident.`,
-   part1:`This Christian slave from Nineveh served the Prophet grapes in Ta'if, recognized him through the mention of Yunus, and accepted Islam. For 100 points — name him.`,
-   part2:`For 50 points — Addas: the Christian slave from Nineveh who accepted Islam after the Prophet mentioned Yunus.`},
 
-  {id:'sr04',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 20',answer:'Angel of the Mountains',alternates:['angel of mountains','malak al jibal','mountain angel'],
-   tossup:`After the brutal experience at Ta'if, the Angel Jibreel appeared to the Prophet alongside this entity, who introduced himself and offered to crush the people of Ta'if between two mountains — the Akhshabayn — as divine punishment. The Prophet declined, expressing hope that their descendants would one day embrace Islam. For 10 points — name this angel who offered to destroy Ta'if by collapsing mountains upon it.`,
-   part1:`This angel appeared after Ta'if and offered to crush the city between the Akhshabayn mountains; the Prophet declined. For 100 points — name this angel.`,
-   part2:`For 50 points — the Angel of the Mountains: the one who offered to destroy Ta'if, refused by the Prophet.`},
+// ════════════════════════════════════════════════════════
+//  SUDAN
+// ════════════════════════════════════════════════════════
 
-  {id:'sr05',topic:'Seerah',source:'Dr. Yasir Qadhi Eps. 21-23',answer:'Buraq',alternates:['al-buraq','buraaq'],
-   tossup:`During the Night Journey and Ascension, the Prophet Muhammad was brought this heavenly mount, described as white, larger than a donkey but smaller than a mule, whose stride reached the furthest point its eye could see. Its name comes from the Arabic word for lightning. It carried the Prophet from Mecca to Jerusalem at the start of the Isra. For 10 points — name this heavenly steed of the Night Journey.`,
-   part1:`This white heavenly steed named for the Arabic word for lightning carried the Prophet from Mecca to Jerusalem during the Isra. For 100 points — name it.`,
-   part2:`For 50 points — Buraq: the lightning-named heavenly mount that carried the Prophet to Jerusalem.`},
+// PBS NewsHour
+{id:'s01',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Geoff Bennett',alternates:['geoff bennett'],
+ tossup:'According to the PBS NewsHour source, who is the anchor and broadcaster who introduced the segment on Sudan\'s cultural heritage?',
+ part1:'This PBS NewsHour anchor opened the segment on Sudan\'s cultural heritage crisis. For 100 points — name him.',
+ part2:'For 50 points — Geoff Bennett: the PBS NewsHour anchor who introduced the Sudan cultural heritage segment.'},
 
-  {id:'sr06',topic:'Seerah',source:'Dr. Yasir Qadhi Eps. 21-23',answer:'Bayt al-Maʿmur',alternates:['bayt al mamur','bait al mamur','heavenly kabah','al-bayt al-mamur'],
-   tossup:`During the Miraj, the Prophet Muhammad was shown this structure in the seventh heaven, directly above the Ka'bah in Mecca. The Prophet Ibrahim was found leaning against it. Every day, 70,000 angels enter it to worship, and those who enter never return — so great is the endless supply of angels. For 10 points — name this heavenly Ka'bah in the seventh heaven.`,
-   part1:`The Prophet saw this seventh-heaven structure directly above the Ka'bah, against which Ibrahim leaned, visited by 70,000 new angels daily. For 100 points — name it.`,
-   part2:`For 50 points — Bayt al-Ma'mur: the heavenly Ka'bah in the seventh heaven, visited daily by 70,000 angels who never return.`},
+{id:'s02',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Jeffrey Brown',alternates:['jeffrey brown'],
+ tossup:'Who is the PBS NewsHour senior arts correspondent who reported the segment on Sudan\'s cultural heritage?',
+ part1:'This PBS NewsHour senior arts correspondent filed the report on Sudan\'s cultural losses. For 100 points.',
+ part2:'For 50 points — Jeffrey Brown: the senior arts correspondent who reported the Sudan cultural heritage piece.'},
 
-  {id:'sr07',topic:'Seerah',source:'Dr. Yasir Qadhi Eps. 21-23',answer:'50 prayers',alternates:['fifty prayers','fifty salah','50 salah','fifty salat'],
-   tossup:`During the Miraj, Allah initially ordained this number of daily prayers for the Muslim community. As the Prophet descended, Prophet Musa repeatedly advised him to return and request a reduction, arguing that his people could not bear such a burden. Through multiple returns, the number was reduced to five — which still carries the reward of the original figure. For 10 points — give the original number of daily prayers ordained during the Miraj before Musa's intercession.`,
-   part1:`Allah initially ordained this many daily prayers during the Miraj; Musa's repeated advice led to their reduction to five. For 100 points — give the original number.`,
-   part2:`For 50 points — 50 prayers: the original number ordained in the Miraj, reduced to 5 through Musa's advice.`},
+{id:'s03',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Canvas',alternates:['canvas series'],
+ tossup:'According to the PBS NewsHour source, what is the name of the arts and culture series on which the Sudan segment aired?',
+ part1:'The Sudan cultural heritage report aired on this PBS NewsHour arts and culture series. For 100 points.',
+ part2:'For 50 points — Canvas: the PBS NewsHour arts series that aired the Sudan cultural heritage report.'},
 
-  {id:'sr08',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 71',answer:'Heraclius',alternates:['heraclitus','heraklius'],
-   tossup:`This Byzantine emperor received a letter from the Prophet Muhammad inviting him to Islam, delivered by Dihyah al-Kalbi. He responded by summoning Abu Sufyan — then still an enemy of the Muslims — and questioning him about the Prophet's character and lineage. His private responses suggested he believed Muhammad was a true prophet, but political pressure prevented him from converting. For 10 points — name this Byzantine emperor who received the Prophet's letter.`,
-   part1:`This Byzantine emperor received the Prophet's letter via Dihyah al-Kalbi and questioned Abu Sufyan about Muhammad. For 100 points — name him.`,
-   part2:`For 50 points — Heraclius: the Byzantine emperor who received the Prophet's letter and privately questioned Abu Sufyan.`},
+{id:'s04',topic:'Sudan',source:'PBS NewsHour',
+ answer:'150,000',alternates:['150000','one hundred fifty thousand','about 150,000'],
+ tossup:'According to PBS NewsHour, approximately how many people have been killed in Sudan\'s civil war?',
+ part1:'PBS NewsHour reports this many deaths in Sudan\'s civil war, alongside nearly 13 million displaced. For 100 points.',
+ part2:'For 50 points — 150,000: the PBS NewsHour estimate of people killed in Sudan\'s civil war.'},
 
-  {id:'sr09',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 71',answer:'Khosrow',alternates:['kisra','khusrow','khosrau','chosroes'],
-   tossup:`In stark contrast to Heraclius, this Persian emperor tore up the Prophet Muhammad's letter of invitation to Islam. The Prophet reportedly predicted that his kingdom would be torn up similarly — a prediction that came true when his own son Shirawayh assassinated him and Persia's power subsequently collapsed. For 10 points — name this Persian emperor, also called Kisra, who tore the Prophet's letter.`,
-   part1:`This Persian emperor, also called Kisra, tore the Prophet's letter and was later killed by his own son. For 100 points — name him.`,
-   part2:`For 50 points — Khosrow or Kisra: the Persian emperor who tore the Prophet's letter and was killed by his own son.`},
+{id:'s05',topic:'Sudan',source:'PBS NewsHour',
+ answer:'nearly 13 million',alternates:['13 million','almost 13 million'],
+ tossup:'According to PBS NewsHour, approximately how many people have been forced from their homes in Sudan\'s civil war?',
+ part1:'PBS NewsHour reports this many people displaced — the world\'s largest displacement crisis — alongside 150,000 deaths. For 100 points.',
+ part2:'For 50 points — nearly 13 million: the PBS NewsHour figure for people displaced by Sudan\'s civil war.'},
 
-  {id:'sr10',topic:'Seerah',source:'Dr. Yasir Qadhi Ep. 72',answer:'Umrah al-Qadah',alternates:['umrat al qadah','umra al qadha','makeup umrah','compensatory umrah','umrah qadha'],
-   tossup:`This makeup Umrah was performed by the Prophet Muhammad in the month of Dhul-Qa'dah of 7 AH, fulfilling the terms of the Treaty of Hudaybiyyah which had forced the Muslims to turn back the previous year. The Quraysh evacuated Mecca for three days to allow the Muslims to perform it. During this visit, the Prophet also married Maymunah bint al-Harith. For 10 points — name this compensatory Umrah performed in 7 AH.`,
-   part1:`In Dhul-Qa'dah 7 AH, the Prophet performed this makeup Umrah per the Treaty of Hudaybiyyah; the Quraysh vacated Mecca for 3 days. For 100 points — name it.`,
-   part2:`For 50 points — Umrah al-Qadah: the makeup Umrah in 7 AH during which the Quraysh vacated Mecca and the Prophet married Maymunah.`},
+{id:'s06',topic:'Sudan',source:'PBS NewsHour',
+ answer:'third year',alternates:['third','year three','its third year'],
+ tossup:'According to PBS NewsHour, Sudan\'s civil war, which began April 2023, was in what year at the time of the broadcast?',
+ part1:'The PBS NewsHour segment describes Sudan\'s civil war as being "in its" what, when it aired? For 100 points.',
+ part2:'For 50 points — third year: PBS NewsHour described Sudan\'s civil war as being in its third year at broadcast time.'},
 
-  // ── CURRENT EVENTS ──
-  {id:'c01',topic:'Current Events',source:'2026',answer:'FIFA World Cup 2026',alternates:['world cup 2026','2026 world cup','fifa world cup','world cup'],
-   tossup:`This sporting tournament officially kicked off on June 11, 2026, hosted jointly by the United States, Canada, and Mexico. For the first time, it features an expanded format of 48 teams, up from the previous 32, making it the largest World Cup in history by team count. For 10 points — name this 2026 international football tournament.`,
-   part1:`This June 11, 2026 tournament hosted by the US, Canada, and Mexico is the first FIFA World Cup with 48 teams. For 100 points — name it.`,
-   part2:`For 50 points — the 2026 FIFA World Cup: the first 48-team World Cup, hosted jointly by the United States, Canada, and Mexico.`},
+{id:'s07',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Christopher Tounsel',alternates:['tounsel'],
+ tossup:'According to PBS NewsHour, what is the name of the University of Washington historian who studies Sudan and appeared in the segment?',
+ part1:'This University of Washington historian appeared on PBS NewsHour to provide historical context on Sudan\'s civil war and cultural heritage. For 100 points.',
+ part2:'For 50 points — Christopher Tounsel: the University of Washington historian featured on the PBS NewsHour Sudan segment.'},
 
-  {id:'c02',topic:'Current Events',source:'2026',answer:'Mark Carney',alternates:['carney'],
-   tossup:`This former governor of both the Bank of Canada and the Bank of England became Canada's Prime Minister after Justin Trudeau announced his resignation in January 2025. He led the Liberal Party to victory in the subsequent federal election. For 10 points — name this Canadian Prime Minister who succeeded Trudeau.`,
-   part1:`This former Bank of Canada and Bank of England governor succeeded Justin Trudeau as Canadian Prime Minister. For 100 points — name him.`,
-   part2:`For 50 points — Mark Carney: the former central bank governor who became Canadian Prime Minister after Trudeau's resignation.`},
+{id:'s08',topic:'Sudan',source:'PBS NewsHour',
+ answer:'hellscape',alternates:['a hellscape'],
+ tossup:'According to PBS NewsHour, what specific word did Christopher Tounsel use to describe the situation in Sudan?',
+ part1:'Historian Christopher Tounsel used this one-word description for Sudan during the PBS NewsHour segment. For 100 points.',
+ part2:'For 50 points — hellscape: the word Christopher Tounsel used to describe Sudan\'s situation on PBS NewsHour.'},
 
-  {id:'c03',topic:'Current Events',source:'2026',answer:'Department of Government Efficiency',alternates:['doge','d.o.g.e.'],
-   tossup:`This advisory body was established early in Donald Trump's second term with Elon Musk as a key figure, tasked with identifying and eliminating wasteful federal spending. It generated significant controversy over its legal authority and access to government systems. For 10 points — name this body, abbreviated DOGE.`,
-   part1:`Elon Musk led this Trump second-term advisory body tasked with cutting federal waste, abbreviated DOGE. For 100 points — name it in full.`,
-   part2:`For 50 points — the Department of Government Efficiency or DOGE: Trump's second-term initiative led by Elon Musk.`},
+{id:'s09',topic:'Sudan',source:'PBS NewsHour',
+ answer:'cultural heritage provides legitimacy to nation-states',
+ alternates:['legitimacy','cultural heritage is legitimacy','nation state legitimacy'],
+ tossup:'According to Christopher Tounsel on PBS NewsHour, why did the Rapid Support Forces target Sudan\'s museums?',
+ part1:'Tounsel explained the RSF targeted museums because cultural heritage is a foundational part of how nation-states do what? For 100 points.',
+ part2:'For 50 points — cultural heritage provides legitimacy to nation-states: Tounsel\'s explanation of why museums were targeted.'},
 
-  {id:'c04',topic:'Current Events',source:'2026',answer:'Pope Leo XIV',alternates:['leo xiv','robert prevost','robert francis prevost','pope leo'],
-   tossup:`Elected in May 2025, this man became the first American-born pope in the history of the Catholic Church. Born Robert Francis Prevost, he had served as a bishop in Peru and later as Prefect of the Dicastery for Bishops at the Vatican before his historic election. For 10 points — name this American-born pope who took the name Leo XIV.`,
-   part1:`Born Robert Francis Prevost, this man elected in May 2025 became the first American-born pope, taking the name Leo XIV. For 100 points — name him.`,
-   part2:`For 50 points — Pope Leo XIV, born Robert Francis Prevost: the first American-born pope, elected May 2025.`},
+{id:'s10',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Habab Idriss Ahmed',alternates:['habab','habab idriss'],
+ tossup:'According to PBS NewsHour, who is the senior inspector at Sudan\'s National Corporation for Antiquities and Museums who fled to Scotland in 2023?',
+ part1:'This government archaeologist and senior inspector fled Sudan in 2023 and appeared on PBS NewsHour from Scotland. For 100 points.',
+ part2:'For 50 points — Habab Idriss Ahmed: the senior inspector at Sudan\'s National Corporation for Antiquities and Museums.'},
 
-  {id:'c05',topic:'Current Events',source:'2026',answer:'Donald Trump',alternates:['trump','donald j trump'],
-   tossup:`This individual was inaugurated as the 47th President of the United States on January 20, 2025, making him only the second person in American history to serve two non-consecutive presidential terms. His second administration has pursued major shifts in trade policy, immigration enforcement, and executive power. For 10 points — name this current U.S. president.`,
-   part1:`Inaugurated January 20, 2025 as the 47th president, this man became only the second to serve two non-consecutive terms. For 100 points — name him.`,
-   part2:`For 50 points — Donald Trump: the 47th U.S. president inaugurated January 20, 2025, serving his second non-consecutive term.`},
+{id:'s11',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Scotland',alternates:['the uk','united kingdom'],
+ tossup:'According to PBS NewsHour, where did Habab Idriss Ahmed flee to after the fighting began in 2023?',
+ part1:'Habab Idriss Ahmed fled Sudan\'s civil war to this country in 2023. For 100 points.',
+ part2:'For 50 points — Scotland: where Habab Idriss Ahmed fled after the 2023 civil war fighting erupted.'},
+
+{id:'s12',topic:'Sudan',source:'PBS NewsHour',
+ answer:'National Corporation for Antiquities and Museums',alternates:['ncam','national corporation antiquities museums'],
+ tossup:'According to PBS NewsHour, what is the name of the Sudanese government agency responsible for overseeing the country\'s cultural sites?',
+ part1:'Jeffrey Brown describes this as the government agency overseeing Sudan\'s cultural sites, where Habab Idriss Ahmed works. For 100 points.',
+ part2:'For 50 points — the National Corporation for Antiquities and Museums: Sudan\'s government agency overseeing cultural sites.'},
+
+{id:'s13',topic:'Sudan',source:'PBS NewsHour',
+ answer:'100,000',alternates:['100000','one hundred thousand','some 100,000'],
+ tossup:'According to PBS NewsHour, approximately how many artifacts did Sudan\'s National Museum house before the war?',
+ part1:'The Sudan National Museum housed this many artifacts before the civil war, per PBS NewsHour. For 100 points.',
+ part2:'For 50 points — 100,000: the number of artifacts Sudan\'s National Museum housed before the war.'},
+
+{id:'s14',topic:'Sudan',source:'PBS NewsHour',
+ answer:'3',alternates:['three'],
+ tossup:'According to PBS NewsHour, how many UNESCO World Heritage Sites does Sudan have?',
+ part1:'PBS NewsHour states Sudan has this many UNESCO World Heritage Sites, all under threat. For 100 points.',
+ part2:'For 50 points — 3: the number of UNESCO World Heritage Sites in Sudan, per PBS NewsHour.'},
+
+{id:'s15',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Nubian',alternates:['nubian collection'],
+ tossup:'According to PBS NewsHour, Sudan\'s National Museum housed one of the largest collections of what kind of artifacts in the world?',
+ part1:'PBS NewsHour describes the Sudan National Museum\'s collection as one of the largest of this type in the world. For 100 points.',
+ part2:'For 50 points — Nubian: Sudan National Museum\'s collection is one of the largest Nubian collections in the world.'},
+
+{id:'s16',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Reem Aljeally',alternates:['aljeally','reem al-jeally'],
+ tossup:'According to PBS NewsHour, who is the Sudanese visual artist and curator, now living in Cairo, whose work focuses on women in Sudan?',
+ part1:'This displaced Sudanese artist and curator now based in Cairo focuses her work on the lives of women in Sudan. For 100 points.',
+ part2:'For 50 points — Reem Aljeally: the Sudanese visual artist and curator in Cairo featured on PBS NewsHour.'},
+
+{id:'s17',topic:'Sudan',source:'PBS NewsHour',
+ answer:'Sudan Art Archive',alternates:['the sudan art archive','art archive'],
+ tossup:'According to PBS NewsHour, what did Reem Aljeally start before the war to document contemporary Sudanese art?',
+ part1:'Before the war, Reem Aljeally founded this digital database to document contemporary Sudanese artwork. For 100 points.',
+ part2:'For 50 points — the Sudan Art Archive: the digital database Reem Aljeally started to document contemporary Sudanese art.'},
+
+{id:'s18',topic:'Sudan',source:'PBS NewsHour',
+ answer:'virtual museum',alternates:['a virtual museum','online museum'],
+ tossup:'According to PBS NewsHour, what is Habab Idriss Ahmed working to create to document the lost collection of the Sudan National Museum?',
+ part1:'Habab Idriss Ahmed described her project to rebuild the Sudan National Museum\'s collection in this digital format. For 100 points.',
+ part2:'For 50 points — a virtual museum: what Habab Idriss Ahmed is building to document the Sudan National Museum\'s lost collection.'},
+
+{id:'s19',topic:'Sudan',source:'PBS NewsHour',
+ answer:'stalemate',alternates:['a stalemate'],
+ tossup:'According to PBS NewsHour, how do observers now describe the state of Sudan\'s civil war in terms of military progress?',
+ part1:'PBS NewsHour reports that observers now describe Sudan\'s civil war as this — with no end in sight. For 100 points.',
+ part2:'For 50 points — stalemate: how observers describe Sudan\'s civil war according to PBS NewsHour.'},
+
+// CFR / Sudan
+{id:'s20',topic:'Sudan',source:'CFR',
+ answer:'Omar al-Bashir',alternates:['bashir','al-bashir'],
+ tossup:'According to the CFR source, who was the longtime Sudanese dictator whose 2019 downfall set off the chain of events leading to civil war?',
+ part1:'The CFR identifies this Sudanese dictator, who ruled for roughly 30 years, as the figure whose 2019 downfall preceded the civil war. For 100 points.',
+ part2:'For 50 points — Omar al-Bashir: the longtime Sudanese dictator whose 2019 downfall set the stage for civil war.'},
+
+{id:'s21',topic:'Sudan',source:'CFR',
+ answer:'Rapid Support Forces',alternates:['rsf','rapid support force'],
+ tossup:'According to the CFR, what is the full name of the paramilitary group — abbreviated RSF — that fought Sudan\'s Armed Forces beginning April 15, 2023?',
+ part1:'The CFR describes this paramilitary organization, which grew from the Janjaweed, as one of the two main combatants in Sudan\'s civil war. For 100 points — give its full name.',
+ part2:'For 50 points — the Rapid Support Forces: the paramilitary abbreviated RSF that fought the Sudanese Armed Forces.'},
+
+{id:'s22',topic:'Sudan',source:'CFR',
+ answer:'April 15, 2023',alternates:['april 2023','april 15 2023'],
+ tossup:'According to the CFR, on what date did fighting between the Sudanese Armed Forces and the Rapid Support Forces break out?',
+ part1:'The CFR gives this specific date as when the Sudan civil war began between the SAF and RSF. For 100 points.',
+ part2:'For 50 points — April 15, 2023: the CFR\'s date for the start of fighting between the SAF and RSF.'},
+
+{id:'s23',topic:'Sudan',source:'CFR',
+ answer:'Mohamed Hamdan Dagalo',alternates:['hemedti','dagalo','hamdan dagalo'],
+ tossup:'According to the CFR, who is the leader of the Rapid Support Forces, known by the nickname Hemedti?',
+ part1:'The CFR names this leader of the RSF, who goes by the nickname Hemedti. For 100 points.',
+ part2:'For 50 points — Mohamed Hamdan Dagalo, known as Hemedti: the RSF leader per the CFR.'},
+
+{id:'s24',topic:'Sudan',source:'CFR',
+ answer:'Janjaweed',alternates:['the janjaweed','janjaweed militia'],
+ tossup:'According to the CFR, what militia did the Rapid Support Forces grow out of?',
+ part1:'The CFR traces the RSF\'s origins to this militia that operated in Darfur. For 100 points.',
+ part2:'For 50 points — the Janjaweed: the militia from which the Rapid Support Forces grew, per the CFR.'},
+
+// Khartoum / ACRC
+{id:'s25',topic:'Sudan',source:'Khartoum / ACRC',
+ answer:'Blue Nile and White Nile',alternates:['the blue nile and white nile','white nile blue nile'],
+ tossup:'According to the Khartoum ACRC report, at the confluence of which two rivers is the city of Khartoum located?',
+ part1:'The ACRC Khartoum report describes the city as sitting at the meeting point of these two rivers. For 100 points.',
+ part2:'For 50 points — the Blue Nile and White Nile: the two rivers that meet at Khartoum per the ACRC report.'},
+
+{id:'s26',topic:'Sudan',source:'Khartoum / ACRC',
+ answer:'Omdurman and Khartoum North',alternates:['omdurman','khartoum north','bahri','omdurman and bahri'],
+ tossup:'According to the ACRC Khartoum report, what two cities alongside Khartoum make up the tri-city metropolitan area?',
+ part1:'The ACRC report describes Khartoum as part of a tri-city area that includes these two other cities. For 100 points.',
+ part2:'For 50 points — Omdurman and Khartoum North (also called Bahri): the cities in the Khartoum tri-city area.'},
+
+// Britannica / Darfur
+{id:'s27',topic:'Sudan',source:'Britannica',
+ answer:'home of the Fur',alternates:['land of the fur','dar fur means home of the fur'],
+ tossup:'According to Britannica, what does the name "Darfur" mean in Arabic?',
+ part1:'Britannica explains that the name "Darfur" translates to this phrase in Arabic, referring to the region\'s largest ethnic group. For 100 points.',
+ part2:'For 50 points — "Home of the Fur": the meaning of Darfur\'s name, referring to the Fur people.'},
+
+{id:'s28',topic:'Sudan',source:'Britannica',
+ answer:'Fur',alternates:['the fur','fur people'],
+ tossup:'According to Britannica, who are the largest ethnic group in Darfur, for whom the region is named?',
+ part1:'Britannica states the region of Darfur is named for this ethnic group, its largest. For 100 points.',
+ part2:'For 50 points — the Fur: the ethnic group Darfur is named for, per Britannica.'},
+
+{id:'s29',topic:'Sudan',source:'Britannica',
+ answer:'2003',alternates:['year 2003','the year 2003'],
+ tossup:'According to Britannica, in what year did the major conflict involving the Janjaweed militia begin in Darfur?',
+ part1:'Britannica dates the start of the Darfur conflict involving the Janjaweed to this year. For 100 points.',
+ part2:'For 50 points — 2003: the year Britannica gives for the start of the Darfur conflict.'},
+
+{id:'s30',topic:'Sudan',source:'Britannica',
+ answer:'western Sudan',alternates:['west sudan','western'],
+ tossup:'According to Britannica, in what region of Sudan is Darfur located?',
+ part1:'Britannica places Darfur in this region of Sudan. For 100 points.',
+ part2:'For 50 points — western Sudan: where Britannica says Darfur is located.'},
+
+
+// ════════════════════════════════════════════════════════
+//  HOUSING INEQUALITY
+// ════════════════════════════════════════════════════════
+
+// WashU
+{id:'h01',topic:'Housing',source:'WashU',
+ answer:'still separate and unequal',alternates:['separate and unequal'],
+ tossup:'What phrase does the WashU article use in its title to describe how subsidized housing operates in the United States?',
+ part1:'The WashU article\'s title uses this phrase — echoing Brown v. Board — to describe subsidized housing. For 100 points.',
+ part2:'For 50 points — "still separate and unequal": the phrase in the WashU article title about subsidized housing.'},
+
+{id:'h02',topic:'Housing',source:'WashU',
+ answer:'redlining',alternates:['red lining'],
+ tossup:'According to WashU research, what was the practice of outlining minority neighborhoods in red on maps to deny them mortgage lending called?',
+ part1:'WashU research identifies this discriminatory 1930s practice of color-coding maps to deny mortgages to minority neighborhoods. For 100 points.',
+ part2:'For 50 points — redlining: the practice WashU identifies as foundational to racial housing inequality.'},
+
+{id:'h03',topic:'Housing',source:'WashU',
+ answer:'Low-Income Housing Tax Credit',alternates:['lihtc','low income housing tax credit'],
+ tossup:'According to WashU research, what federal program enacted in 1986 was designed to expand affordable housing but has been criticized for concentrating poverty?',
+ part1:'WashU research criticizes this 1986 federal tax credit program for concentrating poverty in already-segregated neighborhoods. For 100 points.',
+ part2:'For 50 points — the Low-Income Housing Tax Credit, or LIHTC: the 1986 program WashU says concentrates poverty.'},
+
+{id:'h04',topic:'Housing',source:'WashU',
+ answer:'1986',alternates:['nineteen eighty six'],
+ tossup:'According to WashU research, in what year was the Low-Income Housing Tax Credit enacted?',
+ part1:'WashU research notes that the Low-Income Housing Tax Credit was enacted in this year. For 100 points.',
+ part2:'For 50 points — 1986: the year the Low-Income Housing Tax Credit was enacted, per WashU.'},
+
+{id:'h05',topic:'Housing',source:'WashU',
+ answer:'Section 8',alternates:['housing choice vouchers','housing choice voucher program','section eight'],
+ tossup:'According to WashU research, what federal rental assistance program allows low-income households to choose where they live, but is undercut because landlords in high-opportunity areas often refuse to accept it?',
+ part1:'WashU research points out that landlords in good neighborhoods often refuse to accept this federal rental subsidy, limiting housing mobility. For 100 points.',
+ part2:'For 50 points — Section 8, also called Housing Choice Vouchers: the program WashU says is undermined by landlord refusal.'},
+
+{id:'h06',topic:'Housing',source:'WashU',
+ answer:'Home Owners Loan Corporation',alternates:['holc','home owners\' loan corporation'],
+ tossup:'According to WashU research, what federal agency created the color-coded maps in the 1930s that institutionalized redlining?',
+ part1:'WashU traces redlining\'s origins to the color-coded maps created by this 1930s federal agency. For 100 points.',
+ part2:'For 50 points — the Home Owners\' Loan Corporation, or HOLC: the agency whose maps institutionalized redlining.'},
+
+// CDA
+{id:'h07',topic:'Housing',source:'CDA',
+ answer:'Community Development Administration',alternates:['cda'],
+ tossup:'According to the CDA source, what is the full name of the St. Louis city agency that administers housing and community development programs?',
+ part1:'This St. Louis city agency, abbreviated CDA, is responsible for administering housing programs and federal block grants. For 100 points.',
+ part2:'For 50 points — the Community Development Administration: the St. Louis city agency abbreviated CDA.'},
+
+{id:'h08',topic:'Housing',source:'CDA',
+ answer:'2020 to 2024',alternates:['2020-2024','twenty twenty to twenty twenty four'],
+ tossup:'According to the CDA source, what time period does the CDA Impact Report cover?',
+ part1:'The CDA Impact Report on St. Louis neighborhoods covers this five-year time span. For 100 points.',
+ part2:'For 50 points — 2020 to 2024: the period covered by the CDA Impact Report.'},
+
+{id:'h09',topic:'Housing',source:'CDA',
+ answer:'Empowering Developing and Transforming St. Louis Neighborhoods',
+ alternates:['empowering developing transforming'],
+ tossup:'According to the CDA source, what is the full subtitle of the CDA Impact Report?',
+ part1:'The CDA Impact Report\'s full subtitle includes these three action words about St. Louis neighborhoods. For 100 points.',
+ part2:'For 50 points — Empowering, Developing, and Transforming St. Louis Neighborhoods: the CDA Impact Report subtitle.'},
+
+// Reimagining St. Louis
+{id:'h10',topic:'Housing',source:'Reimagining St. Louis',
+ answer:'St. Louis Realtors Association',alternates:['stl realtors','st louis realtors'],
+ tossup:'According to the Reimagining St. Louis source, which organization published the 2024 Reimagining St. Louis report?',
+ part1:'This real estate industry organization published the 2024 Reimagining St. Louis report on housing and population. For 100 points.',
+ part2:'For 50 points — the St. Louis Realtors Association: the publisher of the 2024 Reimagining St. Louis report.'},
+
+{id:'h11',topic:'Housing',source:'Reimagining St. Louis',
+ answer:'856,000',alternates:['856000','eight hundred fifty six thousand','approximately 856,000'],
+ tossup:'According to the Reimagining St. Louis report, what was St. Louis\'s peak population?',
+ part1:'The Reimagining St. Louis report cites this figure as St. Louis\'s peak population, reached in 1950. For 100 points.',
+ part2:'For 50 points — 856,000: the Reimagining St. Louis report\'s figure for St. Louis\'s peak population.'},
+
+{id:'h12',topic:'Housing',source:'Reimagining St. Louis',
+ answer:'1950',alternates:['nineteen fifty'],
+ tossup:'According to the Reimagining St. Louis report, in what decade did St. Louis reach its peak population?',
+ part1:'The Reimagining St. Louis report identifies this year as St. Louis\'s peak population year. For 100 points.',
+ part2:'For 50 points — 1950: the year St. Louis reached its peak population of 856,000, per the report.'},
+
+{id:'h13',topic:'Housing',source:'Reimagining St. Louis',
+ answer:'fewer than 300,000',alternates:['under 300,000','less than 300,000','about 300000'],
+ tossup:'According to the Reimagining St. Louis report, what is St. Louis\'s approximate current population?',
+ part1:'The Reimagining St. Louis report states the city\'s current population is this — less than 35% of its 1950 peak. For 100 points.',
+ part2:'For 50 points — fewer than 300,000: St. Louis\'s approximate current population per the Reimagining report.'},
+
+{id:'h14',topic:'Housing',source:'Reimagining St. Louis',
+ answer:'vacant land and aging infrastructure',alternates:['vacant land','vacancy','abandoned properties','vacant properties'],
+ tossup:'According to the Reimagining St. Louis report, what two problems has population decline left behind in the city?',
+ part1:'The Reimagining St. Louis report says population decline has left these two main physical legacies in the city. For 100 points.',
+ part2:'For 50 points — vacant land and aging infrastructure: the legacies of population decline identified in the Reimagining report.'},
+
+{id:'h15',topic:'Housing',source:'WashU',
+ answer:'exacerbates racial and economic segregation',alternates:['exacerbates segregation','worsens segregation','increases segregation'],
+ tossup:'According to WashU research, what does the current system of subsidized housing in St. Louis systematically do to racial and economic inequality?',
+ part1:'WashU research concludes that St. Louis\'s subsidized housing system does this to racial and economic segregation, rather than reducing it. For 100 points.',
+ part2:'For 50 points — exacerbates racial and economic segregation: WashU\'s conclusion about subsidized housing in St. Louis.'},
+
+
+// ════════════════════════════════════════════════════════
+//  SEERAH
+// ════════════════════════════════════════════════════════
+
+// Episode 20 – Ta'if
+{id:'sr01',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Year of Sorrow',alternates:['aam al-huzn','am al huzn','year of grief'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, what is the English name for the tenth year of the Prophet\'s mission, which the Prophet himself named Aam al-Huzn?',
+ part1:'Dr. Yasir Qadhi describes this year — the tenth of prophethood — as so devastating the Prophet named it Aam al-Huzn. For 100 points — give the English name.',
+ part2:'For 50 points — the Year of Sorrow: the English name for Aam al-Huzn, the tenth year of the Prophet\'s mission.'},
+
+{id:'sr02',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'tenth',alternates:['10th','year ten','10'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, the Year of Sorrow occurred in what year of the Prophet\'s prophethood?',
+ part1:'The Year of Sorrow — Aam al-Huzn — fell in this numbered year of the Prophet\'s mission. For 100 points.',
+ part2:'For 50 points — the tenth year: when the Year of Sorrow occurred in the Prophet\'s prophethood.'},
+
+{id:'sr03',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Khadijah and Abu Talib',alternates:['abu talib and khadijah','khadijah','abu talib'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, which two people closest to the Prophet died during the Year of Sorrow?',
+ part1:'Dr. Qadhi describes the Year of Sorrow as marked by the deaths of the Prophet\'s wife and his uncle — name both. For 100 points.',
+ part2:'For 50 points — Khadijah and Abu Talib: the Prophet\'s wife and uncle who died during the Year of Sorrow.'},
+
+{id:'sr04',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Thaqif',alternates:['banu thaqif','thaqeef'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, which tribe did the Prophet visit in Ta\'if seeking support after the Year of Sorrow?',
+ part1:'Dr. Qadhi describes the Prophet traveling to Ta\'if to seek support from this tribe after the Year of Sorrow. For 100 points.',
+ part2:'For 50 points — Thaqif: the tribe of Ta\'if whose leaders rejected the Prophet and whose youth stoned him.'},
+
+{id:'sr05',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Abd Yalil, Mas\'ud, and Habib',alternates:['abd yalil','masud','habib','abd yalil masud habib'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, who were the three leaders of the tribe of Thaqif who rejected the Prophet at Ta\'if?',
+ part1:'Dr. Qadhi names these three leaders of Thaqif who mockingly rejected the Prophet\'s call at Ta\'if. For 100 points.',
+ part2:'For 50 points — Abd Yalil, Mas\'ud, and Habib: the three Thaqif leaders who rejected the Prophet at Ta\'if.'},
+
+{id:'sr06',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'stoned him and made his feet bleed',alternates:['stoned','pelted with rocks','made his feet bleed','blood covered his feet'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, what did the youth of Thaqif do to the Prophet as he left Ta\'if?',
+ part1:'After the Thaqif leaders rejected the Prophet, their youth did this to him as he left — causing him to bleed. For 100 points.',
+ part2:'For 50 points — stoned him, making his feet bleed: what the youth of Thaqif did to the Prophet as he left Ta\'if.'},
+
+{id:'sr07',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Addas',alternates:[],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, what is the name of the Christian slave from Nineveh who recognized the Prophet and accepted Islam after the Ta\'if incident?',
+ part1:'Dr. Qadhi describes this Christian slave from Nineveh who brought the Prophet grapes in an orchard after Ta\'if, then accepted Islam. For 100 points.',
+ part2:'For 50 points — Addas: the Christian slave from Nineveh who accepted Islam after the Ta\'if incident.'},
+
+{id:'sr08',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Nineveh',alternates:['nineveh iraq'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, what city was Addas originally from?',
+ part1:'The slave Addas who accepted Islam after Ta\'if was originally from this ancient city. For 100 points.',
+ part2:'For 50 points — Nineveh: the city Addas was from, which the Prophet also mentioned when discussing Yunus.'},
+
+{id:'sr09',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Yunus',alternates:['prophet yunus','jonah','prophet jonah'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, when the Prophet mentioned which prophet\'s name did Addas recognize him as a true prophet?',
+ part1:'Addas recognized the Prophet as true when he mentioned this prophet — who was from Addas\'s home city of Nineveh. For 100 points.',
+ part2:'For 50 points — Yunus (Jonah): the prophet whose mention caused Addas to recognize Muhammad as a prophet.'},
+
+{id:'sr10',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Angel of the Mountains',alternates:['malak al jibal','mountain angel','angel of mountains'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, what entity appeared alongside Jibreel after the Ta\'if incident and offered to destroy the city?',
+ part1:'Dr. Qadhi describes this figure, who appeared with Jibreel after Ta\'if and offered to crush the city between two mountains. For 100 points.',
+ part2:'For 50 points — the Angel of the Mountains: the one who offered to destroy Ta\'if, refused by the Prophet.'},
+
+{id:'sr11',topic:'Seerah',source:'Ep. 20 – Ta\'if',
+ answer:'Akhshabayn',alternates:['the akhshabayn','two mountains of mecca'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 20, what are the two mountains the Angel of the Mountains offered to collapse onto the people of Ta\'if?',
+ part1:'The Angel of the Mountains offered to bring these two mountains crashing onto Ta\'if. For 100 points — name them.',
+ part2:'For 50 points — the Akhshabayn: the two mountains the Angel of Mountains offered to collapse onto Ta\'if.'},
+
+// Episodes 21-23 – Isra and Miraj
+{id:'sr12',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Isra',alternates:['the isra','al-isra'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, what is the Arabic term for the Night Journey from Mecca to Jerusalem?',
+ part1:'Dr. Qadhi explains that this Arabic term refers to the Prophet\'s miraculous night journey from Mecca to Jerusalem. For 100 points.',
+ part2:'For 50 points — the Isra: the Arabic name for the Night Journey from Mecca to Jerusalem.'},
+
+{id:'sr13',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Miraj',alternates:['the miraj','al-miraj','miraj ascension'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, what is the Arabic term for the Prophet\'s ascension from Jerusalem through the seven heavens?',
+ part1:'Dr. Qadhi distinguishes this event — the ascension through the heavens — from the Isra, which was the earthly journey. For 100 points.',
+ part2:'For 50 points — the Miraj: the ascension from Jerusalem through the heavens.'},
+
+{id:'sr14',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Buraq',alternates:['al-buraq','buraaq'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, what was the name of the heavenly mount — white in color and named after the Arabic word for lightning — that carried the Prophet from Mecca to Jerusalem?',
+ part1:'Dr. Qadhi describes this heavenly animal, named from the Arabic word for lightning, that transported the Prophet during the Isra. For 100 points.',
+ part2:'For 50 points — Buraq: the heavenly mount named after lightning that carried the Prophet to Jerusalem.'},
+
+{id:'sr15',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'lightning',alternates:['barq','the arabic word for lightning'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, what does the name "Buraq" derive from in Arabic?',
+ part1:'Dr. Qadhi notes the name Buraq comes from this Arabic word, reflecting the animal\'s incredible speed. For 100 points.',
+ part2:'For 50 points — lightning: the meaning of the Arabic root from which "Buraq" is derived.'},
+
+{id:'sr16',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Masjid al-Aqsa',alternates:['al aqsa','al-aqsa mosque','aqsa'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, what mosque in Jerusalem did the Prophet arrive at and lead the other prophets in prayer during the Isra?',
+ part1:'Dr. Qadhi describes the Prophet arriving at this Jerusalem mosque and leading all the assembled prophets in prayer. For 100 points.',
+ part2:'For 50 points — Masjid al-Aqsa: the Jerusalem mosque where the Prophet led the prophets in prayer during the Isra.'},
+
+{id:'sr17',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Bayt al-Maʿmur',alternates:['bayt al mamur','bait al mamur','al-bayt al-mamur'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, what is the name of the heavenly Ka\'bah located in the seventh heaven, directly above the Ka\'bah in Mecca?',
+ part1:'Dr. Qadhi describes this structure in the seventh heaven as directly above the Ka\'bah, visited by 70,000 new angels every day who never return. For 100 points.',
+ part2:'For 50 points — Bayt al-Ma\'mur: the heavenly Ka\'bah in the seventh heaven visited by 70,000 angels daily.'},
+
+{id:'sr18',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Ibrahim',alternates:['prophet ibrahim','abraham'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, which prophet was found leaning against Bayt al-Maʿmur in the seventh heaven?',
+ part1:'Dr. Qadhi notes that the Prophet found this patriarch leaning against Bayt al-Ma\'mur in the seventh heaven. For 100 points.',
+ part2:'For 50 points — Ibrahim: the prophet found leaning against Bayt al-Ma\'mur in the seventh heaven.'},
+
+{id:'sr19',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'70,000',alternates:['seventy thousand','70000'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, how many angels enter Bayt al-Maʿmur each day — never to return?',
+ part1:'Dr. Qadhi states this many angels enter Bayt al-Ma\'mur daily, and they never return because the supply of angels is endless. For 100 points.',
+ part2:'For 50 points — 70,000: the number of angels that enter Bayt al-Ma\'mur daily, never to return.'},
+
+{id:'sr20',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Sidrat al-Muntaha',alternates:['sidrat al muntaha','the lote tree','lote tree'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, what is the name of the lote tree at the furthest boundary of creation that the Prophet passed during the Miraj?',
+ part1:'Dr. Qadhi describes this lote tree as marking the furthest boundary, beyond which no creation had ever gone before the Prophet. For 100 points.',
+ part2:'For 50 points — Sidrat al-Muntaha: the lote tree at the furthest boundary that the Prophet passed during the Miraj.'},
+
+{id:'sr21',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'50 prayers',alternates:['fifty prayers','fifty salat','fifty salah','50 salah'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, how many daily prayers were originally ordained by Allah during the Miraj?',
+ part1:'Dr. Qadhi describes Allah originally ordaining this many daily prayers during the Miraj, before reductions through Musa\'s advice. For 100 points.',
+ part2:'For 50 points — 50 prayers: the original number ordained during the Miraj before Musa advised the Prophet to seek reductions.'},
+
+{id:'sr22',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'Musa',alternates:['prophet musa','moses','prophet moses'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, which prophet repeatedly advised the Prophet Muhammad to return to Allah and ask for a reduction in the number of daily prayers?',
+ part1:'Dr. Qadhi describes this prophet, encountered during the Miraj, who kept sending the Prophet back to Allah to reduce the prayer count. For 100 points.',
+ part2:'For 50 points — Musa: the prophet who advised the reduction of prayers during the Miraj.'},
+
+{id:'sr23',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'milk',alternates:['the milk'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, when the Prophet was offered milk, wine, and honey during the Miraj, which did he choose?',
+ part1:'During the Miraj, the Prophet was offered three drinks and chose this one — a choice Jibreel said confirmed he was on the fitrah. For 100 points.',
+ part2:'For 50 points — milk: what the Prophet chose when offered milk, wine, and honey during the Miraj.'},
+
+{id:'sr24',topic:'Seerah',source:'Eps. 21–23 – Isra & Miraj',
+ answer:'fitrah',alternates:['natural disposition','natural inclination','al-fitrah'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episodes 21–23, when the Prophet chose milk over wine, Jibreel said this choice confirmed he was on what?',
+ part1:'Jibreel told the Prophet that choosing milk confirmed he was on the fitrah — what does that term mean? For 100 points.',
+ part2:'For 50 points — fitrah: the natural human disposition that Jibreel said the Prophet\'s choice of milk confirmed.'},
+
+// Episode 71 – Letters to Rulers
+{id:'sr25',topic:'Seerah',source:'Ep. 71 – Letters to Rulers',
+ answer:'Dihyah al-Kalbi',alternates:['dihyah','dihya al kalbi'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 71, who was the companion the Prophet sent to deliver his letter to Heraclius?',
+ part1:'Dr. Qadhi identifies this companion as the one tasked with delivering the Prophet\'s letter to the Byzantine emperor. For 100 points.',
+ part2:'For 50 points — Dihyah al-Kalbi: the companion who delivered the Prophet\'s letter to Heraclius.'},
+
+{id:'sr26',topic:'Seerah',source:'Ep. 71 – Letters to Rulers',
+ answer:'Heraclius',alternates:['heraclius of byzantium','heraklius'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 71, which Byzantine emperor received the Prophet\'s letter of invitation to Islam?',
+ part1:'Dr. Qadhi describes this Byzantine emperor receiving the Prophet\'s letter via Dihyah al-Kalbi. For 100 points.',
+ part2:'For 50 points — Heraclius: the Byzantine emperor who received the Prophet\'s letter of invitation to Islam.'},
+
+{id:'sr27',topic:'Seerah',source:'Ep. 71 – Letters to Rulers',
+ answer:'Abu Sufyan',alternates:['abu sufyan ibn harb'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 71, who did Heraclius summon and question about the Prophet Muhammad after receiving his letter?',
+ part1:'Heraclius summoned this Qurayshi leader — still an enemy of Islam at the time — to question him about the Prophet. For 100 points.',
+ part2:'For 50 points — Abu Sufyan: the man Heraclius questioned about the Prophet after receiving his letter.'},
+
+{id:'sr28',topic:'Seerah',source:'Ep. 71 – Letters to Rulers',
+ answer:'Khosrow',alternates:['kisra','khusrow','khosrau','chosroes','persian emperor'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 71, which Persian emperor tore up the Prophet\'s letter and was later killed by his own son?',
+ part1:'Dr. Qadhi contrasts Heraclius with this Persian emperor, also called Kisra, who tore the Prophet\'s letter and was later killed by his son Shirawayh. For 100 points.',
+ part2:'For 50 points — Khosrow, also called Kisra: the Persian emperor who tore the Prophet\'s letter and was killed by his own son.'},
+
+{id:'sr29',topic:'Seerah',source:'Ep. 71 – Letters to Rulers',
+ answer:'Shirawayh',alternates:['shiroe','his son','shirawaih'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 71, who killed Khosrow the Persian emperor?',
+ part1:'Dr. Qadhi notes that Khosrow, who tore the Prophet\'s letter, was killed by this person — a fulfillment of the Prophet\'s prediction. For 100 points.',
+ part2:'For 50 points — Shirawayh: Khosrow\'s own son who killed him, fulfilling the Prophet\'s prediction.'},
+
+{id:'sr30',topic:'Seerah',source:'Ep. 71 – Letters to Rulers',
+ answer:'Negus',alternates:['najashi','the negus of abyssinia','ashama ibn abjar'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 71, what was the title of the Abyssinian king who received a letter from the Prophet and is believed to have accepted Islam?',
+ part1:'Dr. Qadhi discusses this Abyssinian monarch who accepted Islam in secret, distinguishing him from Heraclius and Khosrow. For 100 points — give his title.',
+ part2:'For 50 points — the Negus (or Najashi): the Abyssinian king who received the Prophet\'s letter and accepted Islam.'},
+
+{id:'sr31',topic:'Seerah',source:'Ep. 71 – Letters to Rulers',
+ answer:'Muqawqis',alternates:['al-muqawqis','muqauqis'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 71, what was the name of the Egyptian ruler who received the Prophet\'s letter, sent gifts, but did not accept Islam?',
+ part1:'Dr. Qadhi describes this Egyptian ruler as honoring the Prophet\'s letter with gifts but ultimately not accepting Islam. For 100 points.',
+ part2:'For 50 points — Muqawqis: the Egyptian ruler who sent the Prophet gifts but did not accept Islam.'},
+
+// Episode 72 – Umrah al-Qadah
+{id:'sr32',topic:'Seerah',source:'Ep. 72 – Umrah al-Qadah',
+ answer:'Umrah al-Qadah',alternates:['umrat al qadah','umra al qadha','makeup umrah','compensatory umrah'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 72, what is the name of the makeup Umrah the Prophet performed in 7 AH to compensate for being turned back the previous year?',
+ part1:'Dr. Qadhi explains this makeup Umrah, which the Prophet performed in Dhul-Qa\'dah of 7 AH per the Treaty of Hudaybiyyah. For 100 points.',
+ part2:'For 50 points — Umrah al-Qadah: the makeup Umrah performed in 7 AH per the Treaty of Hudaybiyyah.'},
+
+{id:'sr33',topic:'Seerah',source:'Ep. 72 – Umrah al-Qadah',
+ answer:'Treaty of Hudaybiyyah',alternates:['hudaybiyyah','treaty of hudaibiyya'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 72, what treaty stipulated that the Prophet and the Muslims could return to Mecca one year later to perform a makeup Umrah?',
+ part1:'Dr. Qadhi explains that the terms of this treaty allowed the Muslims to perform Umrah al-Qadah. For 100 points.',
+ part2:'For 50 points — the Treaty of Hudaybiyyah: the agreement that allowed the makeup Umrah one year later.'},
+
+{id:'sr34',topic:'Seerah',source:'Ep. 72 – Umrah al-Qadah',
+ answer:'Dhul-Qaʿdah',alternates:['dhul qadah','dhul qa dah','the month of dhul qadah'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 72, in what Islamic month was Umrah al-Qadah performed?',
+ part1:'Dr. Qadhi specifies that Umrah al-Qadah took place in this Islamic month of 7 AH. For 100 points.',
+ part2:'For 50 points — Dhul-Qa\'dah: the Islamic month in which Umrah al-Qadah was performed.'},
+
+{id:'sr35',topic:'Seerah',source:'Ep. 72 – Umrah al-Qadah',
+ answer:'three days',alternates:['3 days','three'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 72, for how many days did the Quraysh evacuate Mecca to allow the Muslims to perform Umrah al-Qadah?',
+ part1:'Under the terms of Hudaybiyyah, the Quraysh evacuated Mecca for this many days for Umrah al-Qadah. For 100 points.',
+ part2:'For 50 points — three days: the number of days the Quraysh vacated Mecca during Umrah al-Qadah.'},
+
+{id:'sr36',topic:'Seerah',source:'Ep. 72 – Umrah al-Qadah',
+ answer:'Maymunah bint al-Harith',alternates:['maymunah','maimunah','maymunah bint harith'],
+ tossup:'According to Dr. Yasir Qadhi\'s Episode 72, which woman did the Prophet marry during Umrah al-Qadah?',
+ part1:'Dr. Qadhi notes the Prophet married this woman during Umrah al-Qadah. For 100 points — name her.',
+ part2:'For 50 points — Maymunah bint al-Harith: the woman the Prophet married during Umrah al-Qadah.'},
+
+
+// ════════════════════════════════════════════════════════
+//  CURRENT EVENTS  (pyramid / tossup style)
+// ════════════════════════════════════════════════════════
+
+{id:'c01',topic:'Current Events',source:'2026',
+ answer:'FIFA World Cup 2026',alternates:['world cup 2026','2026 world cup','fifa world cup','the world cup'],
+ tossup:'This tournament — for the first time ever — expanded to 48 teams, with matches spread across stadiums in 16 cities across three nations. It opened on June 11, 2026 in Los Angeles, with the United States hosting the majority of games alongside its two North American neighbors. For 50 points: name this 2026 international football tournament.',
+ part1:'This historic sporting event, which kicked off June 11, 2026 in Los Angeles, is the first of its kind hosted jointly by three nations and the first to expand to 48 teams. For 100 points — name it.',
+ part2:'For 50 points: name this 2026 international football tournament, the first FIFA World Cup to feature 48 teams, hosted by the USA, Canada, and Mexico.'},
+
+{id:'c02',topic:'Current Events',source:'2026',
+ answer:'Mark Carney',alternates:['carney'],
+ tossup:'This person served as governor of both the Bank of Canada and the Bank of England before entering politics. After Justin Trudeau announced his resignation in early 2025, this man won the Liberal Party leadership and then led the party to victory in a general election, becoming Canada\'s Prime Minister. For 50 points: name this Canadian leader.',
+ part1:'This Canadian Prime Minister, formerly head of two major central banks, led the Liberal Party to victory after Trudeau\'s resignation. For 100 points — name him.',
+ part2:'For 50 points: name this Canadian Prime Minister who succeeded Justin Trudeau, formerly governor of both the Bank of Canada and the Bank of England.'},
+
+{id:'c03',topic:'Current Events',source:'2026',
+ answer:'Department of Government Efficiency',alternates:['doge','d.o.g.e.'],
+ tossup:'This advisory body was established in the early months of Donald Trump\'s second term and became one of the most controversial elements of his administration. Led in a prominent capacity by tech billionaire Elon Musk, it was tasked with identifying and eliminating wasteful federal spending and is known by a four-letter acronym. For 50 points: name this body.',
+ part1:'Led by Elon Musk during Trump\'s second term, this body was tasked with cutting federal waste and is known by a four-letter acronym. For 100 points — give its full name.',
+ part2:'For 50 points: name this Trump second-term initiative, abbreviated DOGE, associated with Elon Musk and federal budget cuts.'},
+
+{id:'c04',topic:'Current Events',source:'2026',
+ answer:'Pope Leo XIV',alternates:['leo xiv','robert prevost','robert francis prevost','pope leo'],
+ tossup:'This person was elected to his position in May 2025, making history as the first person born in the United States to hold it. Born Robert Francis Prevost, he previously served as a bishop in Peru and as Prefect of the Dicastery for Bishops at the Vatican before his historic election. For 50 points: name this religious leader.',
+ part1:'Born Robert Francis Prevost in Chicago, this person became the first American-born holder of his office when elected in May 2025. For 100 points — name him by his chosen name.',
+ part2:'For 50 points: name this first American-born pope, elected May 2025, born Robert Francis Prevost.'},
+
+{id:'c05',topic:'Current Events',source:'2026',
+ answer:'Donald Trump',alternates:['trump','donald j trump'],
+ tossup:'This person was inaugurated on January 20, 2025 as the 47th President of the United States, becoming only the second person in American history to serve two non-consecutive presidential terms. His second term has been marked by sweeping changes to trade policy, immigration enforcement, and executive branch structure. For 50 points: name this U.S. president.',
+ part1:'Inaugurated January 20, 2025 as the 47th president, this politician became only the second to serve two non-consecutive terms in US history. For 100 points — name him.',
+ part2:'For 50 points: name this U.S. president inaugurated January 20, 2025, serving his second non-consecutive term as the 47th president.'},
+
+{id:'c06',topic:'Current Events',source:'2026',
+ answer:'Friedrich Merz',alternates:['merz'],
+ tossup:'This leader of the Christian Democratic Union became Germany\'s Federal Chancellor in February 2026 following his party\'s victory in the federal election, ending years of Social Democrat-led coalition government. He took office amid significant debates over migration policy and Germany\'s economic future. For 50 points: name this German Chancellor.',
+ part1:'This CDU leader became German Chancellor in February 2026 after his party\'s victory in federal elections. For 100 points — name him.',
+ part2:'For 50 points: name this Chancellor of Germany who took office in February 2026 after leading the CDU to victory.'},
+
+{id:'c07',topic:'Current Events',source:'2026',
+ answer:'Claudia Sheinbaum',alternates:['sheinbaum'],
+ tossup:`This scientist and politician made history when she took office on October 1, 2024 as the first woman ever to serve as President of Mexico. A climate scientist and former mayor of Mexico City, she succeeded Andrés Manuel López Obrador and remained Mexico's president through the period covered by this topic. For 50 points: name her.`,
+ part1:`This former Mexico City mayor and climate scientist became Mexico's first female president on October 1, 2024. For 100 points — name her.`,
+ part2:`For 50 points: name Mexico's first female president, a climate scientist who took office October 1, 2024.`},
+
+{id:'c08',topic:'Current Events',source:'2026',
+ answer:'Yoon Suk-yeol',alternates:['yoon','yoon suk yeol'],
+ tossup:`This South Korean president shocked the world in December 2024 when he briefly declared martial law — a move quickly overturned by the National Assembly. He was subsequently impeached by the legislature, and South Korea's Constitutional Court upheld the impeachment in 2025, removing him from office. For 50 points: name this South Korean leader.`,
+ part1:`This South Korean president declared martial law in December 2024, was impeached by the National Assembly, and was removed by the Constitutional Court in 2025. For 100 points — name him.`,
+ part2:`For 50 points: name the South Korean president removed from office after declaring martial law in December 2024.`},
+
+{id:'c09',topic:'Current Events',source:'2026',
+ answer:'Ahmad al-Sharaa',alternates:['abu mohammad al-julani','al-julani','abu muhammad al julani','hayat tahrir al sham','hts'],
+ tossup:`This Syrian rebel leader, who once went by the alias Abu Mohammad al-Julani, led the Hayat Tahrir al-Sham coalition to a rapid military victory in December 2024, toppling Bashar al-Assad's government and sending him into exile in Russia. He then became the de facto leader of Syria's transitional government. For 50 points: name him.`,
+ part1:`This leader of HTS toppled Bashar al-Assad in December 2024 and became Syria's transitional leader; he formerly went by the name Abu Mohammad al-Julani. For 100 points — name him.`,
+ part2:`For 50 points: name the HTS leader who toppled Assad in December 2024, formerly known as Abu Mohammad al-Julani.`},
+
+{id:'c10',topic:'Current Events',source:'2026',
+ answer:'Gaza ceasefire',alternates:['israel hamas ceasefire','hamas israel ceasefire','ceasefire in gaza','january 2026 ceasefire'],
+ tossup:`This agreement, brokered by Qatar and Egypt, was announced in January 2026 between Israel and Hamas, pausing fighting in the Gaza Strip that had continued since the October 7, 2023 attacks. It involved a phased exchange of hostages and prisoners and drew global attention as the conflict entered its third year. For 50 points: name this agreement.`,
+ part1:`Brokered by Qatar and Egypt, this January 2026 agreement paused fighting between Israel and Hamas in the Gaza Strip, involving a phased prisoner and hostage exchange. For 100 points — name it.`,
+ part2:`For 50 points: name the January 2026 ceasefire agreement between Israel and Hamas, brokered by Qatar and Egypt.`},
+
+{id:'c11',topic:'Current Events',source:'2026',
+ answer:'Kamala Harris',alternates:['harris'],
+ tossup:`This person served as the 49th Vice President of the United States and became the first woman, first Black American, and first South Asian American to hold that office. She became the Democratic nominee for president in 2024 after Joe Biden dropped out, ultimately losing to Donald Trump in the November 2024 election. For 50 points: name her.`,
+ part1:`This former US Vice President became the Democratic presidential nominee in 2024 after Biden withdrew, but lost to Trump in November. For 100 points — name her.`,
+ part2:`For 50 points: name the first female US Vice President who ran as the Democratic presidential nominee in 2024 and lost to Donald Trump.`},
+
 ];
 
-// ─── MODES & STATE ───────────────────────────────────────────────────────────
-const M = { PRACTICE:'practice', R1:'round1', R23:'round23', FINALS:'finals' };
-const FR = { R1:'fr1', R2:'fr2', R3:'fr3' };
+// ── MODES ────────────────────────────────────────────────────────────────────
+const M = {PRACTICE:'practice', R1:'round1', R23:'round23', FINALS:'finals'};
+const FR = {R1:'fr1', R2:'fr2', R3:'fr3'};
 const J_VALS = [100, 200, 300, 400, 500];
 const TOPICS = ['Water','Sudan','Housing','Seerah','Current Events'];
 
-let mode = M.PRACTICE;
-let finRound = FR.R1;
-let blindMode = false;
-let revealed = false;
+let mode = M.PRACTICE, finRound = FR.R1;
+let blindMode = false, revealed = false;
 let score = 0, nRight = 0, nWrong = 0;
-
-let pool = [], poolIdx = 0, curQ = null;
+let pool = [], poolIdx = 0, curQ = null, curPts = 10;
 let waitingAns = false;
-let curPts = 10;
-
-// TTS
 let words = [], wordIdx = 0, utt = null;
 const synth = window.speechSynthesis;
-
-// STT
 let recog = null, heardFinal = '', autoSubTimer = null;
-
-// Timer
 let timerInterval = null, timerLeft = 0;
-
-// Board
 let boardUsed = {};
 
-// ─── DOM ────────────────────────────────────────────────────────────────────
-const qCard = document.getElementById('qCard');
-const qText = document.getElementById('qText');
-const qTopic = document.getElementById('qTopic');
-const qSource = document.getElementById('qSource');
-const qPts = document.getElementById('qPts');
-const qNum = document.getElementById('qNum');
-const blindBadge = document.getElementById('blindBadge');
-const phaseBadge = document.getElementById('phaseBadge');
-const buzzBtn = document.getElementById('buzzBtn');
-const ansRow = document.getElementById('ansRow');
-const ansInput = document.getElementById('ansInput');
-const ansTimer = document.getElementById('ansTimer');
-const submitBtn = document.getElementById('submitBtn');
-const feedback = document.getElementById('feedback');
-const fbMsg = document.getElementById('fbMsg');
-const fbReveal = document.getElementById('fbReveal');
-const navRow = document.getElementById('navRow');
-const micDot = document.getElementById('micDot');
-const statsBar = document.getElementById('statsBar');
-const boardWrap = document.getElementById('boardWrap');
-const boardGrid = document.getElementById('boardGrid');
-const blindPill = document.getElementById('blindPill');
-const part2Hint = document.getElementById('part2Hint');
-const part2Text = document.getElementById('part2Text');
-const finalsRow = document.getElementById('finalsRow');
-const hScore = document.getElementById('hScore');
-const hRight = document.getElementById('hRight');
-const hWrong = document.getElementById('hWrong');
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const qCard=$('qCard'), qText=$('qText'), qTopic=$('qTopic'), qSource=$('qSource'),
+      qPts=$('qPts'), qNum=$('qNum'), blindBadge=$('blindBadge'), phaseBadge=$('phaseBadge'),
+      buzzBtn=$('buzzBtn'), ansRow=$('ansRow'), ansInput=$('ansInput'),
+      ansTimer=$('ansTimer'), submitBtn=$('submitBtn'),
+      feedback=$('feedback'), fbMsg=$('fbMsg'), fbReveal=$('fbReveal'),
+      navRow=$('navRow'), micDot=$('micDot'), statsBar=$('statsBar'),
+      boardWrap=$('boardWrap'), boardGrid=$('boardGrid'),
+      blindPill=$('blindPill'), part2Hint=$('part2Hint'), part2Text=$('part2Text'),
+      finalsRow=$('finalsRow'), hScore=$('hScore'), hRight=$('hRight'), hWrong=$('hWrong');
 
-// ─── STORAGE ─────────────────────────────────────────────────────────────────
+// ── STORAGE ───────────────────────────────────────────────────────────────────
 function loadStorage() {
-  score = +localStorage.getItem('mist_score') || 0;
-  nRight = +localStorage.getItem('mist_right') || 0;
-  nWrong = +localStorage.getItem('mist_wrong') || 0;
-  boardUsed = JSON.parse(localStorage.getItem('mist_board') || '{}');
-  blindMode = localStorage.getItem('mist_blind') === '1';
-  updateBlindUI();
-  updateScoreUI();
+  score = +localStorage.getItem('mist_score')||0;
+  nRight = +localStorage.getItem('mist_right')||0;
+  nWrong = +localStorage.getItem('mist_wrong')||0;
+  boardUsed = JSON.parse(localStorage.getItem('mist_board')||'{}');
+  blindMode = localStorage.getItem('mist_blind')==='1';
+  updateBlindUI(); updateScoreUI();
 }
-
 function saveStorage() {
-  localStorage.setItem('mist_score', score);
-  localStorage.setItem('mist_right', nRight);
-  localStorage.setItem('mist_wrong', nWrong);
-  localStorage.setItem('mist_board', JSON.stringify(boardUsed));
-  localStorage.setItem('mist_blind', blindMode ? '1' : '0');
+  localStorage.setItem('mist_score',score);
+  localStorage.setItem('mist_right',nRight);
+  localStorage.setItem('mist_wrong',nWrong);
+  localStorage.setItem('mist_board',JSON.stringify(boardUsed));
+  localStorage.setItem('mist_blind',blindMode?'1':'0');
 }
 
-// ─── MODE BUTTONS ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    mode = btn.dataset.mode;
-    finalsRow.style.display = mode === M.FINALS ? '' : 'none';
-  });
+// ── BUTTONS ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); mode = b.dataset.mode;
+  finalsRow.style.display = mode===M.FINALS ? '' : 'none';
+}));
+document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.mode-btn[data-fin]').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); finRound = b.dataset.fin;
+}));
+$('blindBtn').addEventListener('click', () => { blindMode=!blindMode; updateBlindUI(); saveStorage(); });
+$('rulesBtn').addEventListener('click', () => { const r=$('rulesBox'); r.style.display=r.style.display==='none'?'':'none'; });
+$('startBtn').addEventListener('click', startSession);
+$('shuffleBtn').addEventListener('click', () => {
+  if (!pool.length) { startSession(); return; }
+  stopTTS(); clearTimer(); stopRecog();
+  pool = pool.sort(()=>Math.random()-.5); poolIdx = 0;
+  loadQuestion();
 });
-
-document.querySelectorAll('.mode-btn[data-fin]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    finRound = btn.dataset.fin;
-  });
-});
-
-document.getElementById('blindBtn').addEventListener('click', () => {
-  blindMode = !blindMode;
-  updateBlindUI();
-  saveStorage();
+$('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset all stats?')) return;
+  score=nRight=nWrong=0; boardUsed={};
+  saveStorage(); updateScoreUI();
 });
 
 function updateBlindUI() {
-  blindPill.textContent = blindMode ? 'ON' : 'OFF';
-  blindPill.className = 'pill ' + (blindMode ? 'on' : 'off');
+  blindPill.textContent = blindMode?'ON':'OFF';
+  blindPill.className = 'pill '+(blindMode?'on':'off');
 }
 
-document.getElementById('rulesBtn').addEventListener('click', () => {
-  const rb = document.getElementById('rulesBox');
-  rb.style.display = rb.style.display === 'none' ? '' : 'none';
-});
-
-// ─── START / RESET ────────────────────────────────────────────────────────────
-document.getElementById('startBtn').addEventListener('click', startSession);
-document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Reset all stats?')) return;
-  score = nRight = nWrong = 0;
-  boardUsed = {};
-  saveStorage();
-  updateScoreUI();
-});
-
+// ── SESSION ───────────────────────────────────────────────────────────────────
 function startSession() {
   stopTTS(); clearTimer();
-  const topicFilter = document.getElementById('topicSel').value;
-
-  if (mode === M.FINALS && finRound === FR.R3) {
-    buildBoard(topicFilter);
-    return;
-  }
-
-  let filtered = QB.filter(q => topicFilter === 'all' || q.topic === topicFilter || (topicFilter === 'Housing' && q.topic === 'Housing'));
-  pool = filtered.sort(() => Math.random() - .5);
-  poolIdx = 0;
+  const tf = $('topicSel').value;
+  if (mode===M.FINALS && finRound===FR.R3) { buildBoard(tf); return; }
+  let f = QB.filter(q => tf==='all' || q.topic===tf || (tf==='Housing' && q.topic==='Housing'));
+  pool = f.sort(()=>Math.random()-.5); poolIdx = 0;
   boardWrap.style.display = 'none';
+  $('qcount').textContent = pool.length + ' questions';
   loadQuestion();
 }
 
-// ─── JEOPARDY BOARD ───────────────────────────────────────────────────────────
-function buildBoard(topicFilter) {
-  boardWrap.style.display = '';
-  qCard.style.display = 'none';
-  buzzBtn.style.display = 'none';
-  ansRow.style.display = 'none';
-  feedback.style.display = 'none';
-  navRow.style.display = 'none';
-  part2Hint.style.display = 'none';
-  statsBar.style.display = '';
-  updateStatsBar();
-
-  boardGrid.innerHTML = '';
+// ── JEOPARDY ──────────────────────────────────────────────────────────────────
+function buildBoard(tf) {
+  boardWrap.style.display=''; qCard.style.display='none';
+  buzzBtn.style.display='none'; ansRow.style.display='none';
+  feedback.style.display='none'; navRow.style.display='none';
+  part2Hint.style.display='none'; statsBar.style.display=''; updateStatsBar();
+  boardGrid.innerHTML='';
   TOPICS.forEach(t => {
-    const h = document.createElement('div');
-    h.className = 'board-cell topic-header';
-    h.textContent = t;
+    const h=document.createElement('div'); h.className='board-cell topic-header'; h.textContent=t;
     boardGrid.appendChild(h);
   });
-
-  J_VALS.forEach(val => {
-    TOPICS.forEach(topic => {
-      const key = topic + '_' + val;
-      const cell = document.createElement('div');
-      cell.className = 'board-cell' + (boardUsed[key] ? ' used' : '');
-      cell.textContent = '$' + val;
-      cell.dataset.topic = topic;
-      cell.dataset.val = val;
-      if (!boardUsed[key]) {
-        cell.addEventListener('click', () => selectBoardCell(topic, val, key));
-      }
-      boardGrid.appendChild(cell);
-    });
-  });
+  J_VALS.forEach(val => TOPICS.forEach(topic => {
+    const key=topic+'_'+val, cell=document.createElement('div');
+    cell.className='board-cell'+(boardUsed[key]?' used':'');
+    cell.textContent='$'+val;
+    if (!boardUsed[key]) cell.addEventListener('click',()=>selectCell(topic,val,key));
+    boardGrid.appendChild(cell);
+  }));
+}
+function selectCell(topic,val,key) {
+  boardUsed[key]=true; saveStorage();
+  const c=QB.filter(q=>q.topic===topic||(topic==='Housing'&&q.topic==='Housing'));
+  if (!c.length) { alert('No questions!'); return; }
+  curQ=c[Math.floor(Math.random()*c.length)]; pool=[curQ]; poolIdx=1;
+  boardWrap.style.display='none'; loadQuestion(+val);
 }
 
-function selectBoardCell(topic, val, key) {
-  boardUsed[key] = true;
-  saveStorage();
-  const candidates = QB.filter(q => q.topic === topic || (topic === 'Housing' && q.topic === 'Housing'));
-  if (!candidates.length) { alert('No questions for this topic!'); return; }
-  curQ = candidates[Math.floor(Math.random() * candidates.length)];
-  pool = [curQ]; poolIdx = 1;
-  boardWrap.style.display = 'none';
-  loadQuestion(+val);
-}
-
-// ─── LOAD QUESTION ────────────────────────────────────────────────────────────
+// ── LOAD QUESTION ─────────────────────────────────────────────────────────────
 function loadQuestion(overridePts) {
   stopTTS(); clearTimer(); stopRecog();
-  revealed = false;
-  heardFinal = '';
-
-  if (!(mode === M.FINALS && finRound === FR.R3 && overridePts)) {
-    if (poolIdx >= pool.length) {
-      pool = pool.sort(() => Math.random() - .5);
-      poolIdx = 0;
-    }
-    curQ = pool[poolIdx++];
+  revealed=false; heardFinal='';
+  if (!(mode===M.FINALS && finRound===FR.R3 && overridePts)) {
+    if (poolIdx>=pool.length) { pool=pool.sort(()=>Math.random()-.5); poolIdx=0; }
+    curQ=pool[poolIdx++];
   }
-
-  curPts = overridePts || getBasePts();
-
-  qPts.textContent = curPts + ' pts';
-  qTopic.textContent = curQ.topic;
-  qSource.textContent = curQ.source;
-  qNum.textContent = pool.length > 1 ? `Q${poolIdx}/${pool.length}` : '';
-  blindBadge.style.display = blindMode ? '' : 'none';
-  phaseBadge.textContent = 'Reading…';
-  phaseBadge.className = 'phase-badge reading';
-  phaseBadge.style.display = '';
-
-  qCard.style.display = '';
-  buzzBtn.style.display = '';
-  ansRow.style.display = 'none';
-  feedback.style.display = 'none';
-  navRow.style.display = 'none';
-  part2Hint.style.display = 'none';
-  statsBar.style.display = '';
-  waitingAns = false;
-
-  buzzBtn.disabled = false;
-  buzzBtn.classList.remove('active');
-  buzzBtn.textContent = 'BUZZ   (or press Space)';
-
-  updateStatsBar();
-  renderQText();
-
-  // In MIST, judge reads point value first — announce it via TTS then read question
-  const preamble = `For ${curPts} points: `;
-  const questionText = getTossupText();
-  startTTS(preamble + questionText);
+  curPts=overridePts||getBasePts();
+  qPts.textContent=curPts+' pts'; qTopic.textContent=curQ.topic;
+  qSource.textContent=curQ.source;
+  qNum.textContent=pool.length>1?`${poolIdx}/${pool.length}`:'';
+  blindBadge.style.display=blindMode?'':'none';
+  phaseBadge.textContent='Reading…'; phaseBadge.className='phase-badge reading'; phaseBadge.style.display='';
+  qCard.style.display=''; buzzBtn.style.display='';
+  ansRow.style.display='none'; feedback.style.display='none';
+  navRow.style.display='none'; part2Hint.style.display='none';
+  statsBar.style.display=''; waitingAns=false;
+  buzzBtn.disabled=false; buzzBtn.classList.remove('active');
+  buzzBtn.textContent='BUZZ   (Space)';
+  updateStatsBar(); renderQText();
+  startTTS(`For ${curPts} points: ${getQText()}`);
 }
 
 function getBasePts() {
-  if (mode === M.PRACTICE) return 10;
-  if (mode === M.R1) return 100;
-  if (mode === M.R23) return 300;
-  if (mode === M.FINALS) {
-    if (finRound === FR.R1) return 100;
-    if (finRound === FR.R2) return 200;
-    return 300;
-  }
+  if (mode===M.PRACTICE) return 10;
+  if (mode===M.R1) return 100;
+  if (mode===M.R23) return 300;
+  if (mode===M.FINALS) return finRound===FR.R1?100:finRound===FR.R2?200:300;
   return 10;
 }
-
 function calcPenalty(pts) {
-  if (mode === M.PRACTICE) return 0;
-  if (mode === M.R1) return pts;
-  if (mode === M.R23) return Math.max(1, Math.round(pts * 0.1));
-  if (mode === M.FINALS) {
-    if (finRound === FR.R1) return 0;
-    return Math.max(1, Math.round(pts * 0.1));
-  }
+  if (mode===M.PRACTICE) return 0;
+  if (mode===M.R1) return pts;
+  if (mode===M.R23) return Math.max(1,Math.round(pts*.1));
+  if (mode===M.FINALS) return finRound===FR.R1?0:Math.max(1,Math.round(pts*.1));
   return 0;
 }
-
-// ─── TTS ──────────────────────────────────────────────────────────────────────
-function getTossupText() {
-  if (mode === M.R1) return (curQ.part1 || '') + ' ' + (curQ.part2 || '');
+function getQText() {
+  if (mode===M.R1) return (curQ.part1||'') + ' ' + (curQ.part2||'');
   return curQ.tossup;
 }
 
+// ── TTS ───────────────────────────────────────────────────────────────────────
 function startTTS(fullText) {
-  words = fullText.split(/\s+/);
-  wordIdx = 0;
-  renderQText();
-
-  utt = new SpeechSynthesisUtterance(fullText);
-  utt.rate = 1.05;
-  utt.onboundary = e => {
-    if (e.name !== 'word') return;
-    const ci = e.charIndex;
-    let counted = 0, w = 0;
-    for (let i = 0; i < words.length; i++) {
-      if (counted >= ci) { w = i; break; }
-      counted += words[i].length + 1;
-      w = i + 1;
+  words=fullText.split(/\s+/); wordIdx=0; renderQText();
+  utt=new SpeechSynthesisUtterance(fullText); utt.rate=1.05;
+  utt.onboundary=e => {
+    if (e.name!=='word') return;
+    const ci=e.charIndex; let counted=0, w=0;
+    for (let i=0;i<words.length;i++) {
+      if (counted>=ci){w=i;break;} counted+=words[i].length+1; w=i+1;
     }
-    wordIdx = w;
-    renderQText();
+    wordIdx=w; renderQText();
   };
-  utt.onend = () => {
-    phaseBadge.style.display = 'none';
-    if (!waitingAns) promptAnswer();
-  };
+  utt.onend=()=>{ phaseBadge.style.display='none'; if (!waitingAns) promptAnswer(); };
   synth.speak(utt);
 }
-
 function stopTTS() {
-  if (utt) { utt.onend = null; utt.onboundary = null; }
-  synth.cancel();
-  utt = null;
+  if (utt){utt.onend=null;utt.onboundary=null;} synth.cancel(); utt=null;
 }
 
 function renderQText() {
   if (blindMode && !revealed) {
-    qText.innerHTML = '<span class="blind-hint">🔊 Listening — buzz when you know the answer</span>';
+    qText.innerHTML='<span class="blind-hint">🔊 Listening — buzz when you know the answer</span>';
     return;
   }
-  // Show the question text portion only (skip preamble words like "For X points:")
-  const questionStart = words.findIndex((w, i) => {
-    const joined = words.slice(i, i+2).join(' ').toLowerCase();
-    return joined.match(/^(this|the|a |an |during|after|beginning|located|according|named|known|once|in\b)/);
-  });
-  const dispWords = questionStart > 0 ? words.slice(questionStart) : words;
-  const dispIdx = Math.max(0, wordIdx - (questionStart > 0 ? questionStart : 0));
-  const sp = esc(dispWords.slice(0, dispIdx).join(' '));
-  const un = esc(dispWords.slice(dispIdx).join(' '));
-  qText.innerHTML = `<span class="sp">${sp}</span>${un ? `<span class="un">${dispIdx > 0 ? ' ' : ''}${un}</span>` : ''}`;
+  // Skip "For X points:" preamble
+  let startIdx=0;
+  for (let i=0;i<Math.min(words.length,6);i++) {
+    if (words[i].endsWith(':')) { startIdx=i+1; break; }
+  }
+  const dw=words.slice(startIdx), di=Math.max(0,wordIdx-startIdx);
+  const sp=esc(dw.slice(0,di).join(' ')), un=esc(dw.slice(di).join(' '));
+  qText.innerHTML=`<span class="sp">${sp}</span>${un?`<span class="un">${di>0?' ':''}${un}</span>`:''}`;
 }
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ─── BUZZ ─────────────────────────────────────────────────────────────────────
+// ── BUZZ ──────────────────────────────────────────────────────────────────────
 buzzBtn.addEventListener('click', doBuzz);
-
 function doBuzz() {
   if (waitingAns) return;
-  stopTTS(); // Judge stops reading immediately
-  phaseBadge.textContent = 'Answering…';
-  phaseBadge.className = 'phase-badge answer';
-  phaseBadge.style.display = '';
+  stopTTS();
+  phaseBadge.textContent='Answering…'; phaseBadge.className='phase-badge answer'; phaseBadge.style.display='';
   promptAnswer();
 }
-
 function promptAnswer() {
-  waitingAns = true;
-  buzzBtn.disabled = true;
-  buzzBtn.classList.add('active');
-  buzzBtn.textContent = '🎙 Buzzed — answer now!';
-  ansRow.style.display = 'flex';
-  ansInput.value = '';
-  heardFinal = '';
-  ansInput.focus();
-  part2Hint.style.display = 'none';
-
-  if (mode === M.R1 && curQ.part2) {
-    part2Text.textContent = curQ.part2;
-    part2Hint.style.display = '';
-  }
-
-  startTimer(10);
-  startRecog();
+  waitingAns=true; buzzBtn.disabled=true; buzzBtn.classList.add('active');
+  buzzBtn.textContent='🎙 Buzzed — answer now!';
+  ansRow.style.display='flex'; ansInput.value=''; heardFinal=''; ansInput.focus();
+  if (mode===M.R1 && curQ.part2) { part2Text.textContent=curQ.part2; part2Hint.style.display=''; }
+  startTimer(10); startRecog();
 }
 
-// ─── TIMER ────────────────────────────────────────────────────────────────────
+// ── TIMER ─────────────────────────────────────────────────────────────────────
 function startTimer(s) {
-  clearTimer();
-  timerLeft = s;
-  ansTimer.textContent = timerLeft;
-  ansTimer.className = 'ans-timer';
-  timerInterval = setInterval(() => {
+  clearTimer(); timerLeft=s; ansTimer.textContent=timerLeft; ansTimer.className='ans-timer';
+  timerInterval=setInterval(()=>{
     timerLeft--;
-    if (timerLeft <= 0) {
-      ansTimer.textContent = '';
-      clearTimer();
-      if (waitingAns) { heardFinal = heardFinal || ansInput.value; submitAnswer(); }
-    } else {
-      ansTimer.textContent = timerLeft;
-      ansTimer.className = 'ans-timer' + (timerLeft <= 3 ? ' urgent' : '');
-    }
-  }, 1000);
+    if (timerLeft<=0) { ansTimer.textContent=''; clearTimer(); if (waitingAns) submitAnswer(); }
+    else { ansTimer.textContent=timerLeft; ansTimer.className='ans-timer'+(timerLeft<=3?' urgent':''); }
+  },1000);
 }
+function clearTimer(){clearInterval(timerInterval);timerInterval=null;ansTimer.textContent='';}
 
-function clearTimer() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  ansTimer.textContent = '';
-}
-
-// ─── SPEECH RECOGNITION ───────────────────────────────────────────────────────
+// ── STT ───────────────────────────────────────────────────────────────────────
 function setupRecog() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-  recog = new SR();
-  recog.maxAlternatives = 10;
-  recog.continuous = false;
-  recog.interimResults = true;
-  recog.lang = 'en-US';
-
-  recog.onresult = e => {
-    let best = '', finalSeen = false;
-    for (let i = e.resultIndex; i < e.results.length; i++) {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if (!SR) return;
+  recog=new SR(); recog.maxAlternatives=10; recog.continuous=false;
+  recog.interimResults=true; recog.lang='en-US';
+  recog.onresult=e=>{
+    let best='',finalSeen=false;
+    for (let i=e.resultIndex;i<e.results.length;i++) {
       if (e.results[i].isFinal) {
-        finalSeen = true;
-        for (let j = 0; j < e.results[i].length; j++) {
-          const t = e.results[i][j].transcript.trim();
-          if (!best || isCorrect(t, curQ)) best = t;
+        finalSeen=true;
+        for (let j=0;j<e.results[i].length;j++) {
+          const t=e.results[i][j].transcript.trim();
+          if (!best||isCorrect(t,curQ)) best=t;
         }
-      } else {
-        ansInput.value = e.results[i][0].transcript;
-      }
+      } else { ansInput.value=e.results[i][0].transcript; }
     }
     if (finalSeen) {
-      heardFinal = best || heardFinal;
-      ansInput.value = heardFinal;
+      heardFinal=best||heardFinal; ansInput.value=heardFinal;
       clearTimeout(autoSubTimer);
-      autoSubTimer = setTimeout(() => { if (waitingAns) submitAnswer(); }, 500);
+      autoSubTimer=setTimeout(()=>{if(waitingAns)submitAnswer();},500);
     }
   };
-  recog.onerror = () => {};
-  recog.onend = () => { micDot.style.display = 'none'; };
+  recog.onerror=()=>{}; recog.onend=()=>{micDot.style.display='none';};
 }
+function startRecog(){if(!recog)return;micDot.style.display='';try{recog.start();}catch(e){}}
+function stopRecog(){micDot.style.display='none';if(!recog)return;try{recog.stop();}catch(e){}clearTimeout(autoSubTimer);}
 
-function startRecog() {
-  if (!recog) return;
-  micDot.style.display = '';
-  try { recog.start(); } catch(e) {}
-}
-
-function stopRecog() {
-  micDot.style.display = 'none';
-  if (!recog) return;
-  try { recog.stop(); } catch(e) {}
-  clearTimeout(autoSubTimer);
-}
-
-// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
 submitBtn.addEventListener('click', submitAnswer);
-ansInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitAnswer(); });
-
+ansInput.addEventListener('keydown', e=>{if(e.key==='Enter')submitAnswer();});
 function submitAnswer() {
   if (!waitingAns) return;
-  waitingAns = false;
-  clearTimer();
-  stopRecog();
-  phaseBadge.style.display = 'none';
-
-  const typed = (heardFinal || ansInput.value).trim();
-  const correct = !!typed && isCorrect(typed, curQ);
-
-  // Reveal in blind mode
+  waitingAns=false; clearTimer(); stopRecog(); phaseBadge.style.display='none';
+  const typed=(heardFinal||ansInput.value).trim();
+  const correct=!!typed&&isCorrect(typed,curQ);
   if (blindMode) {
-    revealed = true;
-    const fullText = getTossupText();
-    words = fullText.split(/\s+/);
-    wordIdx = words.length;
-    renderQText();
+    revealed=true;
+    const ft=getQText(); words=ft.split(/\s+/); wordIdx=words.length; renderQText();
   }
-
-  buzzBtn.disabled = true;
-  ansRow.style.display = 'none';
-  part2Hint.style.display = 'none';
-  navRow.style.display = 'flex';
-
-  feedback.className = 'feedback ' + (correct ? 'correct' : 'wrong');
-  feedback.style.display = '';
-
+  buzzBtn.disabled=true; ansRow.style.display='none'; part2Hint.style.display='none';
+  navRow.style.display='flex';
+  feedback.className='feedback '+(correct?'correct':'wrong'); feedback.style.display='';
   if (correct) {
-    score += curPts;
-    nRight++;
-    fbMsg.innerHTML = `✓ Correct! <b>+${curPts}</b> points`;
+    score+=curPts; nRight++;
+    fbMsg.innerHTML=`✓ Correct! <b>+${curPts}</b> points`;
   } else {
-    const pen = calcPenalty(curPts);
-    score -= pen;
-    nWrong++;
-    if (pen > 0) {
-      fbMsg.innerHTML = `✗ ${typed ? `You said "<i>${esc(typed)}</i>"` : 'No answer'}. <b>−${pen}</b> points`;
-    } else {
-      fbMsg.innerHTML = `✗ ${typed ? `You said "<i>${esc(typed)}</i>"` : 'No answer'}. No penalty.`;
-    }
+    const pen=calcPenalty(curPts); score-=pen; nWrong++;
+    fbMsg.innerHTML=pen>0
+      ?`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}. <b>−${pen}</b> points`
+      :`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}. No penalty.`;
   }
-
-  fbReveal.innerHTML = `Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length ? ` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>` : ''}`;
-  fbReveal.style.display = '';
-
-  saveStorage();
-  updateScoreUI();
-  updateStatsBar();
+  fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
+  fbReveal.style.display='';
+  saveStorage(); updateScoreUI(); updateStatsBar();
 }
-
-document.getElementById('nextBtn').addEventListener('click', () => {
-  if (mode === M.FINALS && finRound === FR.R3) {
-    buildBoard(document.getElementById('topicSel').value);
-  } else {
-    loadQuestion();
-  }
+$('nextBtn').addEventListener('click',()=>{
+  if (mode===M.FINALS&&finRound===FR.R3) buildBoard($('topicSel').value);
+  else loadQuestion();
 });
 
-// ─── FUZZY MATCHING ───────────────────────────────────────────────────────────
-const STOP = new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','these','those','for','with','from','by','as','be','been','being']);
-const NUM_MAP = {zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,hundred:100,thousand:1000,million:1000000,billion:1000000000};
-
-function norm(s) {
-  if (!s) return '';
-  return s.toLowerCase()
-    .replace(/[^a-z0-9\s]/g,'')
-    .split(/\s+/)
-    .filter(w => w && !STOP.has(w))
-    .map(w => NUM_MAP[w] !== undefined ? String(NUM_MAP[w]) : w)
-    .join(' ').trim();
+// ── FUZZY MATCH ───────────────────────────────────────────────────────────────
+const STOP=new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','for','with','from','by','as','be','been']);
+const NM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,hundred:100,thousand:1000,million:1e6,billion:1e9};
+function norm(s){
+  if(!s)return'';
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/)
+    .filter(w=>w&&!STOP.has(w)).map(w=>NM[w]!==undefined?String(NM[w]):w).join(' ').trim();
 }
-
-function levenshtein(a, b) {
-  const m = a.length, n = b.length;
-  const dp = Array.from({length:m+1}, (_, i) => Array.from({length:n+1}, (_, j) => i || j));
-  for (let i = 1; i <= m; i++)
-    for (let j = 1; j <= n; j++)
-      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+function lev(a,b){
+  const m=a.length,n=b.length,dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i||j));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
   return dp[m][n];
 }
-
-function isCorrect(typed, q) {
-  const t = norm(typed);
-  if (!t) return false;
-  const targets = [q.answer, ...(q.alternates || [])].map(norm).filter(Boolean);
-  return targets.some(ans => {
-    if (t === ans) return true;
-    if (t.includes(ans) || ans.includes(t)) return true;
-    const maxD = Math.max(2, Math.floor(Math.max(t.length, ans.length) * 0.22));
-    return levenshtein(t, ans) <= maxD;
+function isCorrect(typed,q){
+  const t=norm(typed); if(!t)return false;
+  return [q.answer,...(q.alternates||[])].map(norm).filter(Boolean).some(ans=>{
+    if(t===ans||t.includes(ans)||ans.includes(t))return true;
+    return lev(t,ans)<=Math.max(2,Math.floor(Math.max(t.length,ans.length)*.22));
   });
 }
 
-// ─── UI ──────────────────────────────────────────────────────────────────────
-function updateScoreUI() {
-  hScore.textContent = score;
-  hRight.textContent = nRight;
-  hWrong.textContent = nWrong;
+// ── UI ────────────────────────────────────────────────────────────────────────
+function updateScoreUI(){hScore.textContent=score;hRight.textContent=nRight;hWrong.textContent=nWrong;}
+function updateStatsBar(){
+  statsBar.style.display='';
+  $('stTotal').textContent=nRight+nWrong;
+  $('stRight').textContent=nRight;
+  $('stWrong').textContent=nWrong;
+  $('stScore').textContent=score;
 }
-
-function updateStatsBar() {
-  statsBar.style.display = '';
-  document.getElementById('stTotal').textContent = nRight + nWrong;
-  document.getElementById('stRight').textContent = nRight;
-  document.getElementById('stWrong').textContent = nWrong;
-  document.getElementById('stScore').textContent = score;
-}
-
-// Space to buzz
-document.addEventListener('keydown', e => {
-  if (e.code === 'Space' && !waitingAns && !buzzBtn.disabled && buzzBtn.style.display !== 'none') {
-    e.preventDefault();
-    doBuzz();
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&!waitingAns&&!buzzBtn.disabled&&buzzBtn.style.display!=='none'){
+    e.preventDefault(); doBuzz();
   }
 });
-
-// ─── BOOT ────────────────────────────────────────────────────────────────────
-loadStorage();
-setupRecog();
+loadStorage(); setupRecog();
 </script>
 </body>
 </html>
