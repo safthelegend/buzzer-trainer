@@ -259,37 +259,6 @@ const QB = [
 //  WATER
 // ════════════════════════════════════════════════════════
 
-// BRITANNICA
-{id:'w16',topic:'Water',source:'Britannica',
- answer:'70 percent',alternates:['70%','seventy percent','about 70 percent'],
- tossup:'According to Britannica, approximately what percentage of global freshwater withdrawals does agriculture account for?',
- part1:'Britannica states that agriculture accounts for this share of global freshwater withdrawals. For 100 points.',
- part2:'For 50 points — 70 percent: Britannica\'s figure for agriculture\'s share of global freshwater withdrawals.'},
-
-{id:'w17',topic:'Water',source:'Britannica',
- answer:'virtual water',alternates:['embedded water','hidden water'],
- tossup:'What term, coined by Tony Allan, refers to the water embedded in food and other products during their production?',
- part1:'Tony Allan coined this term for water that is embedded invisibly in goods during production. For 100 points.',
- part2:'For 50 points — virtual water: Tony Allan\'s term for water embedded in products during production.'},
-
-{id:'w18',topic:'Water',source:'Britannica',
- answer:'Tony Allan',alternates:['john anthony allan','j. a. allan'],
- tossup:'According to Britannica, which economist coined the term "virtual water" in the 1990s?',
- part1:'This economist, working in the 1990s, coined the concept of "virtual water" to describe water embedded in traded goods. For 100 points.',
- part2:'For 50 points — Tony Allan: the economist who coined the term "virtual water."'},
-
-{id:'w19',topic:'Water',source:'Britannica',
- answer:'Aral Sea',alternates:['the aral sea','aral'],
- tossup:'According to Britannica, what body of water was once the fourth-largest lake in the world before Soviet irrigation projects caused it to shrink by over 90 percent?',
- part1:'Soviet irrigation of cotton crops diverted two rivers away from this once-massive Central Asian lake. For 100 points — name it.',
- part2:'For 50 points — the Aral Sea: once the world\'s fourth-largest lake, destroyed by Soviet irrigation.'},
-
-{id:'w20',topic:'Water',source:'Britannica',
- answer:'Amu Darya and Syr Darya',alternates:['amu darya','syr darya','amu darya syr darya'],
- tossup:'According to Britannica, which two rivers were diverted by Soviet irrigation projects, causing the Aral Sea to shrink?',
- part1:'The Aral Sea shrank after Soviet projects diverted these two feeder rivers for cotton irrigation. For 100 points — name them.',
- part2:'For 50 points — the Amu Darya and Syr Darya: the rivers diverted from the Aral Sea.'},
-
 // CFR
 {id:'w21',topic:'Water',source:'CFR',
  answer:'3 to 4 billion',alternates:['three to four billion','3-4 billion','four billion','three billion'],
@@ -1036,22 +1005,72 @@ const EXTRA=[
 ['Water','WHO','schistosomiasis is parasitic worms via infested water; dengue is spread by insect vectors that breed in water','What is the difference between how schistosomiasis and dengue fever are contracted via water, per the WHO?'],
 ['Water','WHO','protect users from diarrhoeal-disease pathogens and strengthen national policy and monitoring','What does WHO\'s scheme to evaluate household water treatment technologies test products for?'],
 ['Water','WHO','395,000 under-5 deaths are a preventable subset of the ~1 million total','How does the 395,000 child death figure relate to the ~1 million total diarrhoeal death figure, per the WHO?'],
-// ---- WATER · Britannica ----
-['Water','Britannica','physical and economic','What are the two general types of water scarcity, per Britannica?',['physical and economic scarcity']],
-['Water','Britannica','1.2 billion','Per Britannica (citing the FAO), about how many people live in areas of physical water scarcity?'],
-['Water','Britannica','two-thirds','Per Britannica, what fraction of the world\'s population faces seasonal water scarcity at least one month a year?',['2/3','two thirds']],
-['Water','Britannica','1.6 billion','Per Britannica (FAO), how many people face economic water shortage?'],
-['Water','Britannica','non-revenue water','Per Britannica, what term describes treated water lost to leaks before it is ever used?'],
-['Water','Britannica','about 20 percent','Per Britannica, what is the average non-revenue water loss in the United States?',['20%','20 percent']],
-['Water','Britannica','Mexico City','Per Britannica, which megacity of 20+ million is a classic example of economic water scarcity?'],
-['Water','Britannica','40 centimeters','Per Britannica, how much do parts of Mexico City sink each year from aquifer over-withdrawal?',['40 cm','16 inches']],
-['Water','Britannica','Aral Sea','Per Britannica, which lake — once the world\'s fourth largest — shrank after its rivers were diverted for irrigation?'],
-['Water','Britannica','one-third','Per Britannica, what fraction of the world\'s largest aquifer systems are in distress?',['a third']],
-['Water','Britannica','Cape Town','Per Britannica, which city nearly became the first major city to hit "Day Zero," in 2018?'],
-['Water','Britannica','triple bottom line','Per Britannica, what name is given to balancing economics, environment, and equity in water management?'],
-['Water','Britannica','desalination','Per Britannica, what energy-intensive process supplies much of Saudi Arabia\'s municipal water?'],
-['Water','Britannica','permanent, seasonal, unpredictable, and invisible','Per Britannica, what are the four basic kinds of drought?'],
-['Water','Britannica','70 percent','Per Britannica, about what share of all freshwater resources is devoted to agriculture?',['70%','seventy percent']],
+// ---- WATER · Britannica (Water Scarcity) ----
+['Water','Britannica','insufficient freshwater resources to meet the human and environmental demands of a given area','What is the definition of water scarcity?'],
+['Water','Britannica','human rights','Water scarcity is inextricably linked to what, with safe drinking water a priority for global development?'],
+['Water','Britannica','population growth, profligate use, growing pollution, and climate change','What four challenges are driving 21st-century water scarcity?'],
+['Water','Britannica','physical and economic','What are the two general types of water scarcity?',['physical and economic scarcity']],
+['Water','Britannica','a region\'s demand outpacing its limited water resources','What is physical (absolute) water scarcity?'],
+['Water','Britannica','about 1.2 billion','How many people are affected by physical water scarcity (per the FAO), mostly in arid regions?',['1.2 billion']],
+['Water','Britannica','two-thirds','What fraction of the world\'s population faces seasonal water scarcity at least one month a year?',['2/3','two thirds']],
+['Water','Britannica','a lack of water infrastructure or poor management of existing infrastructure','What is economic water scarcity?'],
+['Water','Britannica','more than 1.6 billion','How many people face economic water shortage, per the FAO?',['1.6 billion']],
+['Water','Britannica','access is limited even though sufficient water usually exists','In economic water scarcity, what is usually true about the water supply?'],
+['Water','Britannica','non-revenue water','What term describes treated water lost to leaks before it is ever used?'],
+['Water','Britannica','around 20 percent','What is the U.S. average for non-revenue water?',['20%','20 percent']],
+['Water','Britannica','unregulated agricultural and industrial use, and undervaluing water as a finite resource','Besides infrastructure leaks, what other factors cause economic water scarcity?'],
+['Water','Britannica','more than 20 million','What is the population of Mexico City\'s metropolitan area?',['20 million']],
+['Water','Britannica','more than 700 mm (27.5 inches)','What is Mexico City\'s annual rainfall?',['700 mm','27.5 inches']],
+['Water','Britannica','most precipitation is lost as contaminated runoff and lost wetlands no longer recharge aquifers','Why doesn\'t Mexico City\'s rainfall relieve its water scarcity?'],
+['Water','Britannica','nearly half','What share of Mexico City\'s municipal water supply is drawn unsustainably from its aquifer?'],
+['Water','Britannica','up to 40 cm (16 inches) per year','How fast do parts of Mexico City sink due to aquifer over-withdrawal?',['40 cm','16 inches']],
+['Water','Britannica','40 to 70 percent','What range of Mexico City\'s water is lost through leaking pipes?',['40-70 percent']],
+['Water','Britannica','nearly 90%','In early 2024, what share of Mexico City was in severe drought, raising "Day Zero" fears?',['90%']],
+['Water','Britannica','the day a city could run out of water and its taps run dry','What does "Day Zero" mean?'],
+['Water','Britannica','one-third','What fraction of the world\'s largest aquifer systems are in distress?',['a third']],
+['Water','Britannica','the fourth largest','The Aral Sea was once what rank among the world\'s inland bodies of water?'],
+['Water','Britannica','diversion of its inflowing rivers for agricultural irrigation','What caused the Aral Sea to shrink?'],
+['Water','Britannica','2018','In what year did Cape Town face "Day Zero"?'],
+['Water','Britannica','the first potential water crisis of any major city','What was the significance of Cape Town\'s "Day Zero"?'],
+['Water','Britannica','extreme water conservation and the fortuitous arrival of rain','How was Cape Town\'s "Day Zero" crisis averted?'],
+['Water','Britannica','third','In the 2017 WEF Global Risks Report, water crises ranked as which most important global risk to humanity?',['third most important','3rd']],
+['Water','Britannica','weapons of mass destruction and extreme weather events','In the 2017 WEF report, which two risks ranked above water crises?'],
+['Water','Britannica','the UN World Water Development Report','Which 2023 UN report warned of an imminent global water crisis and urged cooperation?'],
+['Water','Britannica','economics, environment, and equity','What three things make up the "triple bottom line" in water management?'],
+['Water','Britannica','preserving and restoring ecosystems like wetlands and forests','What is a key environmental-policy strategy against water scarcity?'],
+['Water','Britannica','nutrient recycling and flood protection','Besides storing water, what ecosystem services do wetlands and forests provide?'],
+['Water','Britannica','higher water prices','What economic measure reduces water waste and funds infrastructure but is politically unpopular?'],
+['Water','Britannica','a water tax on heavy users','What targeted tax could deter industrial and agricultural waste without raising household prices?'],
+['Water','Britannica','rebates for replacing water-wasteful appliances','What incentive encourages swapping out wasteful toilets and shower heads?'],
+['Water','Britannica','industrial agriculture','What is a major consumer of freshwater and source of pollution from pesticide, fertilizer, and animal-waste runoff?'],
+['Water','Britannica','almonds and alfalfa','What two water-intensive crops grown in California\'s Central Valley are commonly criticized?'],
+['Water','Britannica','about 70 percent','What share of all freshwater resources is devoted to agriculture?',['70%','seventy percent']],
+['Water','Britannica','it floods fields with more water than crops need, losing water to evaporation','What is the problem with surface (flood) irrigation?'],
+['Water','Britannica','Saudi Arabia','In which densely populated arid country is desalination a main municipal water source?'],
+['Water','Britannica','it is energy-intensive and expensive, creating emissions and brine waste','What is the downside of desalination?'],
+['Water','Britannica','crop and landscape irrigation, groundwater recharge, and recreation','What are common uses of reclaimed wastewater?'],
+['Water','Britannica','fertilizing algae or other biofuels','What additional use of wastewater has been proposed?'],
+['Water','Britannica','it is treated as a water rights issue and restricted','How is rainwater harvesting handled in parts of the western U.S.?'],
+['Water','Britannica','Mexico City','Which city is actively developing rainwater harvesting systems?'],
+['Water','Britannica','permanent, seasonal, unpredictable, and invisible','What are the four basic kinds of drought?'],
+['Water','Britannica','Melissa Petruzzello','Who is the author of the Britannica water scarcity article?'],
+['Water','Britannica','70 percent','In the infographic, what share of global water withdrawals is agricultural?'],
+['Water','Britannica','19 percent','In the infographic, what share of global water withdrawals is industrial?'],
+['Water','Britannica','11 percent','In the infographic, what share of global water withdrawals is municipal?'],
+['Water','Britannica','more than 80 percent','In the infographic, what share of the world\'s wastewater is untreated or unreused?'],
+['Water','Britannica','97.4 percent','What percentage of all water is salt water?'],
+['Water','Britannica','2.6 percent','What percentage of all water is fresh?'],
+['Water','Britannica','72.5 percent','What percentage of freshwater is frozen?'],
+['Water','Britannica','28.15 percent','What percentage of freshwater is groundwater?'],
+['Water','Britannica','0.30 percent','What percentage of freshwater is fresh surface water?'],
+['Water','Britannica','2.1 billion','How many people lack safe, reliable water access at home, per the infographic?'],
+['Water','Britannica','half of the world\'s population','By 2025, how much of the world will live in water-stressed areas, per the infographic?'],
+['Water','Britannica','São Paulo, Bengaluru, Moscow, Jakarta, Beijing, Cairo, Tokyo, Miami, London, Istanbul, and Mexico City','Which major cities are listed as most likely to run out of drinking water?'],
+['Water','Britannica','World Resources Institute','Which organization is the source of the 2040 water stress map?'],
+['Water','Britannica','the ratio of water withdrawal to renewable water supply','How does the 2040 map define "water stress"?'],
+['Water','Britannica','low, low to medium, medium to high, high, and extremely high','What are the five water-stress categories on the 2040 map?'],
+['Water','Britannica','India','Besides the Middle East and North Africa, which large South Asian country is shown "Extremely high" on the 2040 map?'],
+['Water','Britannica','the United States, Mexico, China, Australia, and South Africa','Name some countries shown as "High" water stress on the 2040 map.'],
 // ---- WATER · CFR ----
 ['Water','CFR','water bankruptcy','Per the CFR, what term did a January 2026 UN report use for the era of structural depletion of global water systems?'],
 ['Water','CFR','Falkenmark Water Stress Indicator','Per the CFR, what indicator measures renewable freshwater available per person each year?',['falkenmark']],
@@ -1289,7 +1308,7 @@ $('keyBtn').addEventListener('click',()=>{
     Object.keys(byTopic[topic]).sort().forEach(src=>{
       html+=`<div style="margin-top:8px;color:var(--red);font-weight:900;text-transform:uppercase;letter-spacing:.04em;">${esc(src)} <span style="color:var(--text2);font-weight:500;">(${byTopic[topic][src].length})</span></div>`;
       byTopic[topic][src].forEach(q=>{
-        const disp=(q.tossup||'').replace(/\s*For \d+ points[.:].*$/i,'').trim();
+        const disp=attribute((q.tossup||'').replace(/\s*For \d+ points[.:].*$/i,'').trim(), q.source, q.topic);
         html+=`<div style="margin:5px 0;padding-left:10px;border-left:2px solid var(--border);"><span style="color:var(--text);">${esc(disp)}</span><br><span style="color:var(--green);font-weight:600;">${esc(q.answer)}</span></div>`;
       });
     });
@@ -1389,9 +1408,32 @@ function getBasePts() {
 function calcPenalty(pts) {
   return 0; // study mode: getting it wrong costs nothing — just reveals the answer
 }
+// Readable source label, e.g. WHO → "the WHO", Britannica → "Britannica"
+function srcLabel(s){
+  s=(s||'').replace(/\s*\(Tracker\)/,'').replace(/\s*\/.*$/,'').trim();
+  const needsThe=/^(WHO|CFR|CDA|ACRC|PBS|UN)\b/.test(s);
+  return (needsThe?'the ':'')+s;
+}
+// Strip any source attribution the question already contains, then we re-add ours uniformly
+function stripAttr(q){
+  return (q||'')
+    .replace(/^\s*(according to|per)\s+[^,]{1,45}?,\s*/i,'')
+    .replace(/[,]?\s*(according to|per)\s+(the\s+)?[A-Z][^,.?!]{0,40}?(\s+source)?(?=\s*[?.!]|$)/i,'')
+    .replace(/\s{2,}/g,' ').trim();
+}
+// Every question is announced "According to [source], …" — even when filtered by source
+function attribute(q,src,topic){
+  // Pyramid Current-Events tossups (year sources) stay as-is
+  if (/^\d{4}$/.test(src||'') || topic==='Current Events') return q;
+  let c=stripAttr(q)||q;
+  // lowercase a leading interrogative so "According to X, what…" reads naturally
+  c=c.replace(/^(What|Which|How|Who|Whom|Whose|Where|When|Why|Name|In|On|Besides|By|The)\b/,m=>m.toLowerCase());
+  return 'According to '+srcLabel(src)+', '+c;
+}
 function getQText() {
-  if (mode===M.R1) return (curQ.part1||'') + ' ' + (curQ.part2||'');
-  return curQ.tossup;
+  const src=curQ.source||'';
+  if (mode===M.R1) return attribute((curQ.part1||'') + ' ' + (curQ.part2||''), src, curQ.topic);
+  return attribute(curQ.tossup||'', src, curQ.topic);
 }
 
 // ── TTS ───────────────────────────────────────────────────────────────────────
