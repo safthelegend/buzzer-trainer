@@ -107,20 +107,39 @@
       <option value="Seerah">Seerah</option>
       <option value="Current Events">Current Events</option>
     </select>
+    <select id="sourceSel"><option value="all">All Sources</option></select>
     <button id="startBtn" class="primary">Start</button>
     <button id="shuffleBtn">Shuffle</button>
+    <button id="importBtn">+ Import</button>
     <button id="resetBtn">Reset Stats</button>
     <button id="rulesBtn">Rules</button>
     <span class="qcount" id="qcount"></span>
+  </div>
+  <div id="importBox" class="rules-box" style="display:none;">
+    <b>Bulk-import questions</b> — paste one card per line as <code>Answer | Clue</code> (answer first, then a pipe, then the question/clue). Pick the topic &amp; source they belong to.
+    <div style="display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;">
+      <select id="impTopic">
+        <option value="Water">Water</option><option value="Sudan">Sudan</option>
+        <option value="Housing">Housing</option><option value="Seerah">Seerah</option>
+        <option value="Current Events">Current Events</option>
+      </select>
+      <input id="impSource" placeholder="Source (e.g. WHO, CFR, Britannica)" style="flex:1;min-width:160px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:.85rem;">
+    </div>
+    <textarea id="impText" rows="8" placeholder="251 million | How many people needed schistosomiasis treatment in 2021, per the WHO?&#10;Aral Sea | Lake destroyed by Soviet irrigation, once the world's 4th-largest." style="width:100%;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:.85rem;resize:vertical;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+      <button id="impAdd" class="primary">Add to bank</button>
+      <button id="impClear">Clear all imported</button>
+      <span id="impMsg" style="color:var(--text2);font-size:.8rem;"></span>
+    </div>
   </div>
   <div id="rulesBox" class="rules-box" style="display:none;">
     <b>MIST Quiz Bowl Rules</b>
     <ul>
       <li>Judge reads the <b>point value first</b>, then the question. Buzz at any time.</li>
       <li>Buzzing <b>immediately stops the reader</b> — judge does not repeat the question.</li>
-      <li>After buzzing: <b>10 seconds</b> to answer.</li>
-      <li>Wrong answer: floor opens to all other teams to steal.</li>
-      <li><b>Penalties:</b> Practice = 0 · Round 1 = full deduction · Round 2/3 = −10% · Finals R1 = 0 · Finals R2/R3 = −10%</li>
+      <li><b>Study mode:</b> no timer and no penalties — answer whenever you're ready; right or wrong just reveals the answer.</li>
+      <li>Type or <b>speak</b> your answer; speech is matched phonetically (so "cartoon" still hits "Khartoum"), or hit <b>Show Answer</b>.</li>
+      <li>Filter by <b>Topic</b> and <b>Source</b>; use <b>+ Import</b> to paste your own <code>Answer | Clue</code> lists.</li>
       <li><b>Topics 1–4:</b> Direct factual questions. <b>Topic 5:</b> Pyramid-style tossups.</li>
     </ul>
   </div>
@@ -145,7 +164,8 @@
   <div class="ans-row" id="ansRow" style="display:none;">
     <span id="micDot" style="display:none;"><span class="mic-dot"></span></span>
     <input type="text" id="ansInput" placeholder="Type or say your answer…" autocomplete="off" />
-    <span id="ansTimer" class="ans-timer"></span>
+    <span id="ansTimer" class="ans-timer" style="display:none;"></span>
+    <button id="revealBtn">Show Answer</button>
     <button id="submitBtn" class="primary">Submit</button>
   </div>
   <div id="part2Hint" style="display:none;font-size:.8rem;color:var(--text2);margin-bottom:12px;padding:10px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);">
@@ -932,6 +952,85 @@ const QB = [
 
 ];
 
+// ── CARD BUILDER (used by bulk data + paste-import) ──────────────────────────
+function mkCard(topic,source,q,a,alts){
+  return {topic,source,tossup:q,answer:a,alternates:alts||[],part1:q,part2:'For 50 points — '+a};
+}
+
+// ── SUDAN · CFR "Civil War in Sudan" tracker (Answer | Clue) ──────────────────
+const SUDAN_CFR=[
+[`Fourth year`,`How long had the civil war been going in this version of the CFR article?`],
+[`SAF regaining Khartoum`,`Event from a year before this snapshot: government forces retook the capital from the RSF.`],
+[`Hallmarks of genocide`,`Phrase a UN fact-finding mission used for the situation in RSF-controlled Darfur.`],
+[`61,000 to hundreds of thousands`,`Range of analysts' death-toll estimates for the war.`],
+[`More than 33 million`,`Number of Sudanese awaiting humanitarian assistance amid the hunger crisis.`],
+[`World's largest hunger crisis`,`How the article describes Sudan's famine situation.`],
+[`Anglo-Egyptian Condominium`,`Joint protectorate of Egypt and the UK that governed Sudan in the first half of the 20th century.`],
+[`1956`,`Year Egypt and the UK relinquished sovereignty to the independent Republic of Sudan.`],
+[`North vs. South divide`,`Wealthier Arab/Muslim north vs. less-developed Christian/animist south; sparked two civil wars.`],
+[`Second Sudanese Civil War`,`1983-2005 war that killed an estimated two million people, with famine and atrocities.`],
+[`July 2011`,`When Sudan's southern territory seceded to form the Republic of South Sudan.`],
+[`Omar al-Bashir`,`Dictator whose rule defined Sudan's post-colonial period.`],
+[`1989 coup`,`How Bashir seized power, after serving in the Egyptian military and then as an SAF officer.`],
+[`Second Civil War, secession, and Darfur`,`Three things Bashir's record oversaw: the Second Civil War, South Sudan's secession, and the Darfur conflict.`],
+[`ICC genocide finding`,`Court ruling that condemned the 2003 Darfur war as genocide against non-Arab Fur, Zaghawa, and Masalit peoples.`],
+[`Strict sharia and morality police`,`Bashir's religious policy: enforced strict sharia, used morality police, and persecuted Christianity, Sunni apostasy, and Shiism.`],
+[`2019`,`Year Bashir's regime finally fell.`],
+[`April 2019 coup`,`Joint SAF-RSF action that ousted Bashir and created a transitional government and new constitution.`],
+[`Abdel Fattah al-Burhan`,`SAF general who led the coup and the Transitional Sovereignty Council; now de facto head of state.`],
+[`Mohamed Hamdan Dagalo (Hemedti)`,`RSF leader; Burhan's deputy on the Sovereignty Council.`,[`hemedti`,`dagalo`,`hamdan dagalo`]],
+[`Janjaweed`,`Arab-majority militia funded by Bashir to suppress southern rebels and fight in Darfur; the RSF evolved from it.`],
+[`Over 200,000`,`Lives claimed in the first two years of the Darfur conflict, with 100,000+ more since 2005.`],
+[`2013`,`Year the loosely coordinated Janjaweed was formally organized under the RSF banner.`],
+[`Border guards, Yemen mercenaries, and repression`,`The RSF's various roles: border guard force, mercenaries for the Saudi coalition in Yemen, and repressing uprisings.`],
+[`Seizing gold mines`,`How Hemedti became one of Sudan's richest men.`,[`gold mines`,`gold`]],
+[`Transitional Sovereignty Council`,`Body Burhan led with Hemedti as deputy, plus other military leaders and some civilians.`],
+[`Abdalla Hamdok`,`Economist and development expert chosen as prime minister of the transitional government.`],
+[`October 2021`,`When the SAF and RSF orchestrated a coup against Hamdok and suspended the constitution.`],
+[`World Bank and IMF`,`Institutions that paused debt relief and aid to Sudan after the 2021 coup.`],
+[`November 2021`,`When Hamdok was briefly reinstated after conceding powers to Burhan and Hemedti.`],
+[`January 2022`,`When Hamdok resigned, leaving Sudan with no effective civilian leadership.`],
+[`December 2022 deal`,`Agreement laying groundwork for a two-year transition to civilian rule and national elections.`],
+[`Promoted to Burhan's equal`,`How the 2022 deal changed Hemedti's status — from Burhan's deputy to his equal.`],
+[`No deadline to fold RSF into SAF`,`The RSF integration dispute: the deal had no deadline to merge the RSF into the SAF, due to Burhan-Hemedti disagreement.`],
+[`Early 2023`,`Missed deadline to set conditions for implementing the agreement.`],
+[`April 15`,`Date in 2023 when explosions and gunfire hit Khartoum; each side accused the other of firing first.`],
+[`Wagner Group and UAE`,`Foreign influences that deepened the rivalry at the core of Sudan's crisis.`],
+[`Khamis Abakar`,`West Darfur governor assassinated in June 2023, likely by RSF militants.`],
+[`235 fires`,`Number an NGO report (June 2024) said had been set in villages, mostly by militias in Darfur.`],
+[`Human Rights Watch`,`NGO that documented mass atrocities, prompting accusations of ethnic cleansing and war crimes.`],
+[`Ardamata`,`West Darfur town where the RSF and allies killed more than 800 in a multi-day rampage, targeting the Masalit.`],
+[`Filippo Grandi`,`UN High Commissioner for Refugees who warned the violence echoed the earlier Darfur genocide.`],
+[`300,000`,`Estimated killed in the U.S.-recognized Darfur genocide between 2003 and 2005.`],
+[`10,000 to 15,000`,`Number the UN said were killed in 2023 ethnic violence by the RSF and allies in West Darfur.`],
+[`Linda Thomas-Greenfield`,`U.S. Ambassador to the UN who highlighted RSF sexual violence against girls as young as 14 (April 2024).`],
+[`Over 600`,`People who died in the first month of fighting.`],
+[`Spiraling out of control`,`How the UN described the conflict in August 2023 as the health system collapsed.`],
+[`One of the worst humanitarian nightmares in recent history`,`UN Humanitarian and Emergency Relief chief's description of Sudan.`],
+[`Aid through Chad`,`Route the U.S. urged the UN Security Council to authorize for humanitarian deliveries.`],
+[`March 8, 2024`,`Date the UN Security Council passed a resolution calling for an immediate cessation of violence.`],
+[`Libya and Turkey`,`Countries that mediated short-lived indirect SAF-RSF negotiations in March 2024.`],
+[`Iranian armed drones`,`Weapons that partially contributed to SAF battlefield successes.`],
+[`Late 2024 offensive`,`SAF coordinated push around Khartoum, Omdurman, and Bahri that caught the RSF off guard.`],
+[`January 2025`,`When the SAF drove the RSF out of Omdurman, retook an oil refinery north of Khartoum, and regained most of Bahri.`],
+[`El Obeid`,`Strategic city with rail links to Khartoum; SAF ended the RSF's two-year siege of it in February 2025.`,[`obeid`]],
+[`Nairobi charter`,`Charter the RSF and allies signed (Feb. 2025) for a parallel government: secular, democratic, decentralized, unified army.`],
+[`ICJ complaint`,`Sudan's case accusing the UAE of complicity in genocide for arming the RSF.`],
+[`El Fasher`,`Capital of North Darfur and last major government-held city; RSF captured it Oct. 27 after an 18-month siege.`],
+[`Yale Humanitarian Research Lab`,`Group whose satellite imagery found closely packed objects and ground discoloration believed to be bodies.`],
+[`Nearly 400,000`,`Number of people facing starvation as famine worsened.`],
+];
+SUDAN_CFR.forEach(p=>QB.push(mkCard('Sudan','CFR (Tracker)',p[1],p[0],p[2])));
+
+// ── MERGE PASTE-IMPORTED CARDS (from localStorage) ───────────────────────────
+function loadImported(){
+  try{
+    const arr=JSON.parse(localStorage.getItem('mist_imported')||'[]');
+    arr.forEach(c=>QB.push(mkCard(c.topic,c.source,c.q,c.a,c.alts)));
+  }catch(e){}
+}
+loadImported();
+
 // ── MODES ────────────────────────────────────────────────────────────────────
 const M = {PRACTICE:'practice', R1:'round1', R23:'round23', FINALS:'finals'};
 const FR = {R1:'fr1', R2:'fr2', R3:'fr3'};
@@ -1003,6 +1102,56 @@ $('resetBtn').addEventListener('click', () => {
   saveStorage(); updateScoreUI();
 });
 
+// ── SOURCE FILTER ─────────────────────────────────────────────────────────────
+function populateSources() {
+  const tf=$('topicSel').value, sel=$('sourceSel');
+  const srcs=[...new Set(QB.filter(q=>tf==='all'||q.topic===tf).map(q=>q.source))].sort();
+  sel.innerHTML='<option value="all">All Sources</option>'+
+    srcs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+}
+$('topicSel').addEventListener('change',populateSources);
+
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+$('importBtn').addEventListener('click',()=>{const b=$('importBox');b.style.display=b.style.display==='none'?'':'none';});
+$('impAdd').addEventListener('click',()=>{
+  const topic=$('impTopic').value, source=($('impSource').value||'Imported').trim();
+  const lines=$('impText').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  const added=[];
+  lines.forEach(l=>{
+    const i=l.indexOf('|'); if(i<0)return;
+    const a=l.slice(0,i).trim().replace(/^['"]|['"]$/g,'');
+    const q=l.slice(i+1).trim();
+    if(a&&q){added.push({topic,source,q,a,alts:[]}); QB.push(mkCard(topic,source,q,a));}
+  });
+  if(added.length){
+    const cur=JSON.parse(localStorage.getItem('mist_imported')||'[]');
+    localStorage.setItem('mist_imported',JSON.stringify(cur.concat(added)));
+    populateSources();
+    $('impMsg').textContent=`Added ${added.length} question${added.length>1?'s':''} to ${topic} · ${source}.`;
+    $('impText').value='';
+  } else {
+    $('impMsg').textContent='No valid "Answer | Clue" lines found.';
+  }
+});
+$('impClear').addEventListener('click',()=>{
+  if(!confirm('Remove ALL paste-imported questions? (Built-in questions stay.)'))return;
+  localStorage.removeItem('mist_imported');
+  $('impMsg').textContent='Cleared. Reload the page to fully reset the bank.';
+});
+
+// ── SHOW ANSWER (no scoring) ──────────────────────────────────────────────────
+$('revealBtn').addEventListener('click',()=>{
+  if(!waitingAns)return;
+  waitingAns=false; clearTimer(); stopRecog(); phaseBadge.style.display='none';
+  if(blindMode){revealed=true;const ft=getQText();words=ft.split(/\s+/);wordIdx=words.length;renderQText();}
+  buzzBtn.disabled=true; ansRow.style.display='none'; part2Hint.style.display='none';
+  navRow.style.display='flex';
+  feedback.className='feedback correct'; feedback.style.display='';
+  fbMsg.innerHTML='Answer revealed';
+  fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
+  fbReveal.style.display='';
+});
+
 function updateBlindUI() {
   blindPill.textContent = blindMode?'ON':'OFF';
   blindPill.className = 'pill '+(blindMode?'on':'off');
@@ -1011,9 +1160,10 @@ function updateBlindUI() {
 // ── SESSION ───────────────────────────────────────────────────────────────────
 function startSession() {
   stopTTS(); clearTimer();
-  const tf = $('topicSel').value;
+  const tf = $('topicSel').value, sf = $('sourceSel').value;
   if (mode===M.FINALS && finRound===FR.R3) { buildBoard(tf); return; }
-  let f = QB.filter(q => tf==='all' || q.topic===tf || (tf==='Housing' && q.topic==='Housing'));
+  let f = QB.filter(q => (tf==='all'||q.topic===tf) && (sf==='all'||q.source===sf));
+  if (!f.length) { $('qcount').textContent='No questions match that filter'; return; }
   pool = f.sort(()=>Math.random()-.5); poolIdx = 0;
   boardWrap.style.display = 'none';
   $('qcount').textContent = pool.length + ' questions';
@@ -1079,11 +1229,7 @@ function getBasePts() {
   return 10;
 }
 function calcPenalty(pts) {
-  if (mode===M.PRACTICE) return 0;
-  if (mode===M.R1) return pts;
-  if (mode===M.R23) return Math.max(1,Math.round(pts*.1));
-  if (mode===M.FINALS) return finRound===FR.R1?0:Math.max(1,Math.round(pts*.1));
-  return 0;
+  return 0; // study mode: getting it wrong costs nothing — just reveals the answer
 }
 function getQText() {
   if (mode===M.R1) return (curQ.part1||'') + ' ' + (curQ.part2||'');
@@ -1138,7 +1284,7 @@ function promptAnswer() {
   buzzBtn.textContent='🎙 Buzzed — answer now!';
   ansRow.style.display='flex'; ansInput.value=''; heardFinal=''; ansInput.focus();
   if (mode===M.R1 && curQ.part2) { part2Text.textContent=curQ.part2; part2Hint.style.display=''; }
-  startTimer(10); startRecog();
+  startRecog(); // no timer — answer whenever you're ready
 }
 
 // ── TIMER ─────────────────────────────────────────────────────────────────────
@@ -1226,11 +1372,36 @@ function lev(a,b){
     dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
   return dp[m][n];
 }
+// Phonetic code so speech mishears match (e.g. "cartoon" ≈ "khartoum",
+// "hamedti" ≈ "hemedti", "boorhan" ≈ "burhan"). Soundex-style per word, kept full-length.
+function phonWord(w){
+  if(!w)return'';
+  w=w.toLowerCase().replace(/[^a-z]/g,'');
+  if(!w)return'';
+  // common digraph normalizations
+  w=w.replace(/ph/g,'f').replace(/gh/g,'g').replace(/ck/g,'k').replace(/kh/g,'k')
+     .replace(/sh/g,'s').replace(/ch/g,'k').replace(/th/g,'t').replace(/wr/g,'r')
+     .replace(/q/g,'k').replace(/x/g,'ks').replace(/z/g,'s').replace(/c/g,'k')
+     .replace(/v/g,'f').replace(/y/g,'i');
+  const map={b:'1',f:'1',p:'1',d:'2',t:'2',g:'3',k:'3',j:'2',l:'4',m:'5',n:'5',r:'6',s:'7'};
+  let first=w[0],code='';
+  for(let i=0;i<w.length;i++){
+    const c=map[w[i]]||'';
+    if(c&&c!==code[code.length-1])code+=c;
+  }
+  return first+code;
+}
+function phon(s){return s.split(/\s+/).map(phonWord).filter(Boolean).join(' ');}
 function isCorrect(typed,q){
   const t=norm(typed); if(!t)return false;
+  const tp=phon(t);
   return [q.answer,...(q.alternates||[])].map(norm).filter(Boolean).some(ans=>{
     if(t===ans||t.includes(ans)||ans.includes(t))return true;
-    return lev(t,ans)<=Math.max(2,Math.floor(Math.max(t.length,ans.length)*.22));
+    if(lev(t,ans)<=Math.max(2,Math.floor(Math.max(t.length,ans.length)*.22)))return true;
+    // phonetic fallback — catches speech-to-text mishearings of proper nouns
+    const ap=phon(ans);
+    if(ap&&tp&&(tp===ap||tp.includes(ap)||ap.includes(tp)))return true;
+    return ap&&tp&&lev(tp,ap)<=Math.max(1,Math.floor(Math.max(tp.length,ap.length)*.2));
   });
 }
 
@@ -1248,7 +1419,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); doBuzz();
   }
 });
-loadStorage(); setupRecog();
+loadStorage(); setupRecog(); populateSources();
 </script>
 </body>
 </html>
