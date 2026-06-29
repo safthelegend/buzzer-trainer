@@ -111,10 +111,12 @@
     <button id="startBtn" class="primary">Start</button>
     <button id="shuffleBtn">Shuffle</button>
     <button id="importBtn">+ Import</button>
+    <button id="keyBtn">Answer Key</button>
     <button id="resetBtn">Reset Stats</button>
     <button id="rulesBtn">Rules</button>
     <span class="qcount" id="qcount"></span>
   </div>
+  <div id="keyBox" class="rules-box" style="display:none;max-height:70vh;overflow-y:auto;"></div>
   <div id="importBox" class="rules-box" style="display:none;">
     <b>Bulk-import questions</b> — paste one card per line as <code>Answer | Clue</code> (answer first, then a pipe, then the question/clue). Pick the topic &amp; source they belong to.
     <div style="display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;">
@@ -1022,6 +1024,145 @@ const SUDAN_CFR=[
 ];
 SUDAN_CFR.forEach(p=>QB.push(mkCard('Sudan','CFR (Tracker)',p[1],p[0],p[2])));
 
+// ── EXTRA QUESTIONS pulled directly from the source articles ──────────────────
+// Format: [topic, source, answer, clue, altsArray?]
+const EXTRA=[
+// ---- WATER · WHO ----
+['Water','WHO','1.7 billion','As of 2022, how many people use a drinking water source contaminated with faeces, per the WHO?'],
+['Water','WHO','73%','What percentage of the global population used a safely managed drinking-water service in 2022, per the WHO?',['73 percent','seventy three percent']],
+['Water','WHO','1.5 billion','Per the WHO, how many people in 2022 had only basic drinking-water service — a source within a 30-minute round trip?'],
+['Water','WHO','292 million','Per the WHO, how many people had only limited drinking-water services in 2022?'],
+['Water','WHO','296 million','Per the WHO, how many people took water from unprotected wells and springs in 2022?'],
+['Water','WHO','115 million','Per the WHO, how many people collected untreated surface water from lakes, ponds, rivers and streams in 2022?'],
+['Water','WHO','arsenic and fluoride','Which two naturally occurring chemicals in groundwater does the WHO flag as health risks in drinking water?'],
+['Water','WHO','lead','Per the WHO, which chemical can be elevated in drinking water from leaching of water-supply components?'],
+['Water','WHO','2015','In what year did WHO and UNICEF jointly develop WASH FIT?'],
+['Water','WHO','2004','Since what year have the WHO Guidelines for drinking-water quality promoted the Framework for safe drinking-water?'],
+['Water','WHO','dengue fever','Per the WHO, water-breeding insect vectors transmit which disease, notably breeding in clean water?',['dengue']],
+['Water','WHO','6-fold','Per the WHO, what increase in the rate of progress is needed to reach universal safely managed drinking water by 2030?',['six fold','sixfold','6 fold']],
+['Water','WHO','15','Out of every 100 acute-care hospital patients in low- and middle-income countries, how many get a health care-associated infection, per the WHO?'],
+['Water','WHO','7','Out of every 100 acute-care hospital patients in high-income countries, how many get a health care-associated infection, per the WHO?'],
+// ---- WATER · Britannica ----
+['Water','Britannica','physical and economic','What are the two general types of water scarcity, per Britannica?',['physical and economic scarcity']],
+['Water','Britannica','1.2 billion','Per Britannica (citing the FAO), about how many people live in areas of physical water scarcity?'],
+['Water','Britannica','two-thirds','Per Britannica, what fraction of the world\'s population faces seasonal water scarcity at least one month a year?',['2/3','two thirds']],
+['Water','Britannica','1.6 billion','Per Britannica (FAO), how many people face economic water shortage?'],
+['Water','Britannica','non-revenue water','Per Britannica, what term describes treated water lost to leaks before it is ever used?'],
+['Water','Britannica','about 20 percent','Per Britannica, what is the average non-revenue water loss in the United States?',['20%','20 percent']],
+['Water','Britannica','Mexico City','Per Britannica, which megacity of 20+ million is a classic example of economic water scarcity?'],
+['Water','Britannica','40 centimeters','Per Britannica, how much do parts of Mexico City sink each year from aquifer over-withdrawal?',['40 cm','16 inches']],
+['Water','Britannica','Aral Sea','Per Britannica, which lake — once the world\'s fourth largest — shrank after its rivers were diverted for irrigation?'],
+['Water','Britannica','one-third','Per Britannica, what fraction of the world\'s largest aquifer systems are in distress?',['a third']],
+['Water','Britannica','Cape Town','Per Britannica, which city nearly became the first major city to hit "Day Zero," in 2018?'],
+['Water','Britannica','triple bottom line','Per Britannica, what name is given to balancing economics, environment, and equity in water management?'],
+['Water','Britannica','desalination','Per Britannica, what energy-intensive process supplies much of Saudi Arabia\'s municipal water?'],
+['Water','Britannica','permanent, seasonal, unpredictable, and invisible','Per Britannica, what are the four basic kinds of drought?'],
+['Water','Britannica','70 percent','Per Britannica, about what share of all freshwater resources is devoted to agriculture?',['70%','seventy percent']],
+// ---- WATER · CFR ----
+['Water','CFR','water bankruptcy','Per the CFR, what term did a January 2026 UN report use for the era of structural depletion of global water systems?'],
+['Water','CFR','Falkenmark Water Stress Indicator','Per the CFR, what indicator measures renewable freshwater available per person each year?',['falkenmark']],
+['Water','CFR','1,700 cubic meters','Per the CFR, below what annual per-capita figure (Falkenmark) is an area "water stressed"?',['1700 cubic meters']],
+['Water','CFR','1,000 cubic meters','Per the CFR (Falkenmark), below what per-capita figure is an area in "water scarcity"?',['1000 cubic meters']],
+['Water','CFR','500 cubic meters','Per the CFR (Falkenmark), below what per-capita figure is an area in "absolute scarcity"?'],
+['Water','CFR','Qatar','Per the CFR, which Gulf country relies on desalination for 99% of its drinking water?'],
+['Water','CFR','saltwater kingdoms','Per the CFR, what moniker describes Gulf states dependent on desalination?'],
+['Water','CFR','420','Per the CFR, how many water-related conflicts did the Pacific Institute record in 2024, a record?'],
+['Water','CFR','Nile Basin','Per the CFR, which transboundary river system is a prominent source of Egypt-Ethiopia tension over the GERD?'],
+['Water','CFR','Grand Ethiopian Renaissance Dam','Per the CFR, what Blue Nile hydroelectric project does Egypt fear will cut its water share?',['gerd']],
+['Water','CFR','aquacide','Per the CFR, what term describes the deliberate weaponization of water resources, as in Russia\'s attacks in Ukraine?'],
+['Water','CFR','Panama Canal','Per the CFR, which canal restricted ship traffic in 2023 due to drought-driven low water?'],
+['Water','CFR','$630 billion','Per the CFR, how much does the EPA estimate US states need over two decades for clean water infrastructure?'],
+['Water','CFR','Goal 6','Per the CFR, which Sustainable Development Goal targets water and sanitation for all?',['sdg 6','sdg goal 6']],
+['Water','CFR','15 of 20','Per the CFR (UNICEF), how many of the world\'s 20 most water-scarce countries are in the MENA region?'],
+['Water','CFR','75 percent','Per the CFR, about what share of the world\'s population lives in water-insecure countries?',['75%']],
+// ---- WATER · St. Louis Gov ----
+['Water','St. Louis Gov','Missouri and Mississippi','Per the St. Louis Gov source, St. Louis was founded at the confluence of which two rivers?'],
+['Water','St. Louis Gov','Missouri River','Per the St. Louis Gov source, the city\'s two purification plants draw water primarily from which river?'],
+['Water','St. Louis Gov','150 million gallons','Per the St. Louis Gov source, how much clean water do the city\'s two plants produce each day?'],
+['Water','St. Louis Gov','over 150','Per the St. Louis Gov source, how many contaminants does the Water Division constantly test for?',['150 contaminants']],
+['Water','St. Louis Gov','2007','Per the St. Louis Gov source, in what year was St. Louis named "Best Tasting City Water in America"?'],
+['Water','St. Louis Gov','Francis Slay','Per the St. Louis Gov source, which former mayor signed Executive Order #43 banning city purchase of bottled water?'],
+['Water','St. Louis Gov','Executive Order #43','Per the St. Louis Gov source, what 2008 order banned city departments from buying bottled water?',['executive order 43']],
+['Water','St. Louis Gov','$4 billion','Per the St. Louis Gov source, how much in improvements has the Metropolitan Sewer District planned or underway?'],
+['Water','St. Louis Gov','4.4 pounds','Per the St. Louis Gov source, how many pounds of airborne particulates can one square meter of green roof remove per year?'],
+['Water','St. Louis Gov','Citygarden','Per the St. Louis Gov source, which downtown sculpture park contains six rain gardens?'],
+// ---- WATER · Channel 5 News ----
+['Water','Channel 5 News','1,300 miles','Per Channel 5 News, how many miles of water main run under St. Louis?',['1300 miles']],
+['Water','Channel 5 News','800,000','Per Channel 5 News, what was St. Louis\'s peak population, which its water system was built to serve?',['eight hundred thousand']],
+['Water','Channel 5 News','$700 million','Per Channel 5 News, how much capital investment has the Water Department identified as needed over coming decades?'],
+['Water','Channel 5 News','Niraj Patel','Per Channel 5 News, who is the St. Louis Water Department Commissioner featured in the story?',['patel']],
+['Water','Channel 5 News','399','Per Channel 5 News, how many times did St. Louis water mains break last year?'],
+['Water','Channel 5 News','1835','Per Channel 5 News, since what year has the St. Louis water division been municipally owned?'],
+['Water','Channel 5 News','Howard Bend','Per Channel 5 News, which plant on the Missouri River pumps 120 million gallons a day and has run since 1929?'],
+['Water','Channel 5 News','Chain of Rocks','Per Channel 5 News, which St. Louis plant went online in 1894 and can pump 240 million gallons a day?'],
+['Water','Channel 5 News','125 million gallons','Per Channel 5 News, about how much water does St. Louis consume each day?'],
+['Water','Channel 5 News','360 million gallons','Per Channel 5 News, the St. Louis system was built to produce how much water per day?'],
+['Water','Channel 5 News','data centers','Per Channel 5 News, what new industry does Commissioner Patel suggest could revive the water system\'s rate base?'],
+['Water','Channel 5 News','rate base','Per Channel 5 News, what term means the number of people sharing the cost of the system?'],
+['Water','Channel 5 News','Black & Veatch','Per Channel 5 News, which consulting firm had recommended the 2023 water rate increase?',['black and veatch']],
+['Water','Channel 5 News','flood of 1993','Per Channel 5 News, during which historic flood did the Howard Bend plant\'s wall hold and pumps keep running?',['1993 flood']],
+// ---- SUDAN · Wilson Center ----
+['Sudan','Wilson Center','Zeinab Mohammed Salih','Per the Wilson Center, which Guardian/BBC journalist based in Khartoum wrote "Conflict in Sudan: A Map of Regional and International Actors"?'],
+['Sudan','Wilson Center','United Arab Emirates','Per the Wilson Center, which country supports the RSF, contrary to its ally Saudi Arabia?',['uae']],
+['Sudan','Wilson Center','Saudi Arabia','Per the Wilson Center, which country hosts Sudan peace talks in Jeddah and supports the SAF?'],
+['Sudan','Wilson Center','Jeddah','Per the Wilson Center, in which Saudi city were several Sudan peace talks hosted?'],
+['Sudan','Wilson Center','Egypt','Per the Wilson Center, which country has historically always supported the Sudanese army, founded jointly with its own during colonial rule?'],
+['Sudan','Wilson Center','Wagner Group','Per the Wilson Center, which Russian paramilitary group supported the RSF before and after the war?',['wagner']],
+['Sudan','Wilson Center','Bayraktar','Per the Wilson Center, Turkey reportedly offered which famous drones to the Sudanese army?',['bayraktar drones']],
+['Sudan','Wilson Center','Muhajir-6','Per the Wilson Center, Iran offered which drones that helped push the RSF out of Omdurman?',['muhajir 6','mohajer 6']],
+['Sudan','Wilson Center','11 million','Per the Wilson Center, how many Sudanese have been displaced — the world\'s largest displacement crisis?'],
+['Sudan','Wilson Center','90 percent','Per the Wilson Center, oil represents about what share of South Sudan\'s national income?',['90%']],
+['Sudan','Wilson Center','Russia and Ukraine','Per the Wilson Center, which two warring countries paradoxically both support the SAF?'],
+['Sudan','Wilson Center','Chad','Per the Wilson Center, which country was accused of facilitating UAE weapons to the RSF via airports at Abeche?'],
+['Sudan','Wilson Center','Algeria','Per the Wilson Center, which country offered fighter jets to the SAF, partly because the UAE backs Morocco?'],
+// ---- SUDAN · Britannica (Darfur / Janjaweed / ICC) ----
+['Sudan','Britannica','Land of the Fur','Per Britannica, what does "Darfur" mean in Arabic?',['home of the fur']],
+['Sudan','Britannica','Marrah Mountains','Per Britannica, which volcanic highlands dominate central Darfur?'],
+['Sudan','Britannica','Mount Marrah','Per Britannica, what is the highest peak in Darfur, at 10,131 feet?'],
+['Sudan','Britannica','Nyala and Al-Fashir','Per Britannica, what are the two principal towns of Darfur?',['nyala','al-fashir','el fasher']],
+['Sudan','Britannica','spirit and horse','Per Britannica, the name "Janjaweed" is thought to derive from the Arabic words jinni and jawad — meaning what?',['jinni and jawad','spirit and horse']],
+['Sudan','Britannica','Colin Powell','Per Britannica, which US Secretary of State called the Janjaweed campaign a genocide in 2004?'],
+['Sudan','Britannica','March 4, 2009','Per Britannica, when did the ICC issue its first arrest warrant for Omar al-Bashir?'],
+['Sudan','Britannica','2013','Per Britannica, in what year was the RSF formed from a Janjaweed faction under Hemedti?'],
+['Sudan','Britannica','Ali Kushayb','Per Britannica, which Janjaweed leader became the first convicted at the ICC for Darfur crimes, found guilty in 2025?',['ali muhammad ali abd-al-rahman']],
+['Sudan','Britannica','1998','Per Britannica, the ICC was established by the Rome Statute in what year?'],
+['Sudan','Britannica','The Hague','Per Britannica, where is the International Criminal Court headquartered?'],
+['Sudan','Britannica','Fur, Masalit, and Zaghawa','Per Britannica, the Janjaweed conducted ethnic cleansing against which three peoples?',['fur masalit zaghawa']],
+// ---- HOUSING · WashU ----
+['Housing','WashU','Still separate and unequal','What is the title phrase of the WashU study on subsidized housing?'],
+['Housing','WashU','Elizabeth Korver-Glenn','Per the WashU source, which WashU sociology professor co-authored the subsidized-housing study?',['korver-glenn']],
+['Housing','WashU','$110','Per the WashU study, how much more per month do Latino subsidized renters pay than white ones — a 25% upcharge?'],
+['Housing','WashU','$75','Per the WashU study, how much more per month do Black and Asian subsidized renters pay than white ones?'],
+['Housing','WashU','42 percent','Per the WashU study, white renters remain the largest racial group among subsidized renters — at what share?',['42%']],
+['Housing','WashU','1968 Housing and Urban Development Act','Per the WashU source, which 1968 law followed activist pressure over public housing segregation?'],
+['Housing','WashU','10 million','Per the WashU source, how many Americans receive federal rental assistance today?'],
+['Housing','WashU','2017 American Housing Survey','Per the WashU source, which HUD survey data did the researchers use?'],
+['Housing','WashU','Socius','Per the WashU source, in which journal was the study published in August 2023?'],
+['Housing','WashU','tenant voucher program','Per the WashU study, which housing subsidy program is the most expensive for both government and residents?'],
+// ---- HOUSING · Reimagining St. Louis ----
+['Housing','Reimagining St. Louis','1916','Per the Reimagining St. Louis report, in what year did the St. Louis Real Estate Exchange put a segregationist "Negro blocks" zoning ordinance on the ballot?',['1915']],
+['Housing','Reimagining St. Louis','Buchanan v. Warley','Per the Reimagining St. Louis report, which 1917 Supreme Court case struck down the racial zoning ordinance?'],
+['Housing','Reimagining St. Louis','Home Owners\' Loan Corporation','Per the Reimagining St. Louis report, which Depression-era agency created the residential security maps that began redlining?',['holc']],
+['Housing','Reimagining St. Louis','Best, Still Desirable, Definitely Declining, and Hazardous','Per the Reimagining St. Louis report, what were the four HOLC map grades (A/B/C/D)?'],
+['Housing','Reimagining St. Louis','red','Per the Reimagining St. Louis report, what color marked "Hazardous" (D) areas on HOLC maps?'],
+['Housing','Reimagining St. Louis','Fair Housing Act of 1968','Per the Reimagining St. Louis report, which 1968 law was meant to dismantle discriminatory housing practices?'],
+['Housing','Reimagining St. Louis','Mill Creek Valley','Per the Reimagining St. Louis report, which neighborhood\'s destruction by urban renewal was dubbed "Negro Removal"?'],
+['Housing','Reimagining St. Louis','74,282','Per the Reimagining St. Louis report, roughly how many home purchases (2017-2022) were analyzed?',['nearly 75000','74282']],
+['Housing','Reimagining St. Louis','$53,525','Per the Reimagining St. Louis report, what was the median income of Black single homebuyers (vs $88,919 for non-Black)?'],
+['Housing','Reimagining St. Louis','58 points','Per the Reimagining St. Louis report, what was the VantageScore 4.0 credit-score gap between Black and non-Black single homebuyers (688 vs 746)?'],
+// ---- HOUSING · CDA ----
+['Housing','CDA','2020 to 2024','What period does the CDA Impact Report cover?',['2020-2024']],
+['Housing','CDA','1974','Per the CDA report, in what year was the Community Development Administration founded to oversee HUD block grants?'],
+['Housing','CDA','$58 million','Per the CDA report, expenditures more than tripled to what figure in 2024 (from $19M in 2020)?',['58 million']],
+['Housing','CDA','24,000','Per the CDA report, roughly how many vacant parcels does St. Louis have?',['24000']],
+['Housing','CDA','9,000','Per the CDA report, St. Louis\'s vacant parcels include roughly how many vacant buildings?'],
+['Housing','CDA','10,000 units','Per the CDA report, Mayor Jones set a goal of developing how many housing units (incl. 5,000 affordable) by 2030?'],
+['Housing','CDA','$250 million','Per the CDA report, the City committed over how much toward housing justice initiatives?',['250 million']],
+['Housing','CDA','14 percent','Per the CDA report, about what share of St. Louis households (19,467) lack a broadband subscription?',['14%']],
+['Housing','CDA','$30 million','Per the CDA report, what competitive Choice Neighborhoods grant did St. Louis win under the Obama administration in 2016?'],
+];
+EXTRA.forEach(c=>QB.push(mkCard(c[0],c[1],c[3],c[2],c[4])));
+
 // ── MERGE PASTE-IMPORTED CARDS (from localStorage) ───────────────────────────
 function loadImported(){
   try{
@@ -1139,6 +1280,29 @@ $('impClear').addEventListener('click',()=>{
   $('impMsg').textContent='Cleared. Reload the page to fully reset the bank.';
 });
 
+// ── ANSWER KEY (grouped by topic → source, honors current Topic filter) ───────
+$('keyBtn').addEventListener('click',()=>{
+  const box=$('keyBox');
+  if(box.style.display!=='none'){box.style.display='none';return;}
+  const tf=$('topicSel').value, sf=$('sourceSel').value;
+  const list=QB.filter(q=>(tf==='all'||q.topic===tf)&&(sf==='all'||q.source===sf));
+  const byTopic={};
+  list.forEach(q=>{(byTopic[q.topic]=byTopic[q.topic]||{});(byTopic[q.topic][q.source]=byTopic[q.topic][q.source]||[]).push(q);});
+  let html=`<b>Answer Key</b> — ${list.length} questions${tf!=='all'?' · '+esc(tf):''}${sf!=='all'?' · '+esc(sf):''}`;
+  TOPICS.concat(Object.keys(byTopic).filter(t=>!TOPICS.includes(t))).forEach(topic=>{
+    if(!byTopic[topic])return;
+    html+=`<div style="margin-top:14px;color:var(--accent);font-weight:700;font-size:.95rem;">${esc(topic)}</div>`;
+    Object.keys(byTopic[topic]).sort().forEach(src=>{
+      html+=`<div style="margin-top:8px;color:var(--yellow);font-weight:600;">${esc(src)} <span style="color:var(--text2);font-weight:400;">(${byTopic[topic][src].length})</span></div>`;
+      byTopic[topic][src].forEach(q=>{
+        const disp=(q.tossup||'').replace(/\s*For \d+ points[.:].*$/i,'').trim();
+        html+=`<div style="margin:5px 0;padding-left:10px;border-left:2px solid var(--border);"><span style="color:var(--text);">${esc(disp)}</span><br><span style="color:var(--green);font-weight:600;">${esc(q.answer)}</span></div>`;
+      });
+    });
+  });
+  box.innerHTML=html; box.style.display='';
+});
+
 // ── SHOW ANSWER (no scoring) ──────────────────────────────────────────────────
 $('revealBtn').addEventListener('click',()=>{
   if(!waitingAns)return;
@@ -1146,7 +1310,7 @@ $('revealBtn').addEventListener('click',()=>{
   if(blindMode){revealed=true;const ft=getQText();words=ft.split(/\s+/);wordIdx=words.length;renderQText();}
   buzzBtn.disabled=true; ansRow.style.display='none'; part2Hint.style.display='none';
   navRow.style.display='flex';
-  feedback.className='feedback correct'; feedback.style.display='';
+  feedback.className='feedback correct'; feedback.style.display='block';
   fbMsg.innerHTML='Answer revealed';
   fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
   fbReveal.style.display='';
@@ -1339,7 +1503,7 @@ function submitAnswer() {
   }
   buzzBtn.disabled=true; ansRow.style.display='none'; part2Hint.style.display='none';
   navRow.style.display='flex';
-  feedback.className='feedback '+(correct?'correct':'wrong'); feedback.style.display='';
+  feedback.className='feedback '+(correct?'correct':'wrong'); feedback.style.display='block';
   if (correct) {
     score+=curPts; nRight++;
     fbMsg.innerHTML=`✓ Correct! <b>+${curPts}</b> points`;
