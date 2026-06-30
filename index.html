@@ -146,8 +146,8 @@
 <main>
   <div class="mode-row">
     <button class="mode-btn active" data-mode="practice">Practice</button>
-    <button class="mode-btn" data-mode="round1">Round 1</button>
-    <button class="mode-btn" data-mode="round23">Round 2 / 3</button>
+    <button class="mode-btn" data-mode="round1">Round 1 · 100/50</button>
+    <button class="mode-btn" data-mode="round23">Round 2/3 · 20–140</button>
     <button class="mode-btn" data-mode="finals">Finals</button>
     <div class="spacer"></div>
     <button id="compBtn">Competition <span id="compPill" class="pill off">OFF</span></button>
@@ -156,9 +156,9 @@
   </div>
   <div id="finalsRow" style="display:none;margin-bottom:12px;">
     <div class="mode-row">
-      <button class="mode-btn active" data-fin="fr1">Finals R1 — 100 pts, no penalty</button>
-      <button class="mode-btn" data-fin="fr2">Finals R2 — 200 pts, −10%</button>
-      <button class="mode-btn" data-fin="fr3">Jeopardy — pick value</button>
+      <button class="mode-btn active" data-fin="fr1">Finals R1 · 100 pts</button>
+      <button class="mode-btn" data-fin="fr2">Finals R2 · 200 pts</button>
+      <button class="mode-btn" data-fin="fr3">Finals R3 · Jeopardy</button>
     </div>
   </div>
   <div class="controls">
@@ -209,7 +209,11 @@
     </ul>
   </div>
   <div id="boardWrap">
-    <div style="font-size:.8rem;color:var(--text2);margin-bottom:6px;">Pick a cell:</div>
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+      <span style="font-weight:900;text-transform:uppercase;letter-spacing:-.01em;font-size:1.05rem;">MIST Bowl — Finals Round 3</span>
+      <span style="font-weight:900;color:#fff;background:var(--red);border:2px solid var(--border);padding:1px 8px;text-transform:uppercase;letter-spacing:.06em;font-size:.65rem;">Jeopardy</span>
+    </div>
+    <div style="font-size:.72rem;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Lowest-scoring team picks a category &amp; value — e.g. "Water for 300"</div>
     <div class="board-grid" id="boardGrid"></div>
     <div style="height:14px;"></div>
   </div>
@@ -1474,11 +1478,12 @@ function loadQuestion(overridePts) {
   startTTS(`For ${curPts} points: ${getQText()}`);
 }
 
+const R23_VALS = [20,40,60,80,100,120,140]; // MIST Round 2/3: 20→140 in 20-pt steps
 function getBasePts() {
   if (mode===M.PRACTICE) return 10;
-  if (mode===M.R1) return 100;
-  if (mode===M.R23) return 300;
-  if (mode===M.FINALS) return finRound===FR.R1?100:finRound===FR.R2?200:300;
+  if (mode===M.R1) return 100;                 // MIST Round 1: 100 (50 on second part)
+  if (mode===M.R23) return R23_VALS[Math.floor(Math.random()*R23_VALS.length)];
+  if (mode===M.FINALS) return finRound===FR.R1?100:finRound===FR.R2?200:300; // Finals R1=100, R2=200
   return 10;
 }
 function calcPenalty(pts) {
@@ -1631,11 +1636,8 @@ function submitAnswer() {
   fbReveal.style.display='';
   if (compActive) { compCount++; if(correct) compRight++; updateStatsBar(); }
   saveStorage(); updateScoreUI(); updateStatsBar();
-  if (compActive && correct) {
-    compTimer=setTimeout(goNext, 1100); // smooth auto-advance on a correct answer
-  } else {
-    $('nextBtn').focus();
-  }
+  // Always reveal the answer and wait — press Enter (or Next) to continue
+  $('nextBtn').focus();
 }
 // Mark-correct override: speech/spelling missed it but you actually had it
 $('markBtn').addEventListener('click',()=>{
