@@ -151,6 +151,7 @@
     <button class="mode-btn" data-mode="finals">Finals</button>
     <div class="spacer"></div>
     <button id="compBtn">Competition <span id="compPill" class="pill off">OFF</span></button>
+    <select id="compLenSel" title="Questions per round"><option value="10">10 Qs</option><option value="15" selected>15 Qs</option><option value="20">20 Qs</option><option value="30">30 Qs</option></select>
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
   </div>
   <div id="finalsRow" style="display:none;margin-bottom:12px;">
@@ -250,7 +251,9 @@
     <div>Score: <b id="stScore">0</b></div>
     <div>Streak: <b id="stStreak">0</b></div>
     <div>Best: <b id="stBest">0</b></div>
+    <div id="compProg" style="display:none;">Round: <b id="stProg">0/0</b></div>
   </div>
+  <div id="resultBox" class="rules-box" style="display:none;text-align:center;"></div>
 </main>
 <script>
 // ── QUESTION BANK ────────────────────────────────────────────────────────────
@@ -1250,6 +1253,7 @@ const TOPICS = ['Water','Sudan','Housing','Seerah','Current Events'];
 
 let mode = M.PRACTICE, finRound = FR.R1;
 let compMode = false, streak = 0, bestStreak = 0, lastWrong = false, compTimer = null;
+let compLen = 15, compCount = 0, compRight = 0, compStartScore = 0, compActive = false;
 let blindMode = false, revealed = false;
 let score = 0, nRight = 0, nWrong = 0;
 let pool = [], poolIdx = 0, curQ = null, curPts = 10;
@@ -1400,13 +1404,21 @@ function updateBlindUI() {
 
 // ── SESSION ───────────────────────────────────────────────────────────────────
 function startSession() {
-  stopTTS(); clearTimer();
+  stopTTS(); clearTimer(); clearTimeout(compTimer);
+  $('resultBox').style.display='none';
   const tf = $('topicSel').value, sf = $('sourceSel').value;
   if (mode===M.FINALS && finRound===FR.R3) { buildBoard(tf); return; }
   let f = QB.filter(q => (tf==='all'||q.topic===tf) && (sf==='all'||q.source===sf));
   if (!f.length) { $('qcount').textContent='No questions match that filter'; return; }
   pool = f.sort(()=>Math.random()-.5); poolIdx = 0;
   boardWrap.style.display = 'none';
+  // Competition = a fixed-length scored round
+  compActive = compMode;
+  if (compActive) {
+    compLen = Math.min(+$('compLenSel').value||15, pool.length);
+    compCount = 0; compRight = 0; compStartScore = score; streak = 0;
+    $('compProg').style.display='';
+  } else { $('compProg').style.display='none'; }
   $('qcount').textContent = pool.length + ' questions';
   loadQuestion();
 }
@@ -1617,9 +1629,10 @@ function submitAnswer() {
   }
   fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
   fbReveal.style.display='';
+  if (compActive) { compCount++; if(correct) compRight++; updateStatsBar(); }
   saveStorage(); updateScoreUI(); updateStatsBar();
-  if (compMode && correct && !(mode===M.FINALS&&finRound===FR.R3)) {
-    compTimer=setTimeout(goNext, 1200); // smooth auto-advance on a correct answer
+  if (compActive && correct) {
+    compTimer=setTimeout(goNext, 1100); // smooth auto-advance on a correct answer
   } else {
     $('nextBtn').focus();
   }
@@ -1631,16 +1644,42 @@ $('markBtn').addEventListener('click',()=>{
   const pen=calcPenalty(curPts); score+=pen;       // undo any penalty
   score+=curPts; nRight++; nWrong=Math.max(0,nWrong-1);
   streak++; if(streak>bestStreak)bestStreak=streak;
+  if(compActive) compRight++;
   feedback.className='feedback correct';
   fbMsg.innerHTML=`✓ Counted correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
   saveStorage(); updateScoreUI(); updateStatsBar();
 });
 function goNext(){
   clearTimeout(compTimer);
+  if (compActive && compCount>=compLen) { showCompResults(); return; }
   if (mode===M.FINALS&&finRound===FR.R3) buildBoard($('topicSel').value);
   else loadQuestion();
 }
 $('nextBtn').addEventListener('click',goNext);
+
+function showCompResults(){
+  compActive=false;
+  stopTTS(); clearTimer(); clearTimeout(compTimer);
+  [qCard,buzzBtn,ansRow,feedback,navRow,part2Hint].forEach(el=>el.style.display='none');
+  $('compProg').style.display='none';
+  const total=compCount, acc=total?Math.round(100*compRight/total):0;
+  const roundScore=score-compStartScore;
+  const grade=acc>=90?'OUTSTANDING':acc>=75?'STRONG':acc>=50?'KEEP GOING':'MORE REPS';
+  const chip=(l,v,c)=>`<div style="border:3px solid var(--border);background:${c};padding:10px 14px;min-width:90px;"><div style="font-size:.65rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;">${l}</div><div style="font-size:1.6rem;font-weight:900;line-height:1;margin-top:4px;">${v}</div></div>`;
+  $('resultBox').innerHTML=
+    `<div style="font-size:1.6rem;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;">Round Complete</div>`+
+    `<div style="font-weight:900;color:var(--red);letter-spacing:.06em;margin-top:2px;">${grade}</div>`+
+    `<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0;">`+
+      chip('Correct',`${compRight}/${total}`,'var(--surface)')+
+      chip('Accuracy',`${acc}%`,'var(--yellow)')+
+      chip('Round Pts',roundScore,'var(--surface)')+
+      chip('Best Streak',bestStreak,'var(--blue);color:#fff')+
+    `</div>`+
+    `<button id="againBtn" class="primary">▶ New Round</button>`;
+  $('resultBox').style.display='';
+  $('againBtn').onclick=startSession;
+  $('againBtn').focus();
+}
 
 // ── FUZZY MATCH ───────────────────────────────────────────────────────────────
 const STOP=new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','for','with','from','by','as','be','been']);
@@ -1680,12 +1719,19 @@ function isCorrect(typed,q){
   const t=norm(typed); if(!t)return false;
   const tp=phon(t);
   return [q.answer,...(q.alternates||[])].map(norm).filter(Boolean).some(ans=>{
-    if(t===ans||t.includes(ans)||ans.includes(t))return true;
-    if(lev(t,ans)<=Math.max(2,Math.floor(Math.max(t.length,ans.length)*.22)))return true;
-    // phonetic fallback — catches speech-to-text mishearings of proper nouns
-    const ap=phon(ans);
-    if(ap&&tp&&(tp===ap||tp.includes(ap)||ap.includes(tp)))return true;
-    return ap&&tp&&lev(tp,ap)<=Math.max(1,Math.floor(Math.max(tp.length,ap.length)*.2));
+    if(t===ans) return true;
+    // You said at least the whole expected answer (plus maybe extra words)
+    if(ans.length>=4 && (t===ans || t.includes(' '+ans+' ') || t.startsWith(ans+' ') || t.endsWith(' '+ans) || (ans.length>=8 && t.includes(ans)))) return true;
+    // Tolerant matching ONLY for short answers / proper nouns / numbers — keeps long
+    // definitions strict so wrong input can't accidentally match a huge phrase.
+    if(ans.length<=22){
+      const tol = ans.length<=6 ? 1 : 2;
+      if(lev(t,ans)<=tol && Math.abs(t.length-ans.length)<=tol+1) return true;
+      const ap=phon(ans);
+      if(ap&&tp&&ap===tp) return true;                                   // e.g. cartoon ≈ khartoum
+      if(ap&&tp&&lev(tp,ap)<=1 && Math.abs(tp.length-ap.length)<=2) return true;
+    }
+    return false;
   });
 }
 
@@ -1699,6 +1745,7 @@ function updateStatsBar(){
   $('stScore').textContent=score;
   $('stStreak').textContent=streak;
   $('stBest').textContent=bestStreak;
+  if(compActive){ $('compProg').style.display=''; $('stProg').textContent=Math.min(compCount+1,compLen)+'/'+compLen; }
 }
 document.addEventListener('keydown',e=>{
   if(e.code==='Space'&&!waitingAns&&!buzzBtn.disabled&&buzzBtn.style.display!=='none'){
