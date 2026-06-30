@@ -150,6 +150,7 @@
     <button class="mode-btn" data-mode="round23">Round 2 / 3</button>
     <button class="mode-btn" data-mode="finals">Finals</button>
     <div class="spacer"></div>
+    <button id="compBtn">Competition <span id="compPill" class="pill off">OFF</span></button>
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
   </div>
   <div id="finalsRow" style="display:none;margin-bottom:12px;">
@@ -239,13 +240,16 @@
     <div class="ans-reveal" id="fbReveal" style="display:none;"></div>
   </div>
   <div class="nav-row" id="navRow" style="display:none;">
-    <button id="nextBtn">Next →</button>
+    <button id="markBtn" style="display:none;">✓ Mark me correct</button>
+    <button id="nextBtn" class="primary">Next →</button>
   </div>
   <div class="stats" id="statsBar" style="display:none;">
     <div>Answered: <b id="stTotal">0</b></div>
     <div>Correct: <b id="stRight" style="color:var(--green);">0</b></div>
     <div>Wrong: <b id="stWrong" style="color:var(--red);">0</b></div>
     <div>Score: <b id="stScore">0</b></div>
+    <div>Streak: <b id="stStreak">0</b></div>
+    <div>Best: <b id="stBest">0</b></div>
   </div>
 </main>
 <script>
@@ -965,112 +969,165 @@ SUDAN_CFR.forEach(p=>QB.push(mkCard('Sudan','CFR (Tracker)',p[1],p[0],p[2])));
 // Format: [topic, source, answer, clue, altsArray?]
 const EXTRA=[
 // ---- WATER · WHO ----
-['Water','WHO','over 2 billion','How many people live in water-stressed countries as of 2021, per the WHO?',['2 billion','two billion']],
-['Water','WHO','at least 1.7 billion','How many people used a drinking water source contaminated with feces in 2022, per the WHO?',['1.7 billion']],
-['Water','WHO','microbial contamination from fecal matter','What poses the greatest risk to drinking-water safety, per the WHO?',['microbial contamination','fecal contamination','microbiological contamination']],
-['Water','WHO','diarrhoea, cholera, dysentery, typhoid, and polio','What diseases can microbiologically contaminated water transmit, per the WHO?',['diarrhea cholera dysentery typhoid polio']],
-['Water','WHO','approximately 505,000','How many diarrhoeal deaths does contaminated water cause each year, per the WHO?',['505000','505,000']],
-['Water','WHO','73% (6 billion people)','What percentage of the global population used safely managed drinking water in 2022, per the WHO?',['73%','73 percent','6 billion']],
-['Water','WHO','2010','When did the UN General Assembly recognize the human right to water and sanitation?'],
-['Water','WHO','universal and equitable access to safe and affordable drinking water','What is SDG target 6.1?',['sdg 6.1','safe and affordable drinking water']],
-['Water','WHO','safely managed drinking water services','What indicator tracks SDG target 6.1, per the WHO?'],
-['Water','WHO','2.2 billion','How many people lacked safely managed water services in 2022, per the WHO?'],
-['Water','WHO','1.5 billion','How many people had only basic water services in 2022 — an improved source within a 30-minute round trip — per the WHO?'],
-['Water','WHO','292 million','How many people had only limited water services in 2022 — a source requiring more than 30 minutes to collect — per the WHO?'],
-['Water','WHO','296 million','How many people took water from unprotected wells and springs in 2022, per the WHO?'],
-['Water','WHO','115 million','How many people collected untreated surface water in 2022, per the WHO?'],
-['Water','WHO','cholera, diarrhoea, dysentery, hepatitis A, typhoid, and polio','What diseases are linked to contaminated water and poor sanitation, per the WHO?'],
-['Water','WHO','7 out of 100','How many patients in high-income countries acquire a health care-associated infection, per the WHO?',['7']],
-['Water','WHO','15 out of 100','How many patients in low- and middle-income countries acquire a health care-associated infection, per the WHO?',['15']],
-['Water','WHO','about 1 million','How many people die each year from diarrhoea due to unsafe water, per the WHO?',['1 million','one million']],
-['Water','WHO','395,000','How many child deaths under 5 could be prevented each year by addressing water risk factors, per the WHO?',['395000']],
-['Water','WHO','over 251.4 million','How many people required preventative treatment for schistosomiasis in 2021, per the WHO?',['251.4 million','251 million']],
-['Water','WHO','parasitic worms contracted through exposure to infested water','What is schistosomiasis caused by, per the WHO?',['parasitic worms']],
-['Water','WHO','dengue fever','What disease do water-breeding insects transmit, per the WHO?',['dengue']],
-['Water','WHO','covering water storage containers','What simple intervention reduces vector breeding in household water, per the WHO?'],
-['Water','WHO','historical rates would need to double','What rate increase is needed to achieve universal basic drinking water by 2030, per the WHO?',['double']],
-['Water','WHO','a 6-fold increase','What increase is needed for universal safely managed water services, per the WHO?',['6 fold','six fold','sixfold']],
-['Water','WHO','2004','Since when has WHO published Guidelines for drinking-water quality?'],
-['Water','WHO','Framework for safe drinking-water','What framework do the WHO guidelines promote?'],
-['Water','WHO','health-based targets, water safety plans, and independent surveillance','What does the WHO Framework recommend?'],
-['Water','WHO','2014','Since when has WHO tested household water treatment products?'],
-['Water','WHO','WHO International Scheme to Evaluate Household Water Treatment Technologies','What is the WHO scheme called for testing water treatment products?'],
-['Water','WHO','UNICEF','What organization does WHO work closely with on water and health?'],
-['Water','WHO','Water and Sanitation for Health Facility Improvement Tool','What is WASH FIT — jointly developed by WHO and UNICEF in 2015?',['wash fit']],
-['Water','WHO','a continuous cycle of improvement through assessments, prioritization of risk, and targeted actions','What does WASH FIT guide health facilities through?'],
-['Water','WHO','2023','When was a report on improving WASH in health care facilities published, per the WHO?'],
-['Water','WHO','arsenic and fluoride','What two chemicals occur naturally in groundwater and can be of health significance, per the WHO?'],
-['Water','WHO','lead','What chemical can enter drinking-water through leaching from water supply components, per the WHO?'],
-['Water','WHO','from catchment to consumer','What is the key mechanism Water Safety Plans use to manage risk, backed by independent surveillance?',['catchment to consumer']],
-['Water','WHO','schistosomiasis is parasitic worms via infested water; dengue is spread by insect vectors that breed in water','What is the difference between how schistosomiasis and dengue fever are contracted via water, per the WHO?'],
-['Water','WHO','protect users from diarrhoeal-disease pathogens and strengthen national policy and monitoring','What does WHO\'s scheme to evaluate household water treatment technologies test products for?'],
-['Water','WHO','395,000 under-5 deaths are a preventable subset of the ~1 million total','How does the 395,000 child death figure relate to the ~1 million total diarrhoeal death figure, per the WHO?'],
+['Water','WHO',`Over 2 billion`,`How many people lived in water-stressed countries as of 2021?`],
+['Water','WHO',`Climate change and population growth`,`What two factors are expected to exacerbate water stress in some regions going forward?`],
+['Water','WHO',`At least 1.7 billion`,`How many people used a drinking water source contaminated with feces in 2022?`],
+['Water','WHO',`Microbial contamination as a result of contamination with feces`,`What poses the greatest risk to drinking-water safety?`],
+['Water','WHO',`Diarrhoea, cholera, dysentery, typhoid, and polio`,`What diseases can microbiologically contaminated water transmit?`],
+['Water','WHO',`Approximately 505,000`,`How many diarrhoeal deaths does microbially contaminated water cause each year?`],
+['Water','WHO',`73 percent (6 billion people)`,`What percentage of the global population used a safely managed drinking-water service in 2022?`],
+['Water','WHO',`Located on premises, available when needed, and free from contamination`,`What three conditions define a safely managed drinking-water service?`],
+['Water','WHO',`2010`,`When did the UN General Assembly explicitly recognize the human right to water and sanitation?`],
+['Water','WHO',`It can boost economic growth and contribute greatly to poverty reduction`,`What benefit does improved water supply, sanitation, and water resource management provide to countries, beyond health?`],
+['Water','WHO',`Universal and equitable access to safe and affordable drinking water`,`What does Sustainable Development Goal target 6.1 call for?`],
+['Water','WHO',`Safely managed drinking water services`,`What indicator is used to track SDG target 6.1?`],
+['Water','WHO',`2.2 billion`,`How many people lacked safely managed drinking-water services in 2022?`],
+['Water','WHO',`1.5 billion (an improved source within a 30-minute round trip)`,`Of those without safely managed services in 2022, how many had only basic services?`],
+['Water','WHO',`292 million (an improved source requiring more than 30 minutes to collect)`,`Of those without safely managed services in 2022, how many had limited services?`],
+['Water','WHO',`296 million`,`Of those without safely managed services in 2022, how many took water from unprotected wells and springs?`],
+['Water','WHO',`115 million`,`Of those without safely managed services in 2022, how many collected untreated surface water?`],
+['Water','WHO',`People in low-income, informal, or illegal urban settlements usually have less access to improved drinking-water than other residents`,`What kind of geographic and socioeconomic inequality persists in water access?`],
+['Water','WHO',`Cholera, diarrhoea, dysentery, hepatitis A, typhoid, and polio`,`What diseases are linked to contaminated water and poor sanitation generally?`],
+['Water','WHO',`7`,`Out of every 100 patients in high-income country hospitals, how many acquire a health care-associated infection?`],
+['Water','WHO',`15`,`Out of every 100 patients in low- and middle-income country hospitals, how many acquire a health care-associated infection?`],
+['Water','WHO',`Dangerously contaminated or chemically polluted drinking-water for hundreds of millions of people`,`What does inadequate management of urban, industrial, and agricultural wastewater lead to?`],
+['Water','WHO',`Arsenic and fluoride`,`What two chemicals occur naturally in groundwater and can be of health significance?`],
+['Water','WHO',`Lead`,`What chemical can enter drinking-water through leaching from water supply components?`],
+['Water','WHO',`About 1 million`,`About how many people die each year from diarrhoea due to unsafe water, sanitation, and hand hygiene?`],
+['Water','WHO',`395,000`,`How many child deaths under age 5 could be prevented each year by addressing water risk factors?`],
+['Water','WHO',`The ~1 million is the total annual diarrhoeal deaths from unsafe WASH; the 395,000 under-5 deaths are a preventable subset of that total`,`How does the 395,000 child-death figure relate to the ~1 million total diarrhoeal death figure?`],
+['Water','WHO',`An acute and chronic disease caused by parasitic worms, contracted through exposure to infested water`,`What is schistosomiasis, and how is it contracted?`],
+['Water','WHO',`Over 251.4 million`,`How many people required preventative treatment for schistosomiasis in 2021?`],
+['Water','WHO',`Dengue fever`,`What disease do water-breeding insects (vectors) transmit?`],
+['Water','WHO',`Schistosomiasis comes from parasitic worms via exposure to infested water; dengue is transmitted by vectors that breed in water, including clean water`,`What's the difference between how schistosomiasis and dengue fever are contracted via water?`],
+['Water','WHO',`Covering water storage containers`,`What simple household intervention reduces vector breeding and fecal contamination in stored water?`],
+['Water','WHO',`People spend less time and effort physically collecting water and can be productive in other ways`,`What time and effort benefit comes from improved, more accessible water sources?`],
+['Water','WHO',`Greater personal safety and reduced musculoskeletal disorders`,`What two physical and safety benefits come from not having to make long water-collection journeys?`],
+['Water','WHO',`Less expenditure on health care, since people are less likely to fall ill and remain economically productive`,`What economic benefit comes from better water sources reducing illness?`],
+['Water','WHO',`Better health leads to better school attendance, with positive longer-term consequences for their lives`,`How does water access affect children specifically?`],
+['Water','WHO',`Historical rates of progress would need to double`,`What rate of progress increase is needed to achieve universal basic drinking water services by 2030?`],
+['Water','WHO',`A 6-fold increase`,`What rate of progress increase is needed to achieve universal safely managed water services?`],
+['Water','WHO',`Climate change, increasing water scarcity, population growth, demographic changes, and urbanization`,`What five challenges does WHO list as posing problems for water supply systems?`],
+['Water','WHO',`Water, nutrients, or energy`,`What three things can wastewater reuse help recover?`],
+['Water','WHO',`Increased food production, increased resilience to water and nutrient scarcity, and greater circularity in the economy`,`What three benefits can safe, appropriate wastewater or sludge reuse yield?`],
+['Water','WHO',`Much of it is used informally and/or without sufficient treatment and other controls`,`What problem does WHO note with current global wastewater and sludge reuse practices?`],
+['Water','WHO',`Increasing reliance on groundwater and alternative sources, including wastewater, with greater fluctuations in harvested rainwater`,`What climate-related shift in water sourcing does WHO expect to continue evolving?`],
+['Water','WHO',`The international authority on public health and water quality, leading global efforts to prevent water-related disease`,`How does WHO describe its own role regarding water quality?`],
+['Water','WHO',`Drinking-water, safe use of wastewater, and recreational water quality`,`What three areas does WHO's series of water quality guidelines cover?`],
+['Water','WHO',`2004`,`Since what year has WHO published its Guidelines for drinking-water quality?`],
+['Water','WHO',`The Framework for safe drinking-water`,`What framework do the WHO drinking-water guidelines promote?`],
+['Water','WHO',`Establishment of health-based targets, development and implementation of water safety plans, and independent surveillance`,`What three things does the Framework for safe drinking-water recommend?`],
+['Water','WHO',`Managing risk from catchment to consumer, backed by independent surveillance`,`What is the key mechanism Water Safety Plans use to manage risk?`],
+['Water','WHO',`Developing locally relevant water quality regulations, implementing and auditing water safety plans, and strengthening surveillance practices`,`What three forms of country support does WHO provide to implement drinking-water guidelines?`],
+['Water','WHO',`2014`,`Since what year has WHO tested household water treatment products?`],
+['Water','WHO',`The WHO International Scheme to Evaluate Household Water Treatment Technologies`,`What is WHO's scheme for testing household water treatment products called?`],
+['Water','WHO',`That they protect users from pathogens causing diarrhoeal disease, and to strengthen national policy, regulatory, and monitoring mechanisms`,`What does the WHO International Scheme to Evaluate Household Water Treatment Technologies test products for?`],
+['Water','WHO',`UNICEF`,`What organization does WHO work closely with on water and health issues?`],
+['Water','WHO',`The Water and Sanitation for Health Facility Improvement Tool, jointly developed by WHO and UNICEF in 2015`,`What is WASH FIT?`],
+['Water','WHO',`A continuous cycle of improvement through assessments, prioritization of risk, and definition of targeted actions`,`What does WASH FIT guide health facilities through?`],
+['Water','WHO',`2023`,`When was a report describing practical steps to improve WASH in health care facilities published?`],
+['Water','WHO',`Acute respiratory infections and numerous neglected tropical diseases`,`Besides diarrhoeal disease, what two other categories of illness does safe water and hygiene help prevent?`],
 // ---- WATER · Britannica (Water Scarcity) ----
-['Water','Britannica','insufficient freshwater resources to meet the human and environmental demands of a given area','What is the definition of water scarcity?'],
-['Water','Britannica','human rights','Water scarcity is inextricably linked to what, with safe drinking water a priority for global development?'],
-['Water','Britannica','population growth, profligate use, growing pollution, and climate change','What four challenges are driving 21st-century water scarcity?'],
-['Water','Britannica','physical and economic','What are the two general types of water scarcity?',['physical and economic scarcity']],
-['Water','Britannica','a region\'s demand outpacing its limited water resources','What is physical (absolute) water scarcity?'],
-['Water','Britannica','about 1.2 billion','How many people are affected by physical water scarcity (per the FAO), mostly in arid regions?',['1.2 billion']],
-['Water','Britannica','two-thirds','What fraction of the world\'s population faces seasonal water scarcity at least one month a year?',['2/3','two thirds']],
-['Water','Britannica','a lack of water infrastructure or poor management of existing infrastructure','What is economic water scarcity?'],
-['Water','Britannica','more than 1.6 billion','How many people face economic water shortage, per the FAO?',['1.6 billion']],
-['Water','Britannica','access is limited even though sufficient water usually exists','In economic water scarcity, what is usually true about the water supply?'],
-['Water','Britannica','non-revenue water','What term describes treated water lost to leaks before it is ever used?'],
-['Water','Britannica','around 20 percent','What is the U.S. average for non-revenue water?',['20%','20 percent']],
-['Water','Britannica','unregulated agricultural and industrial use, and undervaluing water as a finite resource','Besides infrastructure leaks, what other factors cause economic water scarcity?'],
-['Water','Britannica','more than 20 million','What is the population of Mexico City\'s metropolitan area?',['20 million']],
-['Water','Britannica','more than 700 mm (27.5 inches)','What is Mexico City\'s annual rainfall?',['700 mm','27.5 inches']],
-['Water','Britannica','most precipitation is lost as contaminated runoff and lost wetlands no longer recharge aquifers','Why doesn\'t Mexico City\'s rainfall relieve its water scarcity?'],
-['Water','Britannica','nearly half','What share of Mexico City\'s municipal water supply is drawn unsustainably from its aquifer?'],
-['Water','Britannica','up to 40 cm (16 inches) per year','How fast do parts of Mexico City sink due to aquifer over-withdrawal?',['40 cm','16 inches']],
-['Water','Britannica','40 to 70 percent','What range of Mexico City\'s water is lost through leaking pipes?',['40-70 percent']],
-['Water','Britannica','nearly 90%','In early 2024, what share of Mexico City was in severe drought, raising "Day Zero" fears?',['90%']],
-['Water','Britannica','the day a city could run out of water and its taps run dry','What does "Day Zero" mean?'],
-['Water','Britannica','one-third','What fraction of the world\'s largest aquifer systems are in distress?',['a third']],
-['Water','Britannica','the fourth largest','The Aral Sea was once what rank among the world\'s inland bodies of water?'],
-['Water','Britannica','diversion of its inflowing rivers for agricultural irrigation','What caused the Aral Sea to shrink?'],
-['Water','Britannica','2018','In what year did Cape Town face "Day Zero"?'],
-['Water','Britannica','the first potential water crisis of any major city','What was the significance of Cape Town\'s "Day Zero"?'],
-['Water','Britannica','extreme water conservation and the fortuitous arrival of rain','How was Cape Town\'s "Day Zero" crisis averted?'],
-['Water','Britannica','third','In the 2017 WEF Global Risks Report, water crises ranked as which most important global risk to humanity?',['third most important','3rd']],
-['Water','Britannica','weapons of mass destruction and extreme weather events','In the 2017 WEF report, which two risks ranked above water crises?'],
-['Water','Britannica','the UN World Water Development Report','Which 2023 UN report warned of an imminent global water crisis and urged cooperation?'],
-['Water','Britannica','economics, environment, and equity','What three things make up the "triple bottom line" in water management?'],
-['Water','Britannica','preserving and restoring ecosystems like wetlands and forests','What is a key environmental-policy strategy against water scarcity?'],
-['Water','Britannica','nutrient recycling and flood protection','Besides storing water, what ecosystem services do wetlands and forests provide?'],
-['Water','Britannica','higher water prices','What economic measure reduces water waste and funds infrastructure but is politically unpopular?'],
-['Water','Britannica','a water tax on heavy users','What targeted tax could deter industrial and agricultural waste without raising household prices?'],
-['Water','Britannica','rebates for replacing water-wasteful appliances','What incentive encourages swapping out wasteful toilets and shower heads?'],
-['Water','Britannica','industrial agriculture','What is a major consumer of freshwater and source of pollution from pesticide, fertilizer, and animal-waste runoff?'],
-['Water','Britannica','almonds and alfalfa','What two water-intensive crops grown in California\'s Central Valley are commonly criticized?'],
-['Water','Britannica','about 70 percent','What share of all freshwater resources is devoted to agriculture?',['70%','seventy percent']],
-['Water','Britannica','it floods fields with more water than crops need, losing water to evaporation','What is the problem with surface (flood) irrigation?'],
-['Water','Britannica','Saudi Arabia','In which densely populated arid country is desalination a main municipal water source?'],
-['Water','Britannica','it is energy-intensive and expensive, creating emissions and brine waste','What is the downside of desalination?'],
-['Water','Britannica','crop and landscape irrigation, groundwater recharge, and recreation','What are common uses of reclaimed wastewater?'],
-['Water','Britannica','fertilizing algae or other biofuels','What additional use of wastewater has been proposed?'],
-['Water','Britannica','it is treated as a water rights issue and restricted','How is rainwater harvesting handled in parts of the western U.S.?'],
-['Water','Britannica','Mexico City','Which city is actively developing rainwater harvesting systems?'],
-['Water','Britannica','permanent, seasonal, unpredictable, and invisible','What are the four basic kinds of drought?'],
-['Water','Britannica','Melissa Petruzzello','Who is the author of the Britannica water scarcity article?'],
-['Water','Britannica','70 percent','In the infographic, what share of global water withdrawals is agricultural?'],
-['Water','Britannica','19 percent','In the infographic, what share of global water withdrawals is industrial?'],
-['Water','Britannica','11 percent','In the infographic, what share of global water withdrawals is municipal?'],
-['Water','Britannica','more than 80 percent','In the infographic, what share of the world\'s wastewater is untreated or unreused?'],
-['Water','Britannica','97.4 percent','What percentage of all water is salt water?'],
-['Water','Britannica','2.6 percent','What percentage of all water is fresh?'],
-['Water','Britannica','72.5 percent','What percentage of freshwater is frozen?'],
-['Water','Britannica','28.15 percent','What percentage of freshwater is groundwater?'],
-['Water','Britannica','0.30 percent','What percentage of freshwater is fresh surface water?'],
-['Water','Britannica','2.1 billion','How many people lack safe, reliable water access at home, per the infographic?'],
-['Water','Britannica','half of the world\'s population','By 2025, how much of the world will live in water-stressed areas, per the infographic?'],
-['Water','Britannica','São Paulo, Bengaluru, Moscow, Jakarta, Beijing, Cairo, Tokyo, Miami, London, Istanbul, and Mexico City','Which major cities are listed as most likely to run out of drinking water?'],
-['Water','Britannica','World Resources Institute','Which organization is the source of the 2040 water stress map?'],
-['Water','Britannica','the ratio of water withdrawal to renewable water supply','How does the 2040 map define "water stress"?'],
-['Water','Britannica','low, low to medium, medium to high, high, and extremely high','What are the five water-stress categories on the 2040 map?'],
-['Water','Britannica','India','Besides the Middle East and North Africa, which large South Asian country is shown "Extremely high" on the 2040 map?'],
-['Water','Britannica','the United States, Mexico, China, Australia, and South Africa','Name some countries shown as "High" water stress on the 2040 map.'],
+['Water','Britannica',`Insufficient freshwater resources to meet the human and environmental demands of a given area`,`What is water scarcity, as defined by Britannica?`],
+['Water','Britannica',`Human rights`,`What broader issue is water scarcity inextricably linked to?`],
+['Water','Britannica',`Population growth, profligate use, growing pollution, and changes in weather patterns due to global warming`,`What four challenges does Britannica cite as driving increasing water scarcity in the 21st century?`],
+['Water','Britannica',`Physical (absolute) and economic`,`What are the two general types of water scarcity?`],
+['Water','Britannica',`The result of a region's demand outpacing the limited water resources found there`,`What is physical (absolute) water scarcity?`],
+['Water','Britannica',`Around 1.2 billion people`,`About how many people live in areas of physical water scarcity, per the FAO?`],
+['Water','Britannica',`About two-thirds`,`What fraction of the world's population lives in areas subject to seasonal physical water scarcity for at least one month a year?`],
+['Water','Britannica',`Water scarcity due to a lack of water infrastructure, or to poor management of water resources where infrastructure exists`,`What is economic water scarcity?`],
+['Water','Britannica',`More than 1.6 billion people`,`About how many people face economic water shortage, per the FAO?`],
+['Water','Britannica',`Yes — usually there's sufficient water, but access is limited`,`In areas with economic water scarcity, is there usually enough water to meet human and environmental needs?`],
+['Water','Britannica',`Non-revenue water`,`What term describes treated water that is never used because it's lost to leaks in supply pipes?`],
+['Water','Britannica',`Around 20 percent`,`What is the average rate of non-revenue water loss in the United States?`],
+['Water','Britannica',`Unregulated water use for agriculture or industry, and the economic undervaluing of water as a finite resource`,`Besides infrastructure leaks, what two other factors can cause economic water scarcity?`],
+['Water','Britannica',`More than 20 million`,`About how many people live in Mexico City's metropolitan area?`],
+['Water','Britannica',`More than 700 mm (27.5 inches)`,`About how much annual rainfall does Mexico City receive?`],
+['Water','Britannica',`Most precipitation is lost as contaminated runoff, and lost wetlands and lakes mean little of it recharges local aquifers`,`Why doesn't Mexico City's abundant rainfall solve its water scarcity?`],
+['Water','Britannica',`Nearly half`,`What share of Mexico City's municipal water supply is taken unsustainably from its aquifer?`],
+['Water','Britannica',`Up to 40 cm (16 inches)`,`By how much does part of the Mexico City region sink each year due to aquifer over-withdrawal?`],
+['Water','Britannica',`An estimated 40 to 70 percent`,`What percentage of Mexico City's water is lost through pipe leaks?`],
+['Water','Britannica',`Nearly 90 percent`,`In early 2024, what percentage of Mexico City was in severe drought?`],
+['Water','Britannica',`The day on which a city could run out of water and municipal taps would run dry`,`What does Day Zero refer to, in the context of water scarcity?`],
+['Water','Britannica',`About one-third`,`What fraction of the world's largest aquifer systems is estimated to be in distress?`],
+['Water','Britannica',`The fourth largest`,`What was the Aral Sea's former rank among the world's bodies of inland water?`],
+['Water','Britannica',`Diversion of its inflowing rivers for agricultural irrigation`,`What caused the Aral Sea to shrink dramatically?`],
+['Water','Britannica',`2018`,`In what year did Cape Town face its Day Zero water crisis?`],
+['Water','Britannica',`It was the first potential water crisis of any major city`,`What made Cape Town's 2018 water crisis notable?`],
+['Water','Britannica',`Extreme water conservation efforts and the fortuitous arrival of rain`,`How did Cape Town avoid disaster during its Day Zero crisis?`],
+['Water','Britannica',`Third, behind weapons of mass destruction and extreme weather events`,`Where did the 2017 World Economic Forum Global Risks Report rank water crises among threats to humanity?`],
+['Water','Britannica',`An imminent risk of a global water crisis, urging greater international cooperation`,`What did the 2023 United Nations World Water Development Report warn about?`],
+['Water','Britannica',`The ideal of equitably maximizing economic and social welfare without compromising ecosystem functioning — economics, environment, and equity`,`What is the triple bottom line, as Britannica frames it for water management?`],
+['Water','Britannica',`Preservation and restoration of ecosystems that naturally collect, filter, store, and release water, like wetlands and forests`,`What is the key environmental policy strategy Britannica names for fighting water scarcity?`],
+['Water','Britannica',`Nutrient recycling and flood protection`,`What two extra ecosystem services do wetlands and forests provide, beyond water storage?`],
+['Water','Britannica',`They reduce water waste and pollution and fund infrastructure improvements, but price increases are publicly and politically unpopular`,`How can higher water prices help address scarcity, and what's the catch?`],
+['Water','Britannica',`A tax on heavy users in industry and agriculture that deters wasteful consumption while leaving household prices unaffected`,`What kind of targeted water tax does Britannica propose as a solution?`],
+['Water','Britannica',`Rebates for replacing water-wasteful appliances like toilets and shower heads`,`What rebate-based solution does Britannica mention for reducing household water waste?`],
+['Water','Britannica',`Through pesticide and fertilizer runoff and animal wastes`,`How does industrial agriculture contribute to water pollution?`],
+['Water','Britannica',`Almonds and alfalfa`,`What two water-intensive crops does Britannica cite as criticized for being grown in California's semi-arid Central Valley?`],
+['Water','Britannica',`About 70 percent`,`About what percentage of all freshwater resources are devoted to agriculture?`],
+['Water','Britannica',`It inundates fields with more water than crops need, and water is lost to evaporation or in transport`,`What's the main problem with simple flooding or surface irrigation?`],
+['Water','Britannica',`Densely populated arid regions, such as Saudi Arabia`,`In what kind of region is desalination already a main source of municipal water supply?`],
+['Water','Britannica',`It requires substantial energy (usually fossil fuels), making it expensive, and generates greenhouse gas emissions and brine wastewater`,`What's the major downside of desalination technology?`],
+['Water','Britannica',`Crop and landscape irrigation, groundwater recharge, and recreational purposes`,`What are three uses for reclaimed wastewater that Britannica lists?`],
+['Water','Britannica',`Using it to fertilize algae or other biofuels`,`What additional use for wastewater has been proposed involving renewable energy?`],
+['Water','Britannica',`As a water rights issue, subject to restrictions`,`In parts of the western United States, how is rainwater harvesting legally viewed?`],
+['Water','Britannica',`Mexico City`,`What city is given as an example of one actively developing rainwater harvesting systems?`],
+['Water','Britannica',`Melissa Petruzzello`,`Who wrote Britannica's water scarcity article?`],
+['Water','Britannica',`70 percent`,`Per the infographic, what percentage of global water withdrawals goes to agriculture?`],
+['Water','Britannica',`19 percent`,`Per the infographic, what percentage of global water withdrawals goes to industrial use?`],
+['Water','Britannica',`11 percent`,`Per the infographic, what percentage of global water withdrawals goes to municipal use?`],
+['Water','Britannica',`More than 80 percent`,`Per the infographic, what percentage of the world's wastewater flows back into the environment without being treated or reused?`],
+['Water','Britannica',`97.4 percent`,`Per the infographic, what percentage of all water on Earth is salt water?`],
+['Water','Britannica',`2.6 percent`,`Per the infographic, what percentage of all water on Earth is fresh water?`],
+['Water','Britannica',`72.5 percent`,`Of that freshwater, what percentage is frozen?`],
+['Water','Britannica',`28.15 percent`,`Of that freshwater, what percentage is groundwater?`],
+['Water','Britannica',`0.30 percent`,`Of that freshwater, what percentage is fresh surface water?`],
+['Water','Britannica',`2.1 billion people`,`Per the infographic, how many people lack access to a safe and reliable drinking water supply at home?`],
+['Water','Britannica',`Half of the world's population will be living in water-stressed areas`,`Per the infographic, what is projected to happen by 2025 regarding water-stressed areas?`],
+['Water','Britannica',`São Paulo, Bengaluru, Moscow, Jakarta, Beijing, Cairo, Tokyo, Miami, London, Istanbul, and Mexico City`,`Name the 11 major cities the infographic lists as most likely to run out of drinking water.`],
+['Water','Britannica',`Weapons of mass destruction, extreme weather events, water crises`,`Per the infographic's ranking of global risks, what are the top three threats to humanity, in order?`],
+['Water','Britannica',`The World Resources Institute`,`Who produced the 2040 water stress projection map shown in the infographic?`],
+['Water','Britannica',`The ratio of water withdrawal to renewable water supply`,`How does the 2040 map define water stress?`],
+['Water','Britannica',`Low, low to medium, medium to high, high, and extremely high`,`What are the five categories on the 2040 water stress projection map?`],
+['Water','Britannica',`Spain, Portugal, Morocco, Algeria, Tunisia, Libya, Egypt, Greece, Turkey, Saudi Arabia, Yemen, Iraq, Iran, Afghanistan, Pakistan, and Kazakhstan`,`Which regions and countries does the 2040 map show as extremely high water stress?`],
+['Water','Britannica',`United States, Mexico, Alaska, India, China, Mongolia, Australia, Ukraine, and parts of southern Africa`,`Which countries does the 2040 map show as just high water stress?`],
+['Water','Britannica',`United Kingdom, France, and Japan and South Korea, among others`,`Which countries does the 2040 map show as medium to high water stress?`],
+['Water','Britannica',`Canada and most of Russia`,`Which countries does the 2040 map show as low to medium water stress?`],
+['Water','Britannica',`Extremely high at its southern tip, medium to high further north`,`How is Chile depicted differently across its own length on the 2040 map?`],
+['Water','Britannica',`UN Water for Life Decade, BBC News, the World Economic Forum, a 2017 WHO report, the FAO, and the U.S. Environmental Protection Agency`,`What organizations are cited as sources in the infographic's footnotes?`],
+['Water','Britannica',`Water is brought in by trucks`,`How do poorer Mexico City neighborhoods routinely get water during shortages?`],
+['Water','Britannica',`One of the top cities threatened by economic water scarcity in the world`,`How does Britannica characterize Mexico City's overall standing on this issue?`],
+['Water','Britannica',`Because humans can survive only a few days without water`,`Why can a water crisis escalate into a humanitarian emergency so quickly?`],
+['Water','Britannica',`Agricultural, industrial, municipal, and environmental interests`,`When water grows scarce, what four competing interests must governments choose between in allocation?`],
+['Water','Britannica',`They are destroyed or degraded for more immediate economic benefits`,`What two things often happen to natural areas because their ecological importance isn't properly valued?`],
+['Water','Britannica',`Conservation and restoration of wild lands adjacent to urban areas`,`What should urban planning and sustainable development prioritize, per the environmental policy section?`],
+['Water','Britannica',`Decoupling economic growth from water use`,`What would a water tax on heavy users ideally achieve for the broader economy?`],
+['Water','Britannica',`Higher product prices due to increased production costs`,`What tradeoff would consumers face under a water tax on industrial and agricultural heavy users?`],
+['Water','Britannica',`Policies incentivizing organic farming and the cultivation of more drought-tolerant crops`,`What two types of farming policies does Britannica suggest to protect water sources from agricultural pollution?`],
+['Water','Britannica',`Infrastructure repair`,`What is named as one of the most obvious solutions in the engineering technologies section?`],
+['Water','Britannica',`Educating farmers about water loss, setting clear water-use reduction targets, and funding irrigation improvements`,`What three engineering-section actions can help reduce wasteful agricultural water use?`],
+['Water','Britannica',`Water-recycling plants`,`What kind of facility is described as increasingly common in cities worldwide for reusing water?`],
+['Water','Britannica',`Collecting runoff and allowing it to percolate into the ground to recharge groundwater`,`What are catchment systems used for, per the rainwater harvesting section?`],
+['Water','Britannica',`In a depression in Central Asia, east of the Caspian Sea`,`Where is the Aral Sea located, per the Britannica video?`],
+['Water','Britannica',`A landlocked saltwater lake`,`What is the Aral Sea technically classified as, per the video?`],
+['Water','Britannica',`The 1950s`,`In what decade were the Aral Sea's water resources still largely untouched?`],
+['Water','Britannica',`Two`,`How many rivers originally replenished the Aral Sea?`],
+['Water','Britannica',`Sturgeon and other fish`,`What supported a modest fishing industry in the Aral Sea before its decline?`],
+['Water','Britannica',`The Soviet Union`,`What government controlled the Aral Sea region and initiated major water projects after World War II?`],
+['Water','Britannica',`Boosting economic output`,`What was the goal of the Soviet water projects affecting the Aral Sea?`],
+['Water','Britannica',`Cotton`,`What crop was the land around the Aral Sea converted to grow, from pasture?`],
+['Water','Britannica',`The 1980s`,`By what decade had water feeding the Aral Sea become so scarce that it began evaporating away?`],
+['Water','Britannica',`More than 50 feet`,`By how much did the Aral Sea's water level drop by 1989?`],
+['Water','Britannica',`125 feet`,`By how much had the Aral Sea's level declined in total by 2000?`],
+['Water','Britannica',`The Northern Aral Sea and the Southern Aral Sea`,`What two smaller bodies did the Aral Sea split into as its shoreline narrowed?`],
+['Water','Britannica',`Over three times as salty`,`How much saltier did the Northern and Southern Aral Sea become compared to the original water?`],
+['Water','Britannica',`They were carried as dust to the land, causing disease`,`What happened to salt and industrial chemicals from the dried seabed, and what did this cause?`],
+['Water','Britannica',`Germ-warfare testing`,`What sensitive Soviet activity had taken place on islands in the Aral Sea?`],
+['Water','Britannica',`Water evaporated away, making the islands accessible by land`,`Why did the Aral Sea's former germ-warfare test islands become vulnerable after 2000?`],
+['Water','Britannica',`2005`,`Since what year have water projects successfully kept the Northern Aral Sea filled?`],
+['Water','Britannica',`It has been largely abandoned due to desiccation`,`What has happened to the Southern Aral Sea despite conservation efforts?`],
+['Water','Britannica',`Regional governments' conservation efforts were poorly coordinated`,`Why did efforts to conserve the Aral Sea after the Soviet breakup ultimately fail to forestall its decline?`],
 // ---- WATER · CFR ----
 ['Water','CFR','water bankruptcy','Per the CFR, what term did a January 2026 UN report use for the era of structural depletion of global water systems?'],
 ['Water','CFR','Falkenmark Water Stress Indicator','Per the CFR, what indicator measures renewable freshwater available per person each year?',['falkenmark']],
@@ -1192,6 +1249,7 @@ const J_VALS = [100, 200, 300, 400, 500];
 const TOPICS = ['Water','Sudan','Housing','Seerah','Current Events'];
 
 let mode = M.PRACTICE, finRound = FR.R1;
+let compMode = false, streak = 0, bestStreak = 0, lastWrong = false, compTimer = null;
 let blindMode = false, revealed = false;
 let score = 0, nRight = 0, nWrong = 0;
 let pool = [], poolIdx = 0, curQ = null, curPts = 10;
@@ -1221,7 +1279,9 @@ function loadStorage() {
   nWrong = +localStorage.getItem('mist_wrong')||0;
   boardUsed = JSON.parse(localStorage.getItem('mist_board')||'{}');
   blindMode = localStorage.getItem('mist_blind')==='1';
-  updateBlindUI(); updateScoreUI();
+  compMode = localStorage.getItem('mist_comp')==='1';
+  bestStreak = +localStorage.getItem('mist_best')||0;
+  updateBlindUI(); updateCompUI(); updateScoreUI();
 }
 function saveStorage() {
   localStorage.setItem('mist_score',score);
@@ -1229,6 +1289,8 @@ function saveStorage() {
   localStorage.setItem('mist_wrong',nWrong);
   localStorage.setItem('mist_board',JSON.stringify(boardUsed));
   localStorage.setItem('mist_blind',blindMode?'1':'0');
+  localStorage.setItem('mist_comp',compMode?'1':'0');
+  localStorage.setItem('mist_best',bestStreak);
 }
 
 // ── BUTTONS ───────────────────────────────────────────────────────────────────
@@ -1242,6 +1304,8 @@ document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.addEventListener
   b.classList.add('active'); finRound = b.dataset.fin;
 }));
 $('blindBtn').addEventListener('click', () => { blindMode=!blindMode; updateBlindUI(); saveStorage(); });
+$('compBtn').addEventListener('click', () => { compMode=!compMode; updateCompUI(); saveStorage(); });
+function updateCompUI(){ const p=$('compPill'); p.textContent=compMode?'ON':'OFF'; p.className='pill '+(compMode?'on':'off'); }
 $('rulesBtn').addEventListener('click', () => { const r=$('rulesBox'); r.style.display=r.style.display==='none'?'':'none'; });
 $('startBtn').addEventListener('click', startSession);
 $('shuffleBtn').addEventListener('click', () => {
@@ -1252,7 +1316,7 @@ $('shuffleBtn').addEventListener('click', () => {
 });
 $('resetBtn').addEventListener('click', () => {
   if (!confirm('Reset all stats?')) return;
-  score=nRight=nWrong=0; boardUsed={};
+  score=nRight=nWrong=streak=bestStreak=0; boardUsed={};
   saveStorage(); updateScoreUI();
 });
 
@@ -1376,8 +1440,8 @@ function selectCell(topic,val,key) {
 
 // ── LOAD QUESTION ─────────────────────────────────────────────────────────────
 function loadQuestion(overridePts) {
-  stopTTS(); clearTimer(); stopRecog();
-  revealed=false; heardFinal='';
+  stopTTS(); clearTimer(); stopRecog(); clearTimeout(compTimer);
+  revealed=false; heardFinal=''; lastWrong=false; $('markBtn').style.display='none';
   if (!(mode===M.FINALS && finRound===FR.R3 && overridePts)) {
     if (poolIdx>=pool.length) { pool=pool.sort(()=>Math.random()-.5); poolIdx=0; }
     curQ=pool[poolIdx++];
@@ -1540,23 +1604,43 @@ function submitAnswer() {
   buzzBtn.disabled=true; ansRow.style.display='none'; part2Hint.style.display='none';
   navRow.style.display='flex';
   feedback.className='feedback '+(correct?'correct':'wrong'); feedback.style.display='block';
+  lastWrong = !correct;
+  $('markBtn').style.display = correct ? 'none' : '';
   if (correct) {
-    score+=curPts; nRight++;
-    fbMsg.innerHTML=`✓ Correct! <b>+${curPts}</b> points`;
+    score+=curPts; nRight++; streak++; if(streak>bestStreak)bestStreak=streak;
+    fbMsg.innerHTML=`✓ Correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
   } else {
-    const pen=calcPenalty(curPts); score-=pen; nWrong++;
+    const pen=calcPenalty(curPts); score-=pen; nWrong++; streak=0;
     fbMsg.innerHTML=pen>0
       ?`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}. <b>−${pen}</b> points`
-      :`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}. No penalty.`;
+      :`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}.`;
   }
   fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
   fbReveal.style.display='';
   saveStorage(); updateScoreUI(); updateStatsBar();
+  if (compMode && correct && !(mode===M.FINALS&&finRound===FR.R3)) {
+    compTimer=setTimeout(goNext, 1200); // smooth auto-advance on a correct answer
+  } else {
+    $('nextBtn').focus();
+  }
 }
-$('nextBtn').addEventListener('click',()=>{
+// Mark-correct override: speech/spelling missed it but you actually had it
+$('markBtn').addEventListener('click',()=>{
+  if(!lastWrong) return;
+  lastWrong=false; $('markBtn').style.display='none';
+  const pen=calcPenalty(curPts); score+=pen;       // undo any penalty
+  score+=curPts; nRight++; nWrong=Math.max(0,nWrong-1);
+  streak++; if(streak>bestStreak)bestStreak=streak;
+  feedback.className='feedback correct';
+  fbMsg.innerHTML=`✓ Counted correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
+  saveStorage(); updateScoreUI(); updateStatsBar();
+});
+function goNext(){
+  clearTimeout(compTimer);
   if (mode===M.FINALS&&finRound===FR.R3) buildBoard($('topicSel').value);
   else loadQuestion();
-});
+}
+$('nextBtn').addEventListener('click',goNext);
 
 // ── FUZZY MATCH ───────────────────────────────────────────────────────────────
 const STOP=new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','for','with','from','by','as','be','been']);
@@ -1613,10 +1697,16 @@ function updateStatsBar(){
   $('stRight').textContent=nRight;
   $('stWrong').textContent=nWrong;
   $('stScore').textContent=score;
+  $('stStreak').textContent=streak;
+  $('stBest').textContent=bestStreak;
 }
 document.addEventListener('keydown',e=>{
   if(e.code==='Space'&&!waitingAns&&!buzzBtn.disabled&&buzzBtn.style.display!=='none'){
     e.preventDefault(); doBuzz();
+  }
+  // Enter advances to the next question while feedback is showing
+  if(e.key==='Enter'&&navRow.style.display!=='none'&&document.activeElement!==ansInput){
+    e.preventDefault(); goNext();
   }
 });
 loadStorage(); setupRecog(); populateSources();
