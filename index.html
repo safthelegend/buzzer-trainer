@@ -246,7 +246,7 @@
     <div class="ans-reveal" id="fbReveal" style="display:none;"></div>
   </div>
   <div class="nav-row" id="navRow" style="display:none;">
-    <button id="markBtn" style="display:none;">✓ Mark me correct</button>
+    <button id="markBtn" style="display:none;">✓ Mark me correct &nbsp;<span style="font-size:.7rem;font-weight:400;opacity:.6;">(C)</span></button>
     <button id="nextBtn" class="primary">Next →</button>
   </div>
   <div class="stats" id="statsBar" style="display:none;">
@@ -1747,7 +1747,10 @@ function showCompResults(){
 }
 
 // ── FUZZY MATCH ───────────────────────────────────────────────────────────────
-const STOP=new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','for','with','from','by','as','be','been']);
+const STOP=new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','for','with','from','by','as','be','been',
+  // qualifiers/fillers that don't change the substance of a number or fact —
+  // "Around 1.2 billion people" should match a typed "1.2 billion"
+  'around','approximately','about','nearly','roughly','est','estimated','some','over','more','than','up','at','least','people','person','persons','individuals','total','totaling','totalling']);
 const NM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,hundred:100,thousand:1000,million:1e6,billion:1e9};
 function norm(s){
   if(!s)return'';
@@ -1819,6 +1822,10 @@ document.addEventListener('keydown',e=>{
   // Enter advances to the next question while feedback is showing
   if(e.key==='Enter'&&navRow.style.display!=='none'&&document.activeElement!==ansInput){
     e.preventDefault(); goNext();
+  }
+  // C = Mark me correct, while it's offered and you're not typing in the answer box
+  if((e.key==='c'||e.key==='C')&&document.activeElement!==ansInput&&$('markBtn').style.display!=='none'){
+    e.preventDefault(); $('markBtn').click();
   }
 });
 loadStorage(); setupRecog(); populateSources(); loadVoices();
