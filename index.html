@@ -153,6 +153,7 @@
     <button id="compBtn">Competition <span id="compPill" class="pill off">OFF</span></button>
     <select id="compLenSel" title="Questions per round"><option value="10">10 Qs</option><option value="15" selected>15 Qs</option><option value="20">20 Qs</option><option value="30">30 Qs</option></select>
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
+    <select id="voiceSel" title="Reader voice"><option value="">Loading voices…</option></select>
   </div>
   <div id="finalsRow" style="display:none;margin-bottom:12px;">
     <div class="mode-row">
@@ -1287,6 +1288,7 @@ function loadStorage() {
   nWrong = +localStorage.getItem('mist_wrong')||0;
   boardUsed = JSON.parse(localStorage.getItem('mist_board')||'{}');
   blindMode = localStorage.getItem('mist_blind')==='1';
+  chosenVoiceURI = localStorage.getItem('mist_voice')||'';
   compMode = localStorage.getItem('mist_comp')==='1';
   bestStreak = +localStorage.getItem('mist_best')||0;
   updateBlindUI(); updateCompUI(); updateScoreUI();
@@ -1518,16 +1520,77 @@ function getQText() {
 }
 
 // ── TTS ───────────────────────────────────────────────────────────────────────
+// Respell Arabic/Sudanese/foreign proper nouns phonetically so default browser
+// voices (which don't know Arabic phonetics) come closer to the real pronunciation.
+// Only affects what's SPOKEN — display text and answer matching are untouched.
+const PRON_MAP = [
+  [/\bKhartoum\b/gi,'kar-TOOM'],
+  [/\bSudan('s)?\b/gi,'soo-DAN$1'],
+  [/\bSudanese\b/gi,'soo-dan-EEZ'],
+  [/\bOmdurman\b/gi,'om-dur-MAHN'],
+  [/\bDarfur\b/gi,'DAR-foor'],
+  [/\bBashir\b/gi,'bah-SHEER'],
+  [/\bHemedti\b/gi,'heh-MED-tee'],
+  [/\bDagalo\b/gi,'dah-GAH-loh'],
+  [/\bBurhan\b/gi,'BOOR-hahn'],
+  [/\bJanjaweed\b/gi,'jan-jah-WEED'],
+  [/\bHamdok\b/gi,'HAHM-dock'],
+  [/\bZaghawa\b/gi,'zah-GAH-wah'],
+  [/\bMasalit\b/gi,'mah-sah-LEET'],
+  [/\bNyala\b/gi,'nee-AH-lah'],
+  [/\bAl-Fashir\b/gi,'al-FAH-sheer'],
+  [/\bAl-Bashir\b/gi,'al-bah-SHEER'],
+  [/\bRSF\b/g,'R S F'],
+  [/\bSAF\b/g,'S A F'],
+  [/\bACRC\b/g,'A C R C'],
+  [/\bTa'?if\b/gi,'TAH-if'],
+  [/\bThaqif\b/gi,'THAH-kif'],
+  [/\bAbu Talib\b/gi,'AH-boo TAH-lib'],
+  [/\bKhadijah\b/gi,'kah-DEE-jah'],
+  [/\bAddas\b/gi,'AH-dahs'],
+  [/\bYasir Qadhi\b/gi,'YAH-sir KAH-dee'],
+  [/\bSeerah\b/gi,'SEE-rah'],
+  [/\bAal Yalil\b/gi,'AH-bd yah-LEEL'],
+  [/\bMas'ud\b/gi,"mah-SOOD"],
+  [/\bHabib\b/gi,'hah-BEEB'],
+];
+function speakText(s){ return PRON_MAP.reduce((t,[re,rep])=>t.replace(re,rep), s); }
+
+let voices = [], chosenVoiceURI = '';
+function loadVoices(){
+  voices = synth.getVoices().filter(v=>/^en/i.test(v.lang));
+  if (!voices.length) voices = synth.getVoices();
+  const sel = $('voiceSel');
+  if (!voices.length) { sel.innerHTML='<option value="">Default voice</option>'; return; }
+  sel.innerHTML = voices.map(v=>`<option value="${esc(v.voiceURI)}">${esc(v.name)} (${esc(v.lang)})</option>`).join('');
+  let pick = voices.find(v=>v.voiceURI===chosenVoiceURI);
+  if (!pick) {
+    // Prefer higher-quality engines that tend to handle foreign names more clearly
+    pick = voices.find(v=>/Google US English|Google UK English Female/i.test(v.name))
+        || voices.find(v=>/Natural|Online|Neural/i.test(v.name))
+        || voices.find(v=>/Microsoft (Aria|Guy|Jenny)/i.test(v.name))
+        || voices.find(v=>v.lang==='en-US')
+        || voices[0];
+  }
+  if (pick) { chosenVoiceURI = pick.voiceURI; sel.value = pick.voiceURI; }
+}
+if (synth) { synth.onvoiceschanged = loadVoices; loadVoices(); }
+$('voiceSel').addEventListener('change', e=>{ chosenVoiceURI = e.target.value; localStorage.setItem('mist_voice', chosenVoiceURI); });
+
 function startTTS(fullText) {
   words=fullText.split(/\s+/); wordIdx=0; renderQText();
-  utt=new SpeechSynthesisUtterance(fullText); utt.rate=1.05;
+  utt=new SpeechSynthesisUtterance(speakText(fullText)); utt.rate=.95; utt.pitch=1;
+  const v = voices.find(v=>v.voiceURI===chosenVoiceURI);
+  if (v) utt.voice = v;
+  // word-boundary indices are based on the spoken (respelled) text, which can drift
+  // from the displayed word count on respelled names — clamp to stay in range.
   utt.onboundary=e => {
     if (e.name!=='word') return;
     const ci=e.charIndex; let counted=0, w=0;
     for (let i=0;i<words.length;i++) {
       if (counted>=ci){w=i;break;} counted+=words[i].length+1; w=i+1;
     }
-    wordIdx=w; renderQText();
+    wordIdx=Math.min(w, words.length); renderQText();
   };
   utt.onend=()=>{ phaseBadge.style.display='none'; if (!waitingAns) promptAnswer(); };
   synth.speak(utt);
@@ -1758,7 +1821,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); goNext();
   }
 });
-loadStorage(); setupRecog(); populateSources();
+loadStorage(); setupRecog(); populateSources(); loadVoices();
 </script>
 </body>
 </html>
