@@ -1750,12 +1750,28 @@ function showCompResults(){
 const STOP=new Set(['the','a','an','of','and','or','in','on','at','to','is','are','was','were','it','its','this','that','for','with','from','by','as','be','been',
   // qualifiers/fillers that don't change the substance of a number or fact —
   // "Around 1.2 billion people" should match a typed "1.2 billion"
-  'around','approximately','about','nearly','roughly','est','estimated','some','over','more','than','up','at','least','people','person','persons','individuals','total','totaling','totalling']);
+  'around','approximately','about','nearly','roughly','est','estimated','some','over','more','than','up','at','least','people','person','persons','individuals','total','totaling','totalling','percent','pct']);
 const NM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,hundred:100,thousand:1000,million:1e6,billion:1e9};
+// Several WHO/Britannica sources use British spelling — normalize so American
+// spelling (which most students type) still matches.
+const SPELL_US=[[/diarrhoeal/g,'diarrheal'],[/diarrhoea/g,'diarrhea'],[/faecal/g,'fecal'],[/faeces/g,'feces'],
+  [/colour/g,'color'],[/centre/g,'center'],[/programme/g,'program'],[/organisation/g,'organization'],
+  [/recognise/g,'recognize'],[/analyse/g,'analyze'],[/defence/g,'defense'],[/labour/g,'labor'],
+  [/behaviour/g,'behavior'],[/travelling/g,'traveling'],[/modelling/g,'modeling'],[/per cent/g,'percent']];
 function norm(s){
   if(!s)return'';
-  return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/)
+  let x=s.toLowerCase();
+  SPELL_US.forEach(([re,rep])=>{x=x.replace(re,rep);});
+  return x
+    .replace(/%/g,' percent ')        // "70%" and "70 percent" must normalize the same
+    .replace(/[-–—\/]/g,' ')          // hyphens/slashes split words instead of merging them
+    .replace(/[^a-z0-9\s]/g,'').split(/\s+/)
     .filter(w=>w&&!STOP.has(w)).map(w=>NM[w]!==undefined?String(NM[w]):w).join(' ').trim();
+}
+// Word-boundary-safe "does haystack contain needle" check (post-norm strings)
+function hasPhrase(haystack,needle){
+  return haystack===needle || haystack.includes(' '+needle+' ') ||
+    haystack.startsWith(needle+' ') || haystack.endsWith(' '+needle);
 }
 function lev(a,b){
   const m=a.length,n=b.length,dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i||j));
@@ -1783,13 +1799,34 @@ function phonWord(w){
   return first+code;
 }
 function phon(s){return s.split(/\s+/).map(phonWord).filter(Boolean).join(' ');}
+// Enumerated answers like "Diarrhoea, cholera, dysentery, typhoid, and polio" shouldn't
+// require the exact phrase verbatim — credit for naming most of the listed items.
+function listItemCredit(t,raw){
+  const items=raw.split(/,|;|\band\b/i).map(s=>norm(s)).filter(s=>s && s.length>=3);
+  if (items.length<3) return false;
+  const matched=items.filter(it=>hasPhrase(t,it)).length;
+  return matched>=Math.max(2,Math.ceil(items.length*0.6));
+}
+// "X, Y, and Z" or "X and Y" name multiple distinct things — saying just one of them
+// should NOT get full credit for the chunk-of-a-name leniency below.
+function isEnumeratedAnswer(raw){ return /,|;|\band\b/i.test(raw); }
 function isCorrect(typed,q){
   const t=norm(typed); if(!t)return false;
   const tp=phon(t);
-  return [q.answer,...(q.alternates||[])].map(norm).filter(Boolean).some(ans=>{
+  return [q.answer,...(q.alternates||[])].some(raw=>{
+    const ans=norm(raw); if(!ans) return false;
     if(t===ans) return true;
     // You said at least the whole expected answer (plus maybe extra words)
-    if(ans.length>=4 && (t===ans || t.includes(' '+ans+' ') || t.startsWith(ans+' ') || t.endsWith(' '+ans) || (ans.length>=8 && t.includes(ans)))) return true;
+    if(ans.length>=4 && hasPhrase(t,ans)) return true;
+    // Typed just the number/percent, and the answer leads with that figure
+    // (covers parenthetical extras, e.g. "73% (6 billion people)")
+    if(/^\d+(\.\d+)?$/.test(t) && ans.split(' ')[0]===t) return true;
+    // You said a recognizable whole-word chunk of a SINGLE longer name/answer
+    // (e.g. typed "Habab" for "Habab Idriss Ahmed") — not for multi-item answers,
+    // where naming only one of several things shouldn't count as the full answer.
+    if(!isEnumeratedAnswer(raw) && ans.split(' ').length>=2 && t.length>=4 && hasPhrase(ans,t)) return true;
+    // Partial credit on enumerated/list-style answers (most items named)
+    if(listItemCredit(t,raw)) return true;
     // Tolerant matching ONLY for short answers / proper nouns / numbers — keeps long
     // definitions strict so wrong input can't accidentally match a huge phrase.
     if(ans.length<=22){
