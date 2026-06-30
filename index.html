@@ -1608,7 +1608,7 @@ function stopRecog(){micDot.style.display='none';if(!recog)return;try{recog.stop
 
 // ── SUBMIT ────────────────────────────────────────────────────────────────────
 submitBtn.addEventListener('click', submitAnswer);
-ansInput.addEventListener('keydown', e=>{if(e.key==='Enter')submitAnswer();});
+ansInput.addEventListener('keydown', e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();submitAnswer();}});
 function submitAnswer() {
   if (!waitingAns) return;
   waitingAns=false; clearTimer(); stopRecog(); phaseBadge.style.display='none';
