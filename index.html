@@ -20,6 +20,20 @@
     --sh: 4px 4px 0 0 var(--border);
     --sh-lg: 8px 8px 0 0 var(--border);
   }
+  /* ── THEME: Midnight (dark) ─────────────────────────────────────────────── */
+  [data-theme="midnight"] {
+    --bg: #101014; --surface: #1b1b20; --surface2: #26262c; --border: #3a3a42;
+    --text: #f2f2f2; --text2: #9a9aa5;
+    --red: #e5484d; --blue: #3b6fe0; --yellow: #f5c144;
+    --accent: #3b6fe0; --accent2: #2a55b8; --green: #3b6fe0;
+  }
+  /* ── THEME: Paper (warm light) ──────────────────────────────────────────── */
+  [data-theme="paper"] {
+    --bg: #FBF7F0; --surface: #FFFFFF; --surface2: #F0EAE0; --border: #2B2B2B;
+    --text: #2B2B2B; --text2: #6b6b6b;
+    --red: #B23A2E; --blue: #2E5C8A; --yellow: #D9A441;
+    --accent: #2E5C8A; --accent2: #234a70; --green: #2E5C8A;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh;
@@ -154,6 +168,11 @@
     <select id="compLenSel" title="Questions per round"><option value="10">10 Qs</option><option value="15" selected>15 Qs</option><option value="20">20 Qs</option><option value="30">30 Qs</option></select>
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
     <select id="voiceSel" title="Reader voice"><option value="">Loading voices…</option></select>
+    <select id="themeSel" title="Theme"><option value="bauhaus">Bauhaus</option><option value="midnight">Midnight</option><option value="paper">Paper</option></select>
+  </div>
+  <div id="compSetup" class="rules-box" style="display:none;">
+    <b>Competition Setup</b> — pick which topics to compete on (all sources included). Starting resets your score to 0.
+    <div id="compTopics" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-weight:700;"></div>
   </div>
   <div id="finalsRow" style="display:none;margin-bottom:12px;">
     <div class="mode-row">
@@ -176,11 +195,13 @@
     <button id="shuffleBtn">Shuffle</button>
     <button id="importBtn">+ Import</button>
     <button id="keyBtn">Answer Key</button>
+    <button id="mistakesBtn">Mistakes</button>
     <button id="resetBtn">Reset Stats</button>
     <button id="rulesBtn">Rules</button>
     <span class="qcount" id="qcount"></span>
   </div>
   <div id="keyBox" class="rules-box" style="display:none;max-height:70vh;overflow-y:auto;"></div>
+  <div id="mistakesBox" class="rules-box" style="display:none;max-height:70vh;overflow-y:auto;"></div>
   <div id="importBox" class="rules-box" style="display:none;">
     <b>Bulk-import questions</b> — paste one card per line as <code>Answer | Clue</code> (answer first, then a pipe, then the question/clue). Pick the topic &amp; source they belong to.
     <div style="display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;">
@@ -1256,9 +1277,11 @@ const FR = {R1:'fr1', R2:'fr2', R3:'fr3'};
 const J_VALS = [100, 200, 300, 400, 500];
 const TOPICS = ['Water','Sudan','Housing','Seerah','Current Events'];
 
+let theme = 'bauhaus';
 let mode = M.PRACTICE, finRound = FR.R1;
-let compMode = false, streak = 0, bestStreak = 0, lastWrong = false, compTimer = null;
+let compMode = false, streak = 0, bestStreak = 0, streakBeforeWrong = 0, lastWrong = false, compTimer = null;
 let compLen = 15, compCount = 0, compRight = 0, compStartScore = 0, compActive = false;
+let mistakes = [];
 let blindMode = false, revealed = false;
 let score = 0, nRight = 0, nWrong = 0;
 let pool = [], poolIdx = 0, curQ = null, curPts = 10;
@@ -1291,7 +1314,11 @@ function loadStorage() {
   chosenVoiceURI = localStorage.getItem('mist_voice')||'';
   compMode = localStorage.getItem('mist_comp')==='1';
   bestStreak = +localStorage.getItem('mist_best')||0;
-  updateBlindUI(); updateCompUI(); updateScoreUI();
+  mistakes = JSON.parse(localStorage.getItem('mist_mistakes')||'[]');
+  theme = localStorage.getItem('mist_theme')||'bauhaus';
+  document.documentElement.setAttribute('data-theme', theme);
+  const themeSelEl=$('themeSel'); if(themeSelEl) themeSelEl.value=theme;
+  updateBlindUI(); updateCompUI(); updateScoreUI(); updateMistakesUI();
 }
 function saveStorage() {
   localStorage.setItem('mist_score',score);
@@ -1301,6 +1328,7 @@ function saveStorage() {
   localStorage.setItem('mist_blind',blindMode?'1':'0');
   localStorage.setItem('mist_comp',compMode?'1':'0');
   localStorage.setItem('mist_best',bestStreak);
+  localStorage.setItem('mist_mistakes',JSON.stringify(mistakes.slice(-300)));
 }
 
 // ── BUTTONS ───────────────────────────────────────────────────────────────────
@@ -1315,7 +1343,26 @@ document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.addEventListener
 }));
 $('blindBtn').addEventListener('click', () => { blindMode=!blindMode; updateBlindUI(); saveStorage(); });
 $('compBtn').addEventListener('click', () => { compMode=!compMode; updateCompUI(); saveStorage(); });
-function updateCompUI(){ const p=$('compPill'); p.textContent=compMode?'ON':'OFF'; p.className='pill '+(compMode?'on':'off'); }
+function updateCompUI(){
+  const p=$('compPill'); p.textContent=compMode?'ON':'OFF'; p.className='pill '+(compMode?'on':'off');
+  // Competition mode locks the source filter — only topics can be picked
+  $('topicSel').style.display = compMode?'none':'';
+  $('sourceSel').style.display = compMode?'none':'';
+  $('compSetup').style.display = compMode?'':'none';
+}
+function buildCompTopics(){
+  const box=$('compTopics'); if(box.dataset.built)return;
+  box.innerHTML = TOPICS.map(t=>`<label style="display:flex;align-items:center;gap:5px;font-weight:700;"><input type="checkbox" class="compTopicChk" value="${esc(t)}" checked> ${esc(t)}</label>`).join('');
+  box.dataset.built='1';
+}
+buildCompTopics();
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+$('themeSel').addEventListener('change', e=>{
+  theme = e.target.value;
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('mist_theme', theme);
+});
 $('rulesBtn').addEventListener('click', () => { const r=$('rulesBox'); r.style.display=r.style.display==='none'?'':'none'; });
 $('startBtn').addEventListener('click', startSession);
 $('shuffleBtn').addEventListener('click', () => {
@@ -1390,6 +1437,45 @@ $('keyBtn').addEventListener('click',()=>{
   box.innerHTML=html; box.style.display='';
 });
 
+// ── MISTAKES TRACKER (stores every wrong answer for later review) ────────────
+function recordMistake(typed){
+  mistakes.push({
+    topic: curQ.topic, source: curQ.source,
+    q: attribute((getQText()||'').replace(/\s*For \d+ points[.:].*$/i,'').trim(), curQ.source, curQ.topic),
+    typed: typed||'', answer: curQ.answer, alts: curQ.alternates||[], ts: Date.now()
+  });
+  updateMistakesUI();
+}
+function removeLastMistake(){
+  for(let i=mistakes.length-1;i>=0;i--){
+    if(mistakes[i].answer===curQ.answer){ mistakes.splice(i,1); break; }
+  }
+  updateMistakesUI();
+}
+function updateMistakesUI(){
+  const b=$('mistakesBtn'); if(!b) return;
+  b.textContent = 'Mistakes' + (mistakes.length ? ` (${mistakes.length})` : '');
+}
+$('mistakesBtn').addEventListener('click',()=>{
+  const box=$('mistakesBox');
+  if(box.style.display!=='none'){box.style.display='none';return;}
+  if(!mistakes.length){ box.innerHTML='<b>Mistakes</b> — none yet. Answer some questions wrong and they\'ll show up here.'; box.style.display=''; return; }
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><b>Mistakes</b><button id="clearMistakesBtn" style="padding:5px 10px;">Clear All</button></div>`;
+  mistakes.slice().reverse().forEach(m=>{
+    html+=`<div style="margin-top:12px;padding-left:10px;border-left:2px solid var(--red);">`+
+      `<div style="font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--red);">${esc(m.topic)} · ${esc(m.source)}</div>`+
+      `<div style="margin-top:3px;color:var(--text);">${esc(m.q)}</div>`+
+      `<div style="margin-top:4px;color:var(--text2);">You said: <i>${esc(m.typed||'(no answer)')}</i></div>`+
+      `<div style="color:var(--blue);font-weight:700;">Answer: ${esc(m.answer)}${m.alts?.length?` <span style="color:var(--text2);font-weight:500;">(also: ${m.alts.map(esc).join(', ')})</span>`:''}</div>`+
+    `</div>`;
+  });
+  box.innerHTML=html; box.style.display='';
+  $('clearMistakesBtn').addEventListener('click',()=>{
+    if(!confirm('Clear all recorded mistakes?'))return;
+    mistakes=[]; saveStorage(); updateMistakesUI(); box.style.display='none';
+  });
+});
+
 // ── SHOW ANSWER (no scoring) ──────────────────────────────────────────────────
 $('revealBtn').addEventListener('click',()=>{
   if(!waitingAns)return;
@@ -1412,17 +1498,25 @@ function updateBlindUI() {
 function startSession() {
   stopTTS(); clearTimer(); clearTimeout(compTimer);
   $('resultBox').style.display='none';
-  const tf = $('topicSel').value, sf = $('sourceSel').value;
-  if (mode===M.FINALS && finRound===FR.R3) { buildBoard(tf); return; }
-  let f = QB.filter(q => (tf==='all'||q.topic===tf) && (sf==='all'||q.source===sf));
+  let f;
+  if (compMode) {
+    const picked = Array.from(document.querySelectorAll('.compTopicChk:checked')).map(c=>c.value);
+    if (!picked.length) { $('qcount').textContent='Pick at least one topic to compete on'; return; }
+    f = QB.filter(q => picked.includes(q.topic));
+  } else {
+    const tf = $('topicSel').value, sf = $('sourceSel').value;
+    if (mode===M.FINALS && finRound===FR.R3) { buildBoard(tf); return; }
+    f = QB.filter(q => (tf==='all'||q.topic===tf) && (sf==='all'||q.source===sf));
+  }
   if (!f.length) { $('qcount').textContent='No questions match that filter'; return; }
   pool = f.sort(()=>Math.random()-.5); poolIdx = 0;
   boardWrap.style.display = 'none';
-  // Competition = a fixed-length scored round
+  // Competition = a fixed-length scored round that always starts fresh at 0
   compActive = compMode;
   if (compActive) {
     compLen = Math.min(+$('compLenSel').value||15, pool.length);
-    compCount = 0; compRight = 0; compStartScore = score; streak = 0;
+    score=0; nRight=0; nWrong=0; streak=0;
+    compCount = 0; compRight = 0; compStartScore = 0;
     $('compProg').style.display='';
   } else { $('compProg').style.display='none'; }
   $('qcount').textContent = pool.length + ' questions';
@@ -1690,10 +1784,12 @@ function submitAnswer() {
     score+=curPts; nRight++; streak++; if(streak>bestStreak)bestStreak=streak;
     fbMsg.innerHTML=`✓ Correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
   } else {
-    const pen=calcPenalty(curPts); score-=pen; nWrong++; streak=0;
+    const pen=calcPenalty(curPts); score-=pen; nWrong++;
+    streakBeforeWrong=streak; streak=0;   // remembered so Mark Correct can restore it
     fbMsg.innerHTML=pen>0
       ?`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}. <b>−${pen}</b> points`
       :`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}.`;
+    recordMistake(typed);
   }
   fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
   fbReveal.style.display='';
@@ -1708,8 +1804,9 @@ $('markBtn').addEventListener('click',()=>{
   lastWrong=false; $('markBtn').style.display='none';
   const pen=calcPenalty(curPts); score+=pen;       // undo any penalty
   score+=curPts; nRight++; nWrong=Math.max(0,nWrong-1);
-  streak++; if(streak>bestStreak)bestStreak=streak;
+  streak=streakBeforeWrong+1; if(streak>bestStreak)bestStreak=streak;  // restore the streak this "wrong" had broken
   if(compActive) compRight++;
+  removeLastMistake();
   feedback.className='feedback correct';
   fbMsg.innerHTML=`✓ Counted correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
   saveStorage(); updateScoreUI(); updateStatsBar();
