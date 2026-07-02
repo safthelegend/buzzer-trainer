@@ -269,6 +269,7 @@
   </div>
   <div class="nav-row" id="navRow" style="display:none;">
     <button id="markBtn" style="display:none;">✓ Mark me correct &nbsp;<span style="font-size:.7rem;font-weight:400;opacity:.6;">(C)</span></button>
+    <button id="markWrongBtn" style="display:none;">✗ Mark me wrong &nbsp;<span style="font-size:.7rem;font-weight:400;opacity:.6;">(X)</span></button>
     <button id="nextBtn" class="primary">Next →</button>
   </div>
   <div class="stats" id="statsBar" style="display:none;">
@@ -1351,7 +1352,7 @@ const TOPICS = ['Water','Sudan','Housing','Seerah','Current Events'];
 
 let theme = 'bauhaus';
 let mode = M.PRACTICE, finRound = FR.R1;
-let compMode = false, streak = 0, bestStreak = 0, streakBeforeWrong = 0, lastWrong = false, compTimer = null;
+let compMode = false, streak = 0, bestStreak = 0, streakBeforeWrong = 0, lastMarkedCorrect = false, lastTypedAnswer = '', compTimer = null;
 let compLen = 15, compCount = 0, compRight = 0, compStartScore = 0, compActive = false;
 let mistakes = [];
 let blindMode = false, revealed = false;
@@ -1625,7 +1626,7 @@ function selectCell(topic,val,key) {
 // ── LOAD QUESTION ─────────────────────────────────────────────────────────────
 function loadQuestion(overridePts) {
   stopTTS(); clearTimer(); stopRecog(); clearTimeout(compTimer);
-  revealed=false; heardFinal=''; lastWrong=false; $('markBtn').style.display='none';
+  revealed=false; heardFinal=''; lastMarkedCorrect=false; $('markBtn').style.display='none'; $('markWrongBtn').style.display='none';
   if (!(mode===M.FINALS && finRound===FR.R3 && overridePts)) {
     if (poolIdx>=pool.length) { pool=pool.sort(()=>Math.random()-.5); poolIdx=0; }
     curQ=pool[poolIdx++];
@@ -1858,6 +1859,7 @@ function submitAnswer() {
   waitingAns=false; clearTimer(); stopRecog(); phaseBadge.style.display='none';
   const typed=(heardFinal||ansInput.value).trim();
   const correct=!!typed&&isCorrect(typed,curQ);
+  lastTypedAnswer = typed;
   if (blindMode) {
     revealed=true;
     const ft=getQText(); words=ft.split(/\s+/); wordIdx=words.length; renderQText();
@@ -1865,8 +1867,9 @@ function submitAnswer() {
   buzzBtn.disabled=true; ansRow.style.display='none'; part2Hint.style.display='none';
   navRow.style.display='flex';
   feedback.className='feedback '+(correct?'correct':'wrong'); feedback.style.display='block';
-  lastWrong = !correct;
+  lastMarkedCorrect = correct;
   $('markBtn').style.display = correct ? 'none' : '';
+  $('markWrongBtn').style.display = correct ? '' : 'none';
   if (correct) {
     score+=curPts; nRight++; streak++; if(streak>bestStreak)bestStreak=streak;
     fbMsg.innerHTML=`✓ Correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
@@ -1887,8 +1890,8 @@ function submitAnswer() {
 }
 // Mark-correct override: speech/spelling missed it but you actually had it
 $('markBtn').addEventListener('click',()=>{
-  if(!lastWrong) return;
-  lastWrong=false; $('markBtn').style.display='none';
+  if(lastMarkedCorrect) return;
+  lastMarkedCorrect=true; $('markBtn').style.display='none'; $('markWrongBtn').style.display='';
   const pen=calcPenalty(curPts); score+=pen;       // undo any penalty
   score+=curPts; nRight++; nWrong=Math.max(0,nWrong-1);
   streak=streakBeforeWrong+1; if(streak>bestStreak)bestStreak=streak;  // restore the streak this "wrong" had broken
@@ -1896,6 +1899,19 @@ $('markBtn').addEventListener('click',()=>{
   removeLastMistake();
   feedback.className='feedback correct';
   fbMsg.innerHTML=`✓ Counted correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
+  saveStorage(); updateScoreUI(); updateStatsBar();
+});
+// Mark-wrong override: the matcher was too lenient and shouldn't have accepted this
+$('markWrongBtn').addEventListener('click',()=>{
+  if(!lastMarkedCorrect) return;
+  lastMarkedCorrect=false; $('markWrongBtn').style.display='none'; $('markBtn').style.display='';
+  const pen=calcPenalty(curPts); score-=pen;
+  score-=curPts; nWrong++; nRight=Math.max(0,nRight-1);
+  streakBeforeWrong=Math.max(0,streak-1); streak=0;
+  if(compActive) compRight=Math.max(0,compRight-1);
+  recordMistake(lastTypedAnswer);
+  feedback.className='feedback wrong';
+  fbMsg.innerHTML=`✗ Marked wrong. <b>−${curPts}</b> points`;
   saveStorage(); updateScoreUI(); updateStatsBar();
 });
 function goNext(){
@@ -2047,6 +2063,10 @@ document.addEventListener('keydown',e=>{
   // C = Mark me correct, while it's offered and you're not typing in the answer box
   if((e.key==='c'||e.key==='C')&&document.activeElement!==ansInput&&$('markBtn').style.display!=='none'){
     e.preventDefault(); $('markBtn').click();
+  }
+  // X = Mark me wrong, while it's offered and you're not typing in the answer box
+  if((e.key==='x'||e.key==='X')&&document.activeElement!==ansInput&&$('markWrongBtn').style.display!=='none'){
+    e.preventDefault(); $('markWrongBtn').click();
   }
 });
 loadStorage(); setupRecog(); populateSources(); loadVoices();
