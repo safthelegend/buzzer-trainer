@@ -34,6 +34,19 @@
     --red: #B23A2E; --blue: #2E5C8A; --yellow: #D9A441;
     --accent: #2E5C8A; --accent2: #234a70; --green: #2E5C8A;
   }
+  /* ── THEME: Shafeen (money) — cash green, gold trim, ink black ──────────── */
+  [data-theme="shafeen"] {
+    --bg: #EAF3EA; --surface: #FFFFFF; --surface2: #D7EAD7; --border: #0B3D1E;
+    --text: #0B3D1E; --text2: #3E6B4C;
+    --red: #B4791A; --blue: #146C3B; --yellow: #D4AF37;
+    --accent: #146C3B; --accent2: #0B3D1E; --green: #146C3B;
+  }
+  [data-theme="shafeen"] body { background-image: radial-gradient(var(--yellow) 1.5px, transparent 1.5px); background-size: 24px 24px; }
+  [data-theme="shafeen"] .logo::before { content: '💵'; font-size: 1.3rem; line-height: 1; }
+  [data-theme="shafeen"] .logo i { display: none; }
+  [data-theme="shafeen"] header h1::after { content: ' 🤑'; }
+  [data-theme="shafeen"] #buzzBtn::after { content: ' 💰'; }
+  [data-theme="shafeen"] .feedback.correct::before { content: '💵 '; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh;
@@ -169,7 +182,7 @@
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
     <button id="earlyClueBtn" title="Cuts off the reading before the giveaway, forcing you to buzz on the early clue">Early Clue <span id="earlyCluePill" class="pill off">OFF</span></button>
     <select id="voiceSel" title="Reader voice"><option value="">Loading voices…</option></select>
-    <select id="themeSel" title="Theme"><option value="bauhaus">Bauhaus</option><option value="midnight">Midnight</option><option value="paper">Paper</option></select>
+    <select id="themeSel" title="Theme"><option value="bauhaus">Bauhaus</option><option value="midnight">Midnight</option><option value="paper">Paper</option><option value="shafeen">Shafeen 💰</option></select>
   </div>
   <div id="compSetup" class="rules-box" style="display:none;">
     <b>Competition Setup</b> — pick which topics to compete on (all sources included). Starting resets your score to 0.
