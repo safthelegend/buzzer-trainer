@@ -167,6 +167,7 @@
     <button id="compBtn">Competition <span id="compPill" class="pill off">OFF</span></button>
     <select id="compLenSel" title="Questions per round"><option value="10">10 Qs</option><option value="15" selected>15 Qs</option><option value="20">20 Qs</option><option value="30">30 Qs</option></select>
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
+    <button id="earlyClueBtn" title="Cuts off the reading before the giveaway, forcing you to buzz on the early clue">Early Clue <span id="earlyCluePill" class="pill off">OFF</span></button>
     <select id="voiceSel" title="Reader voice"><option value="">Loading voices…</option></select>
     <select id="themeSel" title="Theme"><option value="bauhaus">Bauhaus</option><option value="midnight">Midnight</option><option value="paper">Paper</option></select>
   </div>
@@ -225,6 +226,7 @@
       <li>Judge reads the <b>point value first</b>, then the question. Buzz at any time.</li>
       <li>Buzzing <b>immediately stops the reader</b> — judge does not repeat the question.</li>
       <li><b>Study mode:</b> no timer and no penalties — answer whenever you're ready; right or wrong just reveals the answer.</li>
+      <li><b>Early Clue mode:</b> cuts the reading off at ~60% through the question — before the giveaway plays — forcing you to buzz off the early clue.</li>
       <li>Type or <b>speak</b> your answer; speech is matched phonetically (so "cartoon" still hits "Khartoum"), or hit <b>Show Answer</b>.</li>
       <li>Filter by <b>Topic</b> and <b>Source</b>; use <b>+ Import</b> to paste your own <code>Answer | Clue</code> lists.</li>
       <li><b>Topics 1–4:</b> Direct factual questions. <b>Topic 5:</b> Pyramid-style tossups.</li>
@@ -319,26 +321,6 @@ const QB = [
  tossup:'According to the St. Louis Gov source, what are the names of the two water treatment plants serving the City of St. Louis?',
  part1:'St. Louis operates two water treatment facilities named after local landmarks. For 100 points — name them.',
  part2:'For 50 points — Chain of Rocks and Howard Bend: the two St. Louis water treatment plants.'},
-
-// CHANNEL 5 NEWS
-{id:'w25',topic:'Water',source:'Channel 5 News',
- answer:'1 million',alternates:['one million','a million','1,000,000'],
- tossup:'According to Channel 5 News, what population was St. Louis\'s water system originally built to serve?',
- part1:'Channel 5 News reports that St. Louis built its water infrastructure to serve this many people. For 100 points.',
- part2:'For 50 points — 1 million: the population St. Louis\'s water system was built to serve, per Channel 5 News.'},
-
-{id:'w26',topic:'Water',source:'Channel 5 News',
- answer:'fewer than 300,000',alternates:['under 300,000','less than 300000','about 300000'],
- tossup:'According to Channel 5 News, approximately how many people actually use St. Louis\'s water system today?',
- part1:'Channel 5 News reports that despite being built for a million, only this many people use St. Louis\'s water system now. For 100 points.',
- part2:'For 50 points — fewer than 300,000: the number of people currently served by St. Louis\'s water system.'},
-
-{id:'w27',topic:'Water',source:'Channel 5 News',
- answer:'population decline',alternates:['depopulation','loss of population','shrinking population'],
- tossup:'According to Channel 5 News, what demographic trend has left St. Louis\'s water system dramatically oversized for its current users?',
- part1:'Channel 5 News identifies this trend — the city losing two-thirds of its peak residents — as the reason St. Louis\'s water system is financially strained. For 100 points.',
- part2:'For 50 points — population decline: the trend Channel 5 News blames for St. Louis\'s oversized, underfunded water system.'},
-
 
 // ════════════════════════════════════════════════════════
 //  SUDAN
@@ -503,31 +485,6 @@ const QB = [
  tossup:'According to the ACRC Khartoum report, what two cities alongside Khartoum make up the tri-city metropolitan area?',
  part1:'The ACRC report describes Khartoum as part of a tri-city area that includes these two other cities. For 100 points.',
  part2:'For 50 points — Omdurman and Khartoum North (also called Bahri): the cities in the Khartoum tri-city area.'},
-
-// Britannica / Darfur
-{id:'s27',topic:'Sudan',source:'Britannica',
- answer:'home of the Fur',alternates:['land of the fur','dar fur means home of the fur'],
- tossup:'According to Britannica, what does the name "Darfur" mean in Arabic?',
- part1:'Britannica explains that the name "Darfur" translates to this phrase in Arabic, referring to the region\'s largest ethnic group. For 100 points.',
- part2:'For 50 points — "Home of the Fur": the meaning of Darfur\'s name, referring to the Fur people.'},
-
-{id:'s28',topic:'Sudan',source:'Britannica',
- answer:'Fur',alternates:['the fur','fur people'],
- tossup:'According to Britannica, who are the largest ethnic group in Darfur, for whom the region is named?',
- part1:'Britannica states the region of Darfur is named for this ethnic group, its largest. For 100 points.',
- part2:'For 50 points — the Fur: the ethnic group Darfur is named for, per Britannica.'},
-
-{id:'s29',topic:'Sudan',source:'Britannica',
- answer:'2003',alternates:['year 2003','the year 2003'],
- tossup:'According to Britannica, in what year did the major conflict involving the Janjaweed militia begin in Darfur?',
- part1:'Britannica dates the start of the Darfur conflict involving the Janjaweed to this year. For 100 points.',
- part2:'For 50 points — 2003: the year Britannica gives for the start of the Darfur conflict.'},
-
-{id:'s30',topic:'Sudan',source:'Britannica',
- answer:'western Sudan',alternates:['west sudan','western'],
- tossup:'According to Britannica, in what region of Sudan is Darfur located?',
- part1:'Britannica places Darfur in this region of Sudan. For 100 points.',
- part2:'For 50 points — western Sudan: where Britannica says Darfur is located.'},
 
 
 // ════════════════════════════════════════════════════════
@@ -1315,20 +1272,47 @@ const EXTRA=[
 ['Water','St. Louis Gov',`Damaging UV radiation and cold winter winds`,`From what two things do green roofs shield the roof surface, protecting it?`],
 ['Water','St. Louis Gov',`Twice as long`,`[HY] How much longer do green roofs last compared to conventional roofs?`],
 // ---- WATER · Channel 5 News ----
-['Water','Channel 5 News','1,300 miles','Per Channel 5 News, how many miles of water main run under St. Louis?',['1300 miles']],
-['Water','Channel 5 News','800,000','Per Channel 5 News, what was St. Louis\'s peak population, which its water system was built to serve?',['eight hundred thousand']],
-['Water','Channel 5 News','$700 million','Per Channel 5 News, how much capital investment has the Water Department identified as needed over coming decades?'],
-['Water','Channel 5 News','Niraj Patel','Per Channel 5 News, who is the St. Louis Water Department Commissioner featured in the story?',['patel']],
-['Water','Channel 5 News','399','Per Channel 5 News, how many times did St. Louis water mains break last year?'],
-['Water','Channel 5 News','1835','Per Channel 5 News, since what year has the St. Louis water division been municipally owned?'],
-['Water','Channel 5 News','Howard Bend','Per Channel 5 News, which plant on the Missouri River pumps 120 million gallons a day and has run since 1929?'],
-['Water','Channel 5 News','Chain of Rocks','Per Channel 5 News, which St. Louis plant went online in 1894 and can pump 240 million gallons a day?'],
-['Water','Channel 5 News','125 million gallons','Per Channel 5 News, about how much water does St. Louis consume each day?'],
-['Water','Channel 5 News','360 million gallons','Per Channel 5 News, the St. Louis system was built to produce how much water per day?'],
-['Water','Channel 5 News','data centers','Per Channel 5 News, what new industry does Commissioner Patel suggest could revive the water system\'s rate base?'],
-['Water','Channel 5 News','rate base','Per Channel 5 News, what term means the number of people sharing the cost of the system?'],
-['Water','Channel 5 News','Black & Veatch','Per Channel 5 News, which consulting firm had recommended the 2023 water rate increase?',['black and veatch']],
-['Water','Channel 5 News','flood of 1993','Per Channel 5 News, during which historic flood did the Howard Bend plant\'s wall hold and pumps keep running?',['1993 flood']],
+['Water','Channel 5 News',`1,300 miles`,`[HY] Per Channel 5 News, how many miles of water pipe run under St. Louis?`],
+['Water','Channel 5 News',`Peaked at 800,000; now fewer than 300,000`,`[HY] What population did St. Louis peak at, and what is it now, per Channel 5 News?`],
+['Water','Channel 5 News',`Commissioner of the St. Louis Water Department`,`Who is Niraj Patel, per Channel 5 News?`],
+['Water','Channel 5 News',`Over $700 million`,`[HY] How much capital investment does the Water Department say is needed over the next few decades?`],
+['Water','Channel 5 News',`$2,500`,`What per-person bill would $700 million work out to for every St. Louis resident?`],
+['Water','Channel 5 News',`1835`,`[HY] Since what year has the St. Louis water division been municipally owned?`],
+['Water','Channel 5 News',`The city bought out a bankrupt private water contractor and ran it itself`,`What happened in 1835 to make the water division municipal?`],
+['Water','Channel 5 News',`Abraham Lincoln was 26 years old when St. Louis took over the water works`,`How does Channel 5 illustrate how long ago 1835 was?`],
+['Water','Channel 5 News',`399 breaks — "more than once a day on average"`,`[HY] How many water main breaks did St. Louis have last year, per Channel 5?`],
+['Water','Channel 5 News',`When asked how to divvy up the Rams settlement money, the water department ranked as the most popular issue by far`,`What Board of Aldermen funding question did the water department win, per the article?`],
+['Water','Channel 5 News',`A treatment plant on the banks of the Missouri River; opened 1929`,`[HY] What is the Howard Bend Water Treatment Plant, and where does it sit?`],
+['Water','Channel 5 News',`120 million gallons a day`,`[HY] How many gallons per day does Howard Bend pump?`],
+['Water','Channel 5 News',`The 1993 flood — the Missouri River crested 50+ feet above normal`,`What historic flood did Howard Bend survive, and by how much?`],
+['Water','Channel 5 News',`A flood wall around the plant`,`What had just been finished right before the 1993 flood hit Howard Bend?`],
+['Water','Channel 5 News',`Chain of Rocks plant — opened 1894`,`[HY] What is the older, more powerful plant called, and when did it open?`],
+['Water','Channel 5 News',`240 million gallons a day`,`[HY] How many gallons per day can Chain of Rocks pump, at its original capacity?`],
+['Water','Channel 5 News',`City leadership expected continued growth (population then ~800,000) and wanted redundant capacity`,`Why was Chain of Rocks built to be so much bigger than needed at the time?`],
+['Water','Channel 5 News',`A 30-bulb chandelier in the lobby`,`What ornamental detail does Channel 5 highlight inside the old Chain of Rocks plant?`],
+['Water','Channel 5 News',`120 years — never once exceeded`,`[HY] How many years has St. Louis water testing gone without exceeding a regulated contaminant level?`],
+['Water','Channel 5 News',`Best tasting tap water in the nation, US Conference of Mayors, 2007`,`What national award did St. Louis water win, and when?`],
+['Water','Channel 5 News',`Consumes about 125 million gallons a day; system built for 360 million gallons a day`,`[HY] How much water does St. Louis actually consume per day, versus system capacity?`],
+['Water','Channel 5 News',`About one third`,`Roughly what fraction of total pipeline capacity does the city currently use?`],
+['Water','Channel 5 News',`The number of people sharing the cost of the water system — fewer people means higher cost per person`,`What is a rate base, per the article's definition?`],
+['Water','Channel 5 News',`12 years — the first rate hike in a dozen years came in 2023`,`[HY] How many years did St. Louis go without raising water rates before 2023?`],
+['Water','Channel 5 News',`Black & Veatch, two years before the 2023 increase`,`Which consulting firm had recommended a rate increase, and when?`],
+['Water','Channel 5 News',`Data centers`,`[HY] What new industry does Channel 5 say is now eyeing St. Louis's spare water capacity?`],
+['Water','Channel 5 News',`To keep servers from overheating — "cooking themselves to death"`,`Why do data centers need so much water, per the article?`],
+['Water','Channel 5 News',`Between 1 and 2 million gallons a day`,`[HY] How much water could one hyperscale data center draw per day?`],
+['Water','Channel 5 News',`Going from 125 to 130 million gallons a day, a 5 million gallon jump, would not be a challenge for the system`,`What example does Patel give to show the system could absorb a data center's draw?`],
+['Water','Channel 5 News',`A 6-inch pipe could supply it, versus 72-inch mains at the plant — "a tributary creek" compared to the mains`,`What pipe-size comparison does Patel use for a data center's water draw versus the plant's main pipes?`],
+['Water','Channel 5 News',`A resident who asked via the Aldermen's online portal how much water a data center needs daily and whether it would stress the system`,`Who is Bruce Mayhew, and what did he ask the Board of Aldermen?`],
+['Water','Channel 5 News',`Its water draws are irregular, surging, and unpredictable — the existing billing and rate structure wasn't designed for that`,`What unresolved billing problem does a hyperscale data center create for the city?`],
+['Water','Channel 5 News',`What it would actually charge data centers for water`,`What has the city not yet determined about data centers, per the article's closing sections?`],
+['Water','Channel 5 News',`The same digital economy that helped empty St. Louis's factories may now be the industry that fills its water system's rate base back up`,`What broader economic irony does the article draw about data centers and St. Louis?`],
+['Water','Channel 5 News',`Growing cities build with optimism things a shrinking city can't afford`,`What is the article's opening thesis about growing versus shrinking cities?`],
+['Water','Channel 5 News',`East, underground, toward city limits`,`Which direction do the twin treatment plants pump water toward the city?`],
+['Water','Channel 5 News',`A tall, now-defunct smoke stack that used to power the machines inside`,`What historic feature sits next to Howard Bend's stone plant building?`],
+['Water','Channel 5 News',`Oily chains, hydraulic elevators, large leather straps, and forklifts`,`What industrial details does Channel 5 note inside the old Chain of Rocks plant?`],
+['Water','Channel 5 News',`"Absolutely" — the city could use the customers and revenue, especially as residents and industry have left`,`What did Patel say when asked if the city could use data centers as customers?`],
+['Water','Channel 5 News',`It's "indicative of that growth and that capacity and that foresight" to be a leader in water utilities`,`What closing description does Patel give of the Howard Bend plant's significance?`],
+['Water','Channel 5 News',`"You can't get very far without water. With it, you can go almost anywhere."`,`What is the article's closing thematic line about water?`],
 // ---- SUDAN · Wilson Center ----
 ['Sudan','Wilson Center','Zeinab Mohammed Salih','Per the Wilson Center, which Guardian/BBC journalist based in Khartoum wrote "Conflict in Sudan: A Map of Regional and International Actors"?'],
 ['Sudan','Wilson Center','United Arab Emirates','Per the Wilson Center, which country supports the RSF, contrary to its ally Saudi Arabia?',['uae']],
@@ -1343,19 +1327,102 @@ const EXTRA=[
 ['Sudan','Wilson Center','Russia and Ukraine','Per the Wilson Center, which two warring countries paradoxically both support the SAF?'],
 ['Sudan','Wilson Center','Chad','Per the Wilson Center, which country was accused of facilitating UAE weapons to the RSF via airports at Abeche?'],
 ['Sudan','Wilson Center','Algeria','Per the Wilson Center, which country offered fighter jets to the SAF, partly because the UAE backs Morocco?'],
-// ---- SUDAN · Britannica (Darfur / Janjaweed / ICC) ----
-['Sudan','Britannica','Land of the Fur','Per Britannica, what does "Darfur" mean in Arabic?',['home of the fur']],
-['Sudan','Britannica','Marrah Mountains','Per Britannica, which volcanic highlands dominate central Darfur?'],
-['Sudan','Britannica','Mount Marrah','Per Britannica, what is the highest peak in Darfur, at 10,131 feet?'],
-['Sudan','Britannica','Nyala and Al-Fashir','Per Britannica, what are the two principal towns of Darfur?',['nyala','al-fashir','el fasher']],
+// ---- SUDAN · Britannica (Janjaweed / ICC — not covered by the Darfur-article set below) ----
 ['Sudan','Britannica','spirit and horse','Per Britannica, the name "Janjaweed" is thought to derive from the Arabic words jinni and jawad — meaning what?',['jinni and jawad','spirit and horse']],
 ['Sudan','Britannica','Colin Powell','Per Britannica, which US Secretary of State called the Janjaweed campaign a genocide in 2004?'],
-['Sudan','Britannica','March 4, 2009','Per Britannica, when did the ICC issue its first arrest warrant for Omar al-Bashir?'],
 ['Sudan','Britannica','2013','Per Britannica, in what year was the RSF formed from a Janjaweed faction under Hemedti?'],
 ['Sudan','Britannica','Ali Kushayb','Per Britannica, which Janjaweed leader became the first convicted at the ICC for Darfur crimes, found guilty in 2025?',['ali muhammad ali abd-al-rahman']],
 ['Sudan','Britannica','1998','Per Britannica, the ICC was established by the Rome Statute in what year?'],
 ['Sudan','Britannica','The Hague','Per Britannica, where is the International Criminal Court headquartered?'],
 ['Sudan','Britannica','Fur, Masalit, and Zaghawa','Per Britannica, the Janjaweed conducted ethnic cleansing against which three peoples?',['fur masalit zaghawa']],
+['Sudan','Britannica',`Land of the Fur`,`What does Darfur mean in Arabic?`],
+['Sudan','Britannica',`Land of the Blacks`,`What does Bilad al-Sudan mean in Arabic?`],
+['Sudan','Britannica',`Kordofan`,`What region is to the east of Darfur?`],
+['Sudan','Britannica',`Wadai`,`What region is to the west of Darfur?`],
+['Sudan','Britannica',`The Al-Ghazal (Gazelle) River`,`Which river forms Darfur's southern boundary?`],
+['Sudan','Britannica',`The Libyan Desert`,`What desert forms Darfur's northern boundary?`],
+['Sudan','Britannica',`170,000 square miles`,`What is the approximate area of Darfur in square miles?`],
+['Sudan','Britannica',`440,000 square km`,`What is the approximate area of Darfur in square kilometers?`],
+['Sudan','Britannica',`The Marrah Mountains`,`What mountain range dominates the central plain of Darfur?`],
+['Sudan','Britannica',`7,200 feet (2,200 metres)`,`What is the average elevation of the Marrah Mountains?`],
+['Sudan','Britannica',`10,131 feet (3,088 metres)`,`What is the height of the highest peak in the Marrah Mountains?`],
+['Sudan','Britannica',`Mount Marrah`,`What is the name of the highest peak in the Marrah Mountains?`],
+['Sudan','Britannica',`Sparsely populated arid plains merging into the Libyan Desert`,`What type of terrain is found in northern Darfur?`],
+['Sudan','Britannica',`Seasonal grass and low thorny shrubs with tropical maquis vegetation`,`What type of vegetation is found in Darfur's plains?`],
+['Sudan','Britannica',`Stony or sandy`,`What type of soil is generally found across Darfur?`],
+['Sudan','Britannica',`Heavier rainfall`,`What do the Marrah highlands receive more of than other parts of Darfur?`],
+['Sudan','Britannica',`Flow southward across the plains`,`What do a number of large wadis in the Marrah Mountains do?`],
+['Sudan','Britannica',`Wadis`,`What is the term for the seasonal watercourses rising in the Marrah Mountains?`],
+['Sudan','Britannica',`Nyala and Al-Fasher`,`What are the two principal towns of Darfur?`],
+['Sudan','Britannica',`Arabs`,`What is the ethnic majority in northern Darfur?`],
+['Sudan','Britannica',`Arabs and Fur`,`Which two groups predominate in southern Darfur?`],
+['Sudan','Britannica',`Beja, Zaghawa, Nubian, and Daju`,`What other ethnic groups are found in Darfur besides Arabs and Fur?`],
+['Sudan','Britannica',`Cereals, rice, and fruits`,`What crops are grown in the Marrah highlands?`],
+['Sudan','Britannica',`Sorghum, millet, sesame, peanuts, root crops, and vegetables`,`What crops are grown in the southern plains of Darfur?`],
+['Sudan','Britannica',`Camels, sheep, and goats`,`What animals are raised in the arid north of Darfur?`],
+['Sudan','Britannica',`Leatherwork, wood carving, and carpet weaving`,`What are three traditional handicrafts of Darfur?`],
+['Sudan','Britannica',`2500 BCE`,`What is the approximate date Darfur came within the sphere of Egyptian caravans?`],
+['Sudan','Britannica',`Aswan`,`Which ancient Egyptian city was involved in trading southward into Darfur?`],
+['Sudan','Britannica',`Egypt during the New Kingdom and the cities of Napata and Meroe in the kingdom of Kush`,`With which kingdoms did Darfur likely trade during the Egyptian New Kingdom period?`],
+['Sudan','Britannica',`Northern Sudan`,`Where is the modern-day location of the Kingdom of Kush?`],
+['Sudan','Britannica',`The Daju (Dagu)`,`Who were the first traditional rulers of Darfur?`],
+['Sudan','Britannica',`The Tunjur (Tungur)`,`Who was the second ruling group that followed the Daju in Darfur?`],
+['Sudan','Britannica',`Ancient Egypt`,`What possible ancient connection did the first Darfur rulers have?`],
+['Sudan','Britannica',`900 to 1200 CE`,`During which period did Christianity probably prevail in Darfur?`],
+['Sudan','Britannica',`Kanem-Bornu`,`Which empire's eastward spread of Islam ended the Christian period in Darfur?`],
+['Sudan','Britannica',`Lake Chad`,`What is the geographic center of the Kanem-Bornu empire?`],
+['Sudan','Britannica',`1240`,`By what year did the king of Kanem claim control of a trade route with Egypt?`],
+['Sudan','Britannica',`A province during their great periods`,`What may Darfur have been to Kanem or Bornu?`],
+['Sudan','Britannica',`The Keira`,`What chiefly clan affiliated with the Fur ruled Darfur from approximately 1640 to 1916?`],
+['Sudan','Britannica',`1664`,`In what year was the name Fur first historically mentioned?`],
+['Sudan','Britannica',`Dark-skinned inhabitants who accepted Islamic religion and their rule`,`What did the Keira sultans use the term Fur to refer to?`],
+['Sudan','Britannica',`Through intermarriage`,`How did the Keira dynasty itself become known as Fur?`],
+['Sudan','Britannica',`Complete Islamization of its inhabitants`,`What religious transformation did the Keira sultans achieve in Darfur?`],
+['Sudan','Britannica',`The Wadai kingdom`,`Which kingdom did the Keira sultanate fight intermittently?`],
+['Sudan','Britannica',`Arab tribes inhabiting Darfur`,`What semi-independent group did the Keira sultans try to subjugate?`],
+['Sudan','Britannica',`The 1870s`,`In which decade did Darfur come under Egyptian rule?`],
+['Sudan','Britannica',`Suppressed them`,`What did the Egyptians do to various revolts in Darfur?`],
+['Sudan','Britannica',`Rudolf Karl Slatin`,`Who was the governor appointed by the Egyptians in 1881?`],
+['Sudan','Britannica',`Defended the province`,`What did Slatin initially do against al-Mahdi's forces?`],
+['Sudan','Britannica',`Al-Mahdi`,`Who was the religious reformer and Sudanese political leader whose forces Slatin ultimately surrendered to?`],
+['Sudan','Britannica',`December 1883`,`In which month and year did Slatin surrender to al-Mahdi?`],
+['Sudan','Britannica',`It was incorporated into al-Mahdi's dominions`,`What happened to Darfur after Slatin's surrender?`],
+['Sudan','Britannica',`The khalifah Abd Allah`,`Who was the successor of al-Mahdi?`],
+['Sudan','Britannica',`1898`,`In what year was Abd Allah overthrown?`],
+['Sudan','Britannica',`1899`,`In what year did the Anglo-Egyptian government recognize Ali Dinar as sultan of Darfur?`],
+['Sudan','Britannica',`1915`,`In what year did Ali Dinar lead a rebellion that provoked a British punitive expedition?`],
+['Sudan','Britannica',`November 1916`,`In what year was Ali Dinar killed?`],
+['Sudan','Britannica',`A province and later three provinces of Sudan`,`What did Darfur become after Ali Dinar's death in 1916?`],
+['Sudan','Britannica',`Nomadic Arab herders vs. sedentary Fur and other agriculturalists`,`What underlying ethnic tension began erupting in the late 1980s?`],
+['Sudan','Britannica',`2003`,`In what year did violence in Darfur shift from sporadic to sustained conflict?`],
+['Sudan','Britannica',`To protest the Sudanese government's disregard for the western region and its non-Arab population`,`Why did rebels from among the agriculturalists attack government installations in 2003?`],
+['Sudan','Britannica',`Creating the Arab militia force known as the Janjaweed`,`What was the government response to the 2003 rebel attacks?`],
+['Sudan','Britannica',`Jingaweit or Janjawid`,`What are the alternative spellings of Janjaweed?`],
+['Sudan','Britannica',`Fur and other agriculturalists`,`Which groups were primarily killed and displaced in the first year of the Darfur conflict?`],
+['Sudan','Britannica',`Westward to refugee camps in neighbouring Chad`,`In which direction did hundreds of thousands of refugees flee during the early Darfur conflict?`],
+['Sudan','Britannica',`2004`,`In what year was a ceasefire reached in Darfur?`],
+['Sudan','Britannica',`The presence of African Union troops`,`What followed the 2004 ceasefire?`],
+['Sudan','Britannica',`Hundreds of thousands dead and more than 2 million displaced`,`What were the death toll and displacement figures by 2007 despite the 2004 ceasefire?`],
+['Sudan','Britannica',`July 31, 2007`,`On what date did the UN Security Council authorize the joint UN-AU peacekeeping mission UNAMID?`],
+['Sudan','Britannica',`The African Union mission`,`What did UNAMID replace?`],
+['Sudan','Britannica',`United Nations-African Union Mission in Darfur`,`What is the full expansion of UNAMID?`],
+['Sudan','Britannica',`2008`,`In what year did UNAMID troop deployment begin?`],
+['Sudan','Britannica',`March 4, 2009`,`In which month and year did the ICC issue the first arrest warrant for Bashir?`],
+['Sudan','Britannica',`War crimes and crimes against humanity, not genocide`,`What were the charges in Bashir's first ICC arrest warrant?`],
+['Sudan','Britannica',`Genocide`,`What charge was notably absent from Bashir's first ICC warrant?`],
+['Sudan','Britannica',`July 12, 2010`,`On what date was Bashir's second ICC arrest warrant issued, adding the genocide charge?`],
+['Sudan','Britannica',`July 2008`,`In which month and year did an ICC prosecutor first seek a warrant for Bashir's arrest?`],
+['Sudan','Britannica',`Rejected them and proclaimed his innocence`,`What was Bashir's response to the ICC allegations?`],
+['Sudan','Britannica',`Decisive Summer`,`What was the name of the Sudanese government's 2013 military campaign that intensified conflict nationwide?`],
+['Sudan','Britannica',`2014`,`In what year did the Decisive Summer campaign reach Darfur?`],
+['Sudan','Britannica',`The Rapid Support Forces (RSF)`,`What new government security unit was deployed in the Decisive Summer campaign?`],
+['Sudan','Britannica',`Similar lawlessness of tactics, with many former Janjaweed fighters among its ranks`,`How was the RSF compared to the Janjaweed?`],
+['Sudan','Britannica',`More than 3,000`,`How many villages in Darfur did the UN note had been burned by 2014?`],
+['Sudan','Britannica',`Widespread sexual violence against civilians`,`What additional atrocity was widely reported during the Decisive Summer campaign in Darfur?`],
+['Sudan','Britannica',`The Sudanese government's restrictions on humanitarian aid groups`,`What further exacerbated the humanitarian crisis beyond the conflict itself?`],
+['Sudan','Britannica',`Omar al-Bashir, St. Josephine Bakhita, Rudolf Anton Karl von Slatin, and William George Browne`,`Who are key people associated with Darfur, per Britannica?`],
+['Sudan','Britannica',`St. Josephine Bakhita`,`Who is the notable saint associated with Darfur?`],
+['Sudan','Britannica',`William George Browne`,`Who is the British explorer listed among Darfur's key people?`],
 // ---- HOUSING · WashU ----
 ['Housing','WashU','Still separate and unequal','What is the title phrase of the WashU study on subsidized housing?'],
 ['Housing','WashU','Elizabeth Korver-Glenn','Per the WashU source, which WashU sociology professor co-authored the subsidized-housing study?',['korver-glenn']],
@@ -1412,6 +1479,8 @@ let compMode = false, streak = 0, bestStreak = 0, streakBeforeWrong = 0, lastMar
 let compLen = 15, compCount = 0, compRight = 0, compStartScore = 0, compActive = false;
 let mistakes = [];
 let blindMode = false, revealed = false;
+let earlyClueMode = false;
+const EARLY_CLUE_FRACTION = .6; // stop reading once this fraction of the question has played
 let score = 0, nRight = 0, nWrong = 0;
 let pool = [], poolIdx = 0, curQ = null, curPts = 10;
 let waitingAns = false;
@@ -1440,6 +1509,7 @@ function loadStorage() {
   nWrong = +localStorage.getItem('mist_wrong')||0;
   boardUsed = JSON.parse(localStorage.getItem('mist_board')||'{}');
   blindMode = localStorage.getItem('mist_blind')==='1';
+  earlyClueMode = localStorage.getItem('mist_earlyclue')==='1';
   chosenVoiceURI = localStorage.getItem('mist_voice')||'';
   compMode = localStorage.getItem('mist_comp')==='1';
   bestStreak = +localStorage.getItem('mist_best')||0;
@@ -1447,7 +1517,7 @@ function loadStorage() {
   theme = localStorage.getItem('mist_theme')||'bauhaus';
   document.documentElement.setAttribute('data-theme', theme);
   const themeSelEl=$('themeSel'); if(themeSelEl) themeSelEl.value=theme;
-  updateBlindUI(); updateCompUI(); updateScoreUI(); updateMistakesUI();
+  updateBlindUI(); updateEarlyClueUI(); updateCompUI(); updateScoreUI(); updateMistakesUI();
 }
 function saveStorage() {
   localStorage.setItem('mist_score',score);
@@ -1455,6 +1525,7 @@ function saveStorage() {
   localStorage.setItem('mist_wrong',nWrong);
   localStorage.setItem('mist_board',JSON.stringify(boardUsed));
   localStorage.setItem('mist_blind',blindMode?'1':'0');
+  localStorage.setItem('mist_earlyclue',earlyClueMode?'1':'0');
   localStorage.setItem('mist_comp',compMode?'1':'0');
   localStorage.setItem('mist_best',bestStreak);
   localStorage.setItem('mist_mistakes',JSON.stringify(mistakes.slice(-300)));
@@ -1471,6 +1542,8 @@ document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.addEventListener
   b.classList.add('active'); finRound = b.dataset.fin;
 }));
 $('blindBtn').addEventListener('click', () => { blindMode=!blindMode; updateBlindUI(); saveStorage(); });
+$('earlyClueBtn').addEventListener('click', () => { earlyClueMode=!earlyClueMode; updateEarlyClueUI(); saveStorage(); });
+function updateEarlyClueUI(){ const p=$('earlyCluePill'); p.textContent=earlyClueMode?'ON':'OFF'; p.className='pill '+(earlyClueMode?'on':'off'); }
 $('compBtn').addEventListener('click', () => { compMode=!compMode; updateCompUI(); saveStorage(); });
 function updateCompUI(){
   const p=$('compPill'); p.textContent=compMode?'ON':'OFF'; p.className='pill '+(compMode?'on':'off');
@@ -1809,9 +1882,11 @@ function startTTS(fullText) {
   lastSpokenText = fullText;
   words=fullText.split(/\s+/); wordIdx=0; renderQText();
   $('replayBtn').style.display='none';
+  let earlyClueFired = false;
   utt=new SpeechSynthesisUtterance(speakText(fullText)); utt.rate=.95; utt.pitch=1;
   const v = voices.find(v=>v.voiceURI===chosenVoiceURI);
   if (v) utt.voice = v;
+  const finishReading = () => { phaseBadge.style.display='none'; $('replayBtn').style.display=''; if (!waitingAns) promptAnswer(); };
   // word-boundary indices are based on the spoken (respelled) text, which can drift
   // from the displayed word count on respelled names — clamp to stay in range.
   utt.onboundary=e => {
@@ -1821,8 +1896,16 @@ function startTTS(fullText) {
       if (counted>=ci){w=i;break;} counted+=words[i].length+1; w=i+1;
     }
     wordIdx=Math.min(w, words.length); renderQText();
+    // Early-Clue mode: cut the reading off before the giveaway ever plays, forcing
+    // you to answer off the early clue instead of riding it out to the end.
+    if (earlyClueMode && !earlyClueFired && words.length>0 && wordIdx/words.length>=EARLY_CLUE_FRACTION) {
+      earlyClueFired = true;
+      utt.onend=null; utt.onboundary=null;
+      synth.cancel();
+      finishReading();
+    }
   };
-  utt.onend=()=>{ phaseBadge.style.display='none'; $('replayBtn').style.display=''; if (!waitingAns) promptAnswer(); };
+  utt.onend=finishReading;
   synth.speak(utt);
 }
 function stopTTS() {
