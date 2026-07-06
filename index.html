@@ -1753,11 +1753,17 @@ $('resetBtn').addEventListener('click', () => {
 });
 
 // ── SOURCE FILTER ─────────────────────────────────────────────────────────────
+// A question counts as "Numbers & Stats" if its answer is a number/date/percent/quantity
+const NUM_ANSWER_RE = /\d|percent|%|billion|million|thousand|hundred/i;
+function isNumericAnswer(q){ return NUM_ANSWER_RE.test(q.answer||''); }
+
 function populateSources() {
   const tf=$('topicSel').value, sel=$('sourceSel');
   const srcs=[...new Set(QB.filter(q=>tf==='all'||q.topic===tf).map(q=>q.source))].sort();
-  sel.innerHTML='<option value="all">All Sources</option>'+
-    srcs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  let opts='<option value="all">All Sources</option>';
+  if (tf==='Water') opts+='<option value="__numstats__">🔢 Numbers &amp; Stats</option>';
+  opts+=srcs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  sel.innerHTML=opts;
 }
 $('topicSel').addEventListener('change',populateSources);
 
@@ -1794,10 +1800,12 @@ $('keyBtn').addEventListener('click',()=>{
   const box=$('keyBox');
   if(box.style.display!=='none'){box.style.display='none';return;}
   const tf=$('topicSel').value, sf=$('sourceSel').value;
-  const list=QB.filter(q=>(tf==='all'||q.topic===tf)&&(sf==='all'||q.source===sf));
+  const list=QB.filter(q=>(tf==='all'||q.topic===tf)&&
+    (sf==='all' || (sf==='__numstats__' ? isNumericAnswer(q) : q.source===sf)));
   const byTopic={};
   list.forEach(q=>{(byTopic[q.topic]=byTopic[q.topic]||{});(byTopic[q.topic][q.source]=byTopic[q.topic][q.source]||[]).push(q);});
-  let html=`<b>Answer Key</b> — ${list.length} questions${tf!=='all'?' · '+esc(tf):''}${sf!=='all'?' · '+esc(sf):''}`;
+  const sfLabel = sf==='__numstats__' ? '🔢 Numbers & Stats' : sf;
+  let html=`<b>Answer Key</b> — ${list.length} questions${tf!=='all'?' · '+esc(tf):''}${sf!=='all'?' · '+esc(sfLabel):''}`;
   TOPICS.concat(Object.keys(byTopic).filter(t=>!TOPICS.includes(t))).forEach(topic=>{
     if(!byTopic[topic])return;
     html+=`<div style="margin-top:14px;color:var(--accent);font-weight:700;font-size:.95rem;">${esc(topic)}</div>`;
@@ -1902,7 +1910,8 @@ function startSession() {
   } else {
     const tf = $('topicSel').value, sf = $('sourceSel').value;
     if (mode===M.FINALS && finRound===FR.R3) { buildBoard(tf); return; }
-    f = QB.filter(q => (tf==='all'||q.topic===tf) && (sf==='all'||q.source===sf));
+    f = QB.filter(q => (tf==='all'||q.topic===tf) &&
+      (sf==='all' || (sf==='__numstats__' ? isNumericAnswer(q) : q.source===sf)));
   }
   if (!f.length) { $('qcount').textContent='No questions match that filter'; return; }
   pool = f.sort(()=>Math.random()-.5); poolIdx = 0;
