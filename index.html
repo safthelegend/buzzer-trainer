@@ -235,12 +235,14 @@
     <button id="startBtn" class="primary">Start</button>
     <button id="shuffleBtn">Shuffle</button>
     <button id="importBtn">+ Import</button>
+    <button id="hyBtn" class="primary">⭐ Likely to be Tested</button>
     <button id="keyBtn">Answer Key</button>
     <button id="mistakesBtn">Mistakes</button>
     <button id="resetBtn">Reset Stats</button>
     <button id="rulesBtn">Rules</button>
     <span class="qcount" id="qcount"></span>
   </div>
+  <div id="hyBox" class="rules-box" style="display:none;max-height:70vh;overflow-y:auto;"></div>
   <div id="keyBox" class="rules-box" style="display:none;max-height:70vh;overflow-y:auto;"></div>
   <div id="mistakesBox" class="rules-box" style="display:none;max-height:70vh;overflow-y:auto;"></div>
   <div id="importBox" class="rules-box" style="display:none;">
@@ -2416,6 +2418,29 @@ $('impClear').addEventListener('click',()=>{
   if(!confirm('Remove ALL paste-imported questions? (Built-in questions stay.)'))return;
   localStorage.removeItem('mist_imported');
   $('impMsg').textContent='Cleared. Reload the page to fully reset the bank.';
+});
+
+// ── LIKELY TO BE TESTED (all [HY]-flagged cards, grouped by topic → source) ───
+$('hyBtn').addEventListener('click',()=>{
+  const box=$('hyBox');
+  if(box.style.display!=='none'){box.style.display='none';return;}
+  const tf=$('topicSel').value;
+  const list=QB.filter(q=>(tf==='all'||q.topic===tf)&&isHY(q));
+  const byTopic={};
+  list.forEach(q=>{(byTopic[q.topic]=byTopic[q.topic]||{});(byTopic[q.topic][q.source]=byTopic[q.topic][q.source]||[]).push(q);});
+  let html=`<b>⭐ Likely to be Tested</b> — ${list.length} high-yield questions${tf!=='all'?' · '+esc(tf):''}`;
+  TOPICS.concat(Object.keys(byTopic).filter(t=>!TOPICS.includes(t))).forEach(topic=>{
+    if(!byTopic[topic])return;
+    html+=`<div style="margin-top:14px;color:var(--accent);font-weight:700;font-size:.95rem;">${esc(topic)}</div>`;
+    Object.keys(byTopic[topic]).sort().forEach(src=>{
+      html+=`<div style="margin-top:8px;color:var(--red);font-weight:900;text-transform:uppercase;letter-spacing:.04em;">${esc(src)} <span style="color:var(--text2);font-weight:500;">(${byTopic[topic][src].length})</span></div>`;
+      byTopic[topic][src].forEach(q=>{
+        const disp=attribute((q.tossup||'').replace(/\[HY\]\s*/,'').replace(/\s*For \d+ points[.:].*$/i,'').trim(), q.source, q.topic);
+        html+=`<div style="margin:5px 0;padding-left:10px;border-left:2px solid var(--yellow);"><span style="color:var(--text);">${esc(disp)}</span><br><span style="color:var(--green);font-weight:600;">${esc(q.answer)}</span></div>`;
+      });
+    });
+  });
+  box.innerHTML=html; box.style.display='';
 });
 
 // ── ANSWER KEY (grouped by topic → source, honors current Topic filter) ───────
