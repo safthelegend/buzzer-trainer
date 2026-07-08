@@ -185,6 +185,14 @@
     .q-card { border-width: 2px; box-shadow: 5px 5px 0 0 var(--border); }
     #buzzBtn { box-shadow: var(--sh); padding: 18px; font-size: 1.2rem; }
   }
+  #historyPanel { position: fixed; top: 110px; right: 20px; width: 260px; max-height: 75vh; overflow-y: auto;
+    background: var(--surface); border: 4px solid var(--border); border-radius: 0; padding: 14px 16px;
+    font-size: .78rem; color: var(--text); box-shadow: var(--sh-lg); font-weight: 500; z-index: 5; }
+  #historyPanel b { color: var(--text); font-weight: 900; }
+  #historyPanel::-webkit-scrollbar { width: 8px; } #historyPanel::-webkit-scrollbar-track { background: var(--surface2); }
+  #historyPanel::-webkit-scrollbar-thumb { background: var(--accent); border: 2px solid var(--surface2); }
+  #historyPanel { scrollbar-width: thin; scrollbar-color: var(--accent) var(--surface2); }
+  @media (max-width: 1400px) { #historyPanel { display: none; } }
 </style>
 </head>
 <body>
@@ -330,6 +338,10 @@
   </div>
   <div id="resultBox" class="rules-box" style="display:none;text-align:center;"></div>
 </main>
+<aside id="historyPanel">
+  <b>Last 10 Questions</b>
+  <div id="historyList" style="margin-top:10px;"></div>
+</aside>
 <script>
 // ── QUESTION BANK ────────────────────────────────────────────────────────────
 // Topics 1-4: direct factual questions. Topic 5: pyramid tossup style.
@@ -2258,6 +2270,27 @@ let mode = M.PRACTICE, finRound = FR.R1;
 let compMode = false, streak = 0, bestStreak = 0, streakBeforeWrong = 0, lastMarkedCorrect = false, lastTypedAnswer = '', compTimer = null;
 let compLen = 15, compCount = 0, compRight = 0, compStartScore = 0, compActive = false;
 let mistakes = [];
+let attemptHistory = []; // last N attempted questions this session, most recent first
+function recordAttempt(typed, correct){
+  attemptHistory.unshift({
+    topic: curQ.topic, source: curQ.source, answer: curQ.answer,
+    q: attribute((getQText()||'').replace(/\[HY\]\s*/,'').replace(/\s*For \d+ points[.:].*$/i,'').trim(), curQ.source, curQ.topic),
+    typed: typed||'', correct
+  });
+  attemptHistory = attemptHistory.slice(0,10);
+  renderHistory();
+}
+function renderHistory(){
+  const box=$('historyList'); if(!box) return;
+  if(!attemptHistory.length){ box.innerHTML='<span style="color:var(--text2);">No questions attempted yet.</span>'; return; }
+  box.innerHTML = attemptHistory.map(h=>
+    `<div style="margin-top:10px;padding-left:8px;border-left:3px solid ${h.correct?'var(--green)':'var(--red)'};">`+
+      `<div style="font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:${h.correct?'var(--green)':'var(--red)'};">${esc(h.topic)} · ${esc(h.source)} ${h.correct?'✓':'✗'}</div>`+
+      `<div style="margin-top:2px;color:var(--text);">${esc(h.q.length>120?h.q.slice(0,120)+'…':h.q)}</div>`+
+      `<div style="margin-top:2px;color:var(--blue);font-weight:700;">${esc(h.answer)}</div>`+
+    `</div>`
+  ).join('');
+}
 let blindMode = false, revealed = false;
 let earlyClueMode = false;
 const EARLY_CLUE_FRACTION = .6; // stop reading once this fraction of the question has played
@@ -2298,6 +2331,7 @@ function loadStorage() {
   document.documentElement.setAttribute('data-theme', theme);
   const themeSelEl=$('themeSel'); if(themeSelEl) themeSelEl.value=theme;
   updateBlindUI(); updateEarlyClueUI(); updateCompUI(); updateScoreUI(); updateMistakesUI();
+  renderHistory();
 }
 function saveStorage() {
   localStorage.setItem('mist_score',score);
@@ -2919,6 +2953,7 @@ function submitAnswer() {
       :`✗ ${typed?`You said "<i>${esc(typed)}</i>"`:'No answer'}.`;
     recordMistake(typed);
   }
+  recordAttempt(typed, correct);
   fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
   fbReveal.style.display='';
   if (compActive) { compCount++; if(correct) compRight++; updateStatsBar(); }
@@ -2937,6 +2972,7 @@ $('markBtn').addEventListener('click',()=>{
   removeLastMistake();
   feedback.className='feedback correct';
   fbMsg.innerHTML=`✓ Counted correct! <b>+${curPts}</b> points${streak>1?`  ·  🔥 ${streak} streak`:''}`;
+  if(attemptHistory.length){ attemptHistory[0].correct=true; renderHistory(); }
   saveStorage(); updateScoreUI(); updateStatsBar();
 });
 // Mark-wrong override: the matcher was too lenient and shouldn't have accepted this
@@ -2950,6 +2986,7 @@ $('markWrongBtn').addEventListener('click',()=>{
   recordMistake(lastTypedAnswer);
   feedback.className='feedback wrong';
   fbMsg.innerHTML=`✗ Marked wrong. <b>−${curPts}</b> points`;
+  if(attemptHistory.length){ attemptHistory[0].correct=false; renderHistory(); }
   saveStorage(); updateScoreUI(); updateStatsBar();
 });
 function goNext(){
