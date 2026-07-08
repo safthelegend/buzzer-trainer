@@ -2299,7 +2299,7 @@ let pool = [], poolIdx = 0, curQ = null, curPts = 10;
 let waitingAns = false;
 let words = [], wordIdx = 0, utt = null;
 const synth = window.speechSynthesis;
-let recog = null, heardFinal = '', autoSubTimer = null;
+let recog = null, heardFinal = '', autoSubTimer = null, finalizedTranscript = '';
 let timerInterval = null, timerLeft = 0;
 let boardUsed = {};
 
@@ -2899,28 +2899,39 @@ function clearTimer(){clearInterval(timerInterval);timerInterval=null;ansTimer.t
 // ── STT ───────────────────────────────────────────────────────────────────────
 function setupRecog() {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if (!SR) return;
-  recog=new SR(); recog.maxAlternatives=10; recog.continuous=false;
+  recog=new SR(); recog.maxAlternatives=10;
+  // continuous=true keeps the mic listening across pauses instead of the browser
+  // ending recognition (and firing onend) the instant you take a breath mid-answer.
+  recog.continuous=true;
   recog.interimResults=true; recog.lang='en-US';
   recog.onresult=e=>{
-    let best='',finalSeen=false;
+    let interim='';
     for (let i=e.resultIndex;i<e.results.length;i++) {
       if (e.results[i].isFinal) {
-        finalSeen=true;
-        for (let j=0;j<e.results[i].length;j++) {
+        let best=e.results[i][0].transcript.trim();
+        for (let j=1;j<e.results[i].length;j++) {
           const t=e.results[i][j].transcript.trim();
-          if (!best||isCorrect(t,curQ)) best=t;
+          if (isCorrect(t,curQ)) best=t;
         }
-      } else { ansInput.value=e.results[i][0].transcript; }
+        finalizedTranscript = (finalizedTranscript+' '+best).trim();
+      } else { interim+=e.results[i][0].transcript; }
     }
-    if (finalSeen) {
-      heardFinal=best||heardFinal; ansInput.value=heardFinal;
-      clearTimeout(autoSubTimer);
-      autoSubTimer=setTimeout(()=>{if(waitingAns)submitAnswer();},500);
-    }
+    heardFinal = finalizedTranscript;
+    ansInput.value = (finalizedTranscript+' '+interim).trim();
+    // Auto-submit only after a longer pause with no new speech, so mid-sentence
+    // breaths don't cut the answer off early. Re-armed on every new result.
+    clearTimeout(autoSubTimer);
+    autoSubTimer=setTimeout(()=>{if(waitingAns)submitAnswer();},1600);
   };
-  recog.onerror=()=>{}; recog.onend=()=>{micDot.style.display='none';};
+  recog.onerror=()=>{};
+  recog.onend=()=>{
+    micDot.style.display='none';
+    // Some browsers end the session on a long pause even in continuous mode; restart
+    // it transparently while we're still waiting on an answer so the user isn't cut off.
+    if (waitingAns) { try{recog.start();micDot.style.display='';}catch(e){} }
+  };
 }
-function startRecog(){if(!recog)return;micDot.style.display='';try{recog.start();}catch(e){}}
+function startRecog(){if(!recog)return;finalizedTranscript='';heardFinal='';micDot.style.display='';try{recog.start();}catch(e){}}
 function stopRecog(){micDot.style.display='none';if(!recog)return;try{recog.stop();}catch(e){}clearTimeout(autoSubTimer);}
 
 // ── SUBMIT ────────────────────────────────────────────────────────────────────
