@@ -47,6 +47,37 @@
   [data-theme="shafeen"] header h1::after { content: ' 🤑'; }
   [data-theme="shafeen"] #buzzBtn::after { content: ' 💰'; }
   [data-theme="shafeen"] .feedback.correct::before { content: '💵 '; }
+  /* ── THEME: Ocean (cool teal/blue) ──────────────────────────────────────── */
+  [data-theme="ocean"] {
+    --bg: #EAF6F8; --surface: #FFFFFF; --surface2: #D3EDF0; --border: #08313A;
+    --text: #08313A; --text2: #43707A;
+    --red: #C24A2E; --blue: #0E7A94; --yellow: #E8B23A;
+    --accent: #0E7A94; --accent2: #095868; --green: #12907A;
+  }
+  /* ── THEME: Sunset (warm orange/purple) ─────────────────────────────────── */
+  [data-theme="sunset"] {
+    --bg: #FFF3E8; --surface: #FFFFFF; --surface2: #FFE2C7; --border: #401A3D;
+    --text: #401A3D; --text2: #7A5876;
+    --red: #E0522C; --blue: #7A3FA0; --yellow: #F2A93B;
+    --accent: #E0522C; --accent2: #B23C1F; --green: #7A3FA0;
+  }
+  /* ── THEME: Forest (deep green/brown) ────────────────────────────────────── */
+  [data-theme="forest"] {
+    --bg: #F1EEE2; --surface: #FBFAF4; --surface2: #E2DCC4; --border: #26311F;
+    --text: #26311F; --text2: #5C6650;
+    --red: #A2402A; --blue: #3E6E4A; --yellow: #C79A3E;
+    --accent: #3E6E4A; --accent2: #2A4E33; --green: #3E6E4A;
+  }
+  /* ── THEME: Neon (cyberpunk dark, glowing accents) ──────────────────────── */
+  [data-theme="neon"] {
+    --bg: #0A0714; --surface: #140F26; --surface2: #1E1836; --border: #FF2FD4;
+    --text: #F2EFFF; --text2: #A796D6;
+    --red: #FF2FD4; --blue: #33F0FF; --yellow: #FFF23A;
+    --accent: #33F0FF; --accent2: #1FB8C9; --green: #39FF88;
+  }
+  [data-theme="neon"] .q-card, [data-theme="neon"] #buzzBtn, [data-theme="neon"] .mode-btn.active {
+    box-shadow: 0 0 12px var(--accent), var(--sh);
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh;
@@ -223,7 +254,7 @@
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
     <button id="earlyClueBtn" title="Cuts off the reading before the giveaway, forcing you to buzz on the early clue">Early Clue <span id="earlyCluePill" class="pill off">OFF</span></button>
     <select id="voiceSel" title="Reader voice"><option value="">Loading voices…</option></select>
-    <select id="themeSel" title="Theme"><option value="bauhaus">Bauhaus</option><option value="midnight">Midnight</option><option value="paper">Paper</option><option value="shafeen">Shafeen 💰</option></select>
+    <select id="themeSel" title="Theme"><option value="bauhaus">Bauhaus</option><option value="midnight">Midnight</option><option value="paper">Paper</option><option value="ocean">Ocean 🌊</option><option value="sunset">Sunset 🌅</option><option value="forest">Forest 🌲</option><option value="neon">Neon ⚡</option><option value="shafeen">Shafeen 💰</option></select>
   </div>
   <div id="compSetup" class="rules-box" style="display:none;">
     <b>Competition Setup</b> — pick which topics to compete on (all sources included). Starting resets your score to 0.
