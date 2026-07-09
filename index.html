@@ -216,6 +216,7 @@
     <button class="mode-btn" data-mode="round1">Round 1 · 100/50</button>
     <button class="mode-btn" data-mode="round23">Round 2/3 · 20–140</button>
     <button class="mode-btn" data-mode="finals">Finals</button>
+    <button class="mode-btn" data-mode="custom">Custom</button>
     <div class="spacer"></div>
     <button id="compBtn">Competition <span id="compPill" class="pill off">OFF</span></button>
     <select id="compLenSel" title="Questions per round"><option value="10">10 Qs</option><option value="15" selected>15 Qs</option><option value="20">20 Qs</option><option value="30">30 Qs</option></select>
@@ -227,6 +228,15 @@
   <div id="compSetup" class="rules-box" style="display:none;">
     <b>Competition Setup</b> — pick which topics to compete on (all sources included). Starting resets your score to 0.
     <div id="compTopics" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-weight:700;"></div>
+  </div>
+  <div id="customSetup" class="rules-box" style="display:none;">
+    <b>Custom Mode</b> — paste your own questions, one per line, as <code>Answer | Clue</code>, then start a practice session on just these.
+    <textarea id="customText" rows="8" placeholder="Mitochondria | This organelle is the powerhouse of the cell.&#10;1789 | In what year did the French Revolution begin?" style="width:100%;margin-top:10px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:.85rem;resize:vertical;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+      <button id="customStartBtn" class="primary">▶ Start Custom Practice</button>
+      <button id="customClearBtn">Clear</button>
+      <span id="customMsg" style="color:var(--text2);font-size:.8rem;"></span>
+    </div>
   </div>
   <div id="finalsRow" style="display:none;margin-bottom:12px;">
     <div class="mode-row">
@@ -2260,7 +2270,7 @@ function loadImported(){
 loadImported();
 
 // ── MODES ────────────────────────────────────────────────────────────────────
-const M = {PRACTICE:'practice', R1:'round1', R23:'round23', FINALS:'finals'};
+const M = {PRACTICE:'practice', R1:'round1', R23:'round23', FINALS:'finals', CUSTOM:'custom'};
 const FR = {R1:'fr1', R2:'fr2', R3:'fr3'};
 const J_VALS = [100, 200, 300, 400, 500];
 const TOPICS = ['Water','Sudan','Housing','Seerah','Current Events'];
@@ -2332,6 +2342,7 @@ function loadStorage() {
   const themeSelEl=$('themeSel'); if(themeSelEl) themeSelEl.value=theme;
   updateBlindUI(); updateEarlyClueUI(); updateCompUI(); updateScoreUI(); updateMistakesUI();
   renderHistory();
+  const savedCustom=localStorage.getItem('mist_custom'); if(savedCustom) $('customText').value=savedCustom;
 }
 function saveStorage() {
   localStorage.setItem('mist_score',score);
@@ -2346,10 +2357,18 @@ function saveStorage() {
 }
 
 // ── BUTTONS ───────────────────────────────────────────────────────────────────
+function updateFilterVisibility(){
+  const hide = mode===M.CUSTOM || compMode;
+  $('topicSel').style.display = hide ? 'none' : '';
+  $('sourceSel').style.display = hide ? 'none' : '';
+  $('startBtn').style.display = mode===M.CUSTOM ? 'none' : '';
+  $('customSetup').style.display = mode===M.CUSTOM ? '' : 'none';
+}
 document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.mode-btn[data-mode]').forEach(x => x.classList.remove('active'));
   b.classList.add('active'); mode = b.dataset.mode;
   finalsRow.style.display = mode===M.FINALS ? '' : 'none';
+  updateFilterVisibility();
 }));
 document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.mode-btn[data-fin]').forEach(x => x.classList.remove('active'));
@@ -2361,10 +2380,8 @@ function updateEarlyClueUI(){ const p=$('earlyCluePill'); p.textContent=earlyClu
 $('compBtn').addEventListener('click', () => { compMode=!compMode; updateCompUI(); saveStorage(); });
 function updateCompUI(){
   const p=$('compPill'); p.textContent=compMode?'ON':'OFF'; p.className='pill '+(compMode?'on':'off');
-  // Competition mode locks the source filter — only topics can be picked
-  $('topicSel').style.display = compMode?'none':'';
-  $('sourceSel').style.display = compMode?'none':'';
   $('compSetup').style.display = compMode?'':'none';
+  updateFilterVisibility();
 }
 function buildCompTopics(){
   const box=$('compTopics'); if(box.dataset.built)return;
@@ -2625,6 +2642,32 @@ function updateBlindUI() {
 }
 
 // ── SESSION ───────────────────────────────────────────────────────────────────
+// ── CUSTOM MODE (paste-your-own, practice only against those cards) ──────────
+function parseCustomLines(text){
+  const cards=[];
+  text.split('\n').map(l=>l.trim()).filter(Boolean).forEach(l=>{
+    const i=l.indexOf('|'); if(i<0)return;
+    const a=l.slice(0,i).trim().replace(/^['"]|['"]$/g,'');
+    const q=l.slice(i+1).trim();
+    if(a&&q) cards.push(mkCard('Custom','Custom',q,a));
+  });
+  return cards;
+}
+$('customStartBtn').addEventListener('click', ()=>{
+  const cards=parseCustomLines($('customText').value);
+  if(!cards.length){ $('customMsg').textContent='No valid "Answer | Clue" lines found.'; return; }
+  localStorage.setItem('mist_custom', $('customText').value);
+  $('customMsg').textContent=`Practicing ${cards.length} custom question${cards.length>1?'s':''}.`;
+  stopTTS(); clearTimer(); clearTimeout(compTimer);
+  $('resultBox').style.display='none'; boardWrap.style.display='none'; $('compProg').style.display='none';
+  compActive=false;
+  pool=cards.sort(()=>Math.random()-.5); poolIdx=0;
+  $('qcount').textContent=pool.length+' custom question'+(pool.length>1?'s':'');
+  loadQuestion();
+});
+$('customClearBtn').addEventListener('click', ()=>{
+  $('customText').value=''; localStorage.removeItem('mist_custom'); $('customMsg').textContent='Cleared.';
+});
 function startSession() {
   stopTTS(); clearTimer(); clearTimeout(compTimer);
   $('resultBox').style.display='none';
