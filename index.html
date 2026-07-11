@@ -3161,11 +3161,20 @@ function stripAttr(q){
     .replace(/[,]?\s*(according to|per)\s+(the\s+)?[A-Z][^,.?!]{0,40}?(\s+source)?(?=\s*[?.!]|$)/i,'')
     .replace(/\s{2,}/g,' ').trim();
 }
-// Every question is announced "According to [source], …" — even when filtered by source
+// A question needs its source named if it leans on a bare, otherwise-dangling
+// reference like "this report" / "the study" / "this source" with no other antecedent.
+const NEEDS_SOURCE_RE=/\b(this|the|per\s+this|per\s+the)\s+(report|study|source|article|infographic|survey|video|series)\b/i;
+function questionNeedsSource(c){ return NEEDS_SOURCE_RE.test(c); }
+// Every question is announced "According to [source], …" when filtered to a single
+// source. When browsing "All Sources" the attribution is dropped instead, unless the
+// clue actually depends on it (a dangling "this report"/"the study" reference).
 function attribute(q,src,topic){
   // Pyramid Current-Events tossups (year sources) stay as-is
   if (/^\d{4}$/.test(src||'') || topic==='Current Events') return q;
   let c=stripAttr(q)||q;
+  const sourceSelEl=$('sourceSel');
+  const browsingAllSources = !sourceSelEl || sourceSelEl.value==='all';
+  if (browsingAllSources && !questionNeedsSource(c)) return c;
   // lowercase a leading interrogative so "According to X, what…" reads naturally
   c=c.replace(/^(What|Which|How|Who|Whom|Whose|Where|When|Why|Name|In|On|Besides|By|The)\b/,m=>m.toLowerCase());
   return 'According to '+srcLabel(src)+', '+c;
