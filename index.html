@@ -253,6 +253,7 @@
     <select id="compLenSel" title="Questions per round"><option value="10">10 Qs</option><option value="15" selected>15 Qs</option><option value="20">20 Qs</option><option value="30">30 Qs</option></select>
     <button id="blindBtn">Blind <span id="blindPill" class="pill off">OFF</span></button>
     <button id="earlyClueBtn" title="Cuts off the reading before the giveaway, forcing you to buzz on the early clue">Early Clue <span id="earlyCluePill" class="pill off">OFF</span></button>
+    <button id="hideSourceBtn" title="Hides the source until after you answer, so you can't use it as a clue">Hide Source <span id="hideSourcePill" class="pill off">OFF</span></button>
     <select id="voiceSel" title="Reader voice"><option value="">Loading voices…</option></select>
     <select id="themeSel" title="Theme"><option value="bauhaus">Bauhaus</option><option value="midnight">Midnight</option><option value="paper">Paper</option><option value="ocean">Ocean 🌊</option><option value="sunset">Sunset 🌅</option><option value="forest">Forest 🌲</option><option value="neon">Neon ⚡</option><option value="shafeen">Shafeen 💰</option></select>
   </div>
@@ -2692,6 +2693,7 @@ function renderHistory(){
 }
 let blindMode = false, revealed = false;
 let earlyClueMode = false;
+let hideSourceMode = false;
 const EARLY_CLUE_FRACTION = .6; // stop reading once this fraction of the question has played
 let score = 0, nRight = 0, nWrong = 0;
 let pool = [], poolIdx = 0, curQ = null, curPts = 10;
@@ -2722,6 +2724,7 @@ function loadStorage() {
   boardUsed = JSON.parse(localStorage.getItem('mist_board')||'{}');
   blindMode = localStorage.getItem('mist_blind')==='1';
   earlyClueMode = localStorage.getItem('mist_earlyclue')==='1';
+  hideSourceMode = localStorage.getItem('mist_hidesource')==='1';
   chosenVoiceURI = localStorage.getItem('mist_voice')||'';
   compMode = localStorage.getItem('mist_comp')==='1';
   bestStreak = +localStorage.getItem('mist_best')||0;
@@ -2729,7 +2732,7 @@ function loadStorage() {
   theme = localStorage.getItem('mist_theme')||'bauhaus';
   document.documentElement.setAttribute('data-theme', theme);
   const themeSelEl=$('themeSel'); if(themeSelEl) themeSelEl.value=theme;
-  updateBlindUI(); updateEarlyClueUI(); updateCompUI(); updateScoreUI(); updateMistakesUI();
+  updateBlindUI(); updateEarlyClueUI(); updateHideSourceUI(); updateCompUI(); updateScoreUI(); updateMistakesUI();
   renderHistory();
   const savedCustom=localStorage.getItem('mist_custom'); if(savedCustom) $('customText').value=savedCustom;
 }
@@ -2740,6 +2743,7 @@ function saveStorage() {
   localStorage.setItem('mist_board',JSON.stringify(boardUsed));
   localStorage.setItem('mist_blind',blindMode?'1':'0');
   localStorage.setItem('mist_earlyclue',earlyClueMode?'1':'0');
+  localStorage.setItem('mist_hidesource',hideSourceMode?'1':'0');
   localStorage.setItem('mist_comp',compMode?'1':'0');
   localStorage.setItem('mist_best',bestStreak);
   localStorage.setItem('mist_mistakes',JSON.stringify(mistakes.slice(-300)));
@@ -2765,6 +2769,8 @@ document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.addEventListener
 }));
 $('blindBtn').addEventListener('click', () => { blindMode=!blindMode; updateBlindUI(); saveStorage(); });
 $('earlyClueBtn').addEventListener('click', () => { earlyClueMode=!earlyClueMode; updateEarlyClueUI(); saveStorage(); });
+$('hideSourceBtn').addEventListener('click', () => { hideSourceMode=!hideSourceMode; updateHideSourceUI(); saveStorage(); if(curQ) qSource.textContent = hideSourceMode ? '???' : curQ.source; });
+function updateHideSourceUI(){ const p=$('hideSourcePill'); p.textContent=hideSourceMode?'ON':'OFF'; p.className='pill '+(hideSourceMode?'on':'off'); }
 function updateEarlyClueUI(){ const p=$('earlyCluePill'); p.textContent=earlyClueMode?'ON':'OFF'; p.className='pill '+(earlyClueMode?'on':'off'); }
 $('compBtn').addEventListener('click', () => { compMode=!compMode; updateCompUI(); saveStorage(); });
 function updateCompUI(){
@@ -3021,7 +3027,9 @@ $('revealBtn').addEventListener('click',()=>{
   navRow.style.display='flex';
   feedback.className='feedback correct'; feedback.style.display='block';
   fbMsg.innerHTML='Answer revealed';
-  fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
+  if (hideSourceMode) qSource.textContent = curQ.source;
+  fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`+
+    (hideSourceMode?` <span style="color:var(--text2);font-size:.85em;">— Source: ${esc(curQ.topic)} · ${esc(curQ.source)}</span>`:'');
   fbReveal.style.display='';
 });
 
@@ -3122,7 +3130,7 @@ function loadQuestion(overridePts) {
   }
   curPts=overridePts||getBasePts();
   qPts.textContent=curPts+' pts'; qTopic.textContent=curQ.topic;
-  qSource.textContent=curQ.source;
+  qSource.textContent=hideSourceMode ? '???' : curQ.source;
   qNum.textContent=pool.length>1?`${poolIdx}/${pool.length}`:'';
   blindBadge.style.display=blindMode?'':'none';
   phaseBadge.textContent='Reading…'; phaseBadge.className='phase-badge reading'; phaseBadge.style.display='';
@@ -3172,6 +3180,7 @@ function attribute(q,src,topic){
   // Pyramid Current-Events tossups (year sources) stay as-is
   if (/^\d{4}$/.test(src||'') || topic==='Current Events') return q;
   let c=stripAttr(q)||q;
+  if (hideSourceMode) return c; // never leak the source via the clue text while hidden
   const sourceSelEl=$('sourceSel');
   const browsingAllSources = !sourceSelEl || sourceSelEl.value==='all';
   if (browsingAllSources && !questionNeedsSource(c)) return c;
@@ -3406,7 +3415,9 @@ function submitAnswer() {
     recordMistake(typed);
   }
   recordAttempt(typed, correct);
-  fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`;
+  if (hideSourceMode) qSource.textContent = curQ.source;
+  fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`+
+    (hideSourceMode?` <span style="color:var(--text2);font-size:.85em;">— Source: ${esc(curQ.topic)} · ${esc(curQ.source)}</span>`:'');
   fbReveal.style.display='';
   if (compActive) { compCount++; if(correct) compRight++; updateStatsBar(); }
   saveStorage(); updateScoreUI(); updateStatsBar();
