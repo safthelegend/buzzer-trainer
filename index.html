@@ -2870,7 +2870,10 @@ document.querySelectorAll('.mode-btn[data-fin]').forEach(b => b.addEventListener
 }));
 $('blindBtn').addEventListener('click', () => { blindMode=!blindMode; updateBlindUI(); saveStorage(); });
 $('earlyClueBtn').addEventListener('click', () => { earlyClueMode=!earlyClueMode; updateEarlyClueUI(); saveStorage(); });
-$('hideSourceBtn').addEventListener('click', () => { hideSourceMode=!hideSourceMode; updateHideSourceUI(); saveStorage(); if(curQ) qSource.textContent = hideSourceMode ? '???' : curQ.source; });
+$('hideSourceBtn').addEventListener('click', () => {
+  hideSourceMode=!hideSourceMode; updateHideSourceUI(); saveStorage();
+  if(curQ){ if(isSourceHidden()){ qSource.style.display='none'; } else { qSource.style.display=''; qSource.textContent=curQ.source; } }
+});
 function updateHideSourceUI(){ const p=$('hideSourcePill'); p.textContent=hideSourceMode?'ON':'OFF'; p.className='pill '+(hideSourceMode?'on':'off'); }
 function updateEarlyClueUI(){ const p=$('earlyCluePill'); p.textContent=earlyClueMode?'ON':'OFF'; p.className='pill '+(earlyClueMode?'on':'off'); }
 $('compBtn').addEventListener('click', () => { compMode=!compMode; updateCompUI(); saveStorage(); });
@@ -3128,9 +3131,10 @@ $('revealBtn').addEventListener('click',()=>{
   navRow.style.display='flex';
   feedback.className='feedback correct'; feedback.style.display='block';
   fbMsg.innerHTML='Answer revealed';
-  if (hideSourceMode) qSource.textContent = curQ.source;
+  const wasHidden = qSource.style.display==='none';
+  if (wasHidden) { qSource.style.display=''; qSource.textContent = curQ.source; }
   fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`+
-    (hideSourceMode?` <span style="color:var(--text2);font-size:.85em;">— Source: ${esc(curQ.topic)} · ${esc(curQ.source)}</span>`:'');
+    (wasHidden?` <span style="color:var(--text2);font-size:.85em;">— Source: ${esc(curQ.topic)} · ${esc(curQ.source)}</span>`:'');
   fbReveal.style.display='';
 });
 
@@ -3231,7 +3235,7 @@ function loadQuestion(overridePts) {
   }
   curPts=overridePts||getBasePts();
   qPts.textContent=curPts+' pts'; qTopic.textContent=curQ.topic;
-  qSource.textContent=hideSourceMode ? '???' : curQ.source;
+  if (isSourceHidden()) { qSource.style.display='none'; } else { qSource.style.display=''; qSource.textContent=curQ.source; }
   qNum.textContent=pool.length>1?`${poolIdx}/${pool.length}`:'';
   blindBadge.style.display=blindMode?'':'none';
   phaseBadge.textContent='Reading…'; phaseBadge.className='phase-badge reading'; phaseBadge.style.display='';
@@ -3274,6 +3278,13 @@ function stripAttr(q){
 // reference like "this report" / "the study" / "this source" with no other antecedent.
 const NEEDS_SOURCE_RE=/\b(this|the|per\s+this|per\s+the)\s+(report|study|source|article|infographic|survey|video|series)\b/i;
 function questionNeedsSource(c){ return NEEDS_SOURCE_RE.test(c); }
+// The source tag is hidden whenever the Hide Source toggle is on, or you're browsing
+// "All Sources" (so mixed-source practice doesn't hand you the source as a free clue).
+function isSourceHidden(){
+  if (hideSourceMode) return true;
+  const sourceSelEl=$('sourceSel');
+  return !sourceSelEl || sourceSelEl.value==='all';
+}
 // Every question is announced "According to [source], …" when filtered to a single
 // source. When browsing "All Sources" the attribution is dropped instead, unless the
 // clue actually depends on it (a dangling "this report"/"the study" reference).
@@ -3516,9 +3527,10 @@ function submitAnswer() {
     recordMistake(typed);
   }
   recordAttempt(typed, correct);
-  if (hideSourceMode) qSource.textContent = curQ.source;
+  const wasHidden = qSource.style.display==='none';
+  if (wasHidden) { qSource.style.display=''; qSource.textContent = curQ.source; }
   fbReveal.innerHTML=`Answer: <b>${esc(curQ.answer)}</b>${curQ.alternates?.length?` <span style="color:var(--text2);font-size:.85em;">(also: ${curQ.alternates.map(esc).join(', ')})</span>`:''}`+
-    (hideSourceMode?` <span style="color:var(--text2);font-size:.85em;">— Source: ${esc(curQ.topic)} · ${esc(curQ.source)}</span>`:'');
+    (wasHidden?` <span style="color:var(--text2);font-size:.85em;">— Source: ${esc(curQ.topic)} · ${esc(curQ.source)}</span>`:'');
   fbReveal.style.display='';
   if (compActive) { compCount++; if(correct) compRight++; updateStatsBar(); }
   saveStorage(); updateScoreUI(); updateStatsBar();
