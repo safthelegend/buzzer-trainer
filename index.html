@@ -2918,18 +2918,32 @@ const DATE_ANSWER_RE = /\b(1[6-9]|20)\d{2}\b|\b(January|February|March|April|May
 function isDateAnswer(q){ return DATE_ANSWER_RE.test(q.answer||''); }
 // A question counts as "High Yield" if its tossup text carries an [HY] flag
 function isHY(q){ return /\[HY\]/.test(q.tossup||''); }
+// A question counts as "Specific" if its answer is a short, concrete, nameable thing
+// (a proper noun, a number, a short term) rather than an open-ended descriptive phrase
+// or full-sentence explanation (e.g. "why did X happen" style answers).
+const OPEN_ENDED_ANSWER_RE=/[.!?]$|\b(because|in order to|which|so that|allows|provides|allowing|enables|ensures|helps to|means that)\b/i;
+function isSpecificAnswer(q){
+  const a=(q.answer||'').trim();
+  if (!a) return false;
+  const words=a.split(/\s+/).filter(Boolean);
+  if (words.length>6) return false;
+  if (OPEN_ENDED_ANSWER_RE.test(a)) return false;
+  return true;
+}
 // Resolve the source dropdown's value (real source name or a virtual filter) against a question
 function matchesSourceFilter(q, sf){
   if (sf==='all') return true;
   if (sf==='__numstats__') return isNumericAnswer(q);
   if (sf==='__dates__') return isDateAnswer(q);
   if (sf==='__hy__') return isHY(q);
+  if (sf==='__specific__') return isSpecificAnswer(q);
   return q.source===sf;
 }
 function sourceFilterLabel(sf){
   if (sf==='__numstats__') return '🔢 Numbers & Stats';
   if (sf==='__dates__') return '📅 Dates';
   if (sf==='__hy__') return '⭐ High Yield';
+  if (sf==='__specific__') return '🎯 Specific';
   return sf;
 }
 
@@ -2938,6 +2952,7 @@ function populateSources() {
   const srcs=[...new Set(QB.filter(q=>tf==='all'||q.topic===tf).map(q=>q.source))].sort();
   let opts='<option value="all">All Sources</option>';
   opts+='<option value="__hy__">⭐ High Yield</option>';
+  opts+='<option value="__specific__">🎯 Specific</option>';
   if (tf==='Water') opts+='<option value="__numstats__">🔢 Numbers &amp; Stats</option>';
   if (tf!=='all') opts+='<option value="__dates__">📅 Dates</option>';
   opts+=srcs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
